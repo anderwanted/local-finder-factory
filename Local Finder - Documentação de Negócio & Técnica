@@ -133,3 +133,26 @@ A monetização foca no modelo "Premium": estabelecimentos pagam para ter **Dest
 ## 5. Fluxo de Trabalho (Deploy)
 * **Conteúdo (Dados):** Edita-se direto no Dashboard em Produção.
 * **Código (Estrutura):** Edita no Localhost -> Commit no Git -> Vercel atualiza automático.
+
+
+
+
+
+# 🐶 Local Finder - Documentação v2.1 (Visual Update)
+
+## 1. Mudanças Visuais (UX)
+* **Navegação:** Substituímos filtros de texto por **4 Botões de Categoria** com ícones (Estilo iFood).
+* **Tags Visuais:** No card, as tags aparecem como etiquetas padronizadas.
+
+## 2. Regras de Dados (Taxonomia)
+O sistema agora é rígido. Não usamos mais texto livre para tags.
+As únicas tags permitidas pelo sistema (para os botões funcionarem) são:
+1. `banho` (Estética, Banho e Tosa)
+2. `vet` (Clínicas, Hospitais, Vacinas)
+3. `loja` (Pet Shops, Rações, Acessórios)
+4. `hotel` (Creche, Hospedagem)
+
+## 3. Fluxo de Cadastro (Atualizado)
+1. **Ingestão IA:** O prompt agora converte automaticamente termos como "Clínica" para `vet`.
+2. **Dashboard:** O campo de tags agora usa **Checkboxes** para evitar erros de digitação.
+3. **Geolocalização:** O Banco está preparado para receber Latitude/Longitude (via URL do Maps) para futuro recurso de "Perto de Mim".
