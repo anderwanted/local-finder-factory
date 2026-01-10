@@ -23,6 +23,11 @@ export default function Dashboard({ projeto }) {
 
   // --- CONFIGURAÇÃO (BRAND STUDIO) ---
   // Inicializa direto das props para garantir que carregue o que está no banco
+const temaInicial =
+  localStorage.getItem('tema_base') ||
+  projeto?.tema_base ||
+  'light';
+
   const [configForm, setConfigForm] = useState({
     nome: projeto?.nome || '',
     titulo_pagina: projeto?.titulo_pagina || '',
@@ -31,11 +36,15 @@ export default function Dashboard({ projeto }) {
     slug: projeto?.slug || '',
     logo_url: projeto?.logo_url || '',
     estilo_borda: projeto?.estilo_borda || 'redondo',
-    tema_base: projeto?.tema_base || 'light' // Aqui define se começa Dark ou Light
+    tema_base: temaInicial // Aqui define se começa Dark ou Light
   });
 
   // --- SISTEMA DE TEMAS (DARK/LIGHT) ---
   const isDark = configForm.tema_base === 'dark';
+
+  useEffect(() => {
+  localStorage.setItem('tema_base', configForm.tema_base);
+}, [configForm.tema_base]);
   
   // Paleta de cores dinâmica para o Painel
   const theme = {
@@ -285,6 +294,28 @@ export default function Dashboard({ projeto }) {
                                <ActionButton onClick={()=>handleDelete(local.id)} theme={theme} active={true} colorActive="#ef4444" bgActive="#fee2e2" label="Excluir">
                                  <Trash2 size={20}/>
                                </ActionButton>
+                               return (
+                        <button
+                          onClick={onClick}
+                          title={label}
+                          style={{
+                            width: '44px',
+                            height: '44px',
+                            borderRadius: '10px',
+                            border: border,
+                            background: bg,
+                            color: color,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          {children}
+                        </button>
+                      );
                             </div>
                          </div>
                       )}
