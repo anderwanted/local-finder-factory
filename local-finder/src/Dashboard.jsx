@@ -22,16 +22,32 @@ export default function Dashboard({ projeto }) {
   const [filtroVip, setFiltroVip] = useState(false);
 
   // --- CONFIGURAÇÃO (BRAND STUDIO) ---
-  const [configForm, setConfigForm] = useState({
-    nome: projeto?.nome || '',
-    titulo_pagina: projeto?.titulo_pagina || '',
-    cor_primaria: projeto?.cor_primaria || '#2563eb',
-    cor_destaque: projeto?.cor_destaque || '#f59e0b',
-    slug: projeto?.slug || '',
-    logo_url: projeto?.logo_url || '',
-    estilo_borda: projeto?.estilo_borda || 'redondo',
-    tema_base: projeto?.tema_base || 'light'
+const [configForm, setConfigForm] = useState({
+    nome: '',
+    titulo_pagina: '',
+    cor_primaria: '#2563eb',
+    cor_destaque: '#f59e0b',
+    slug: '',
+    logo_url: '',
+    estilo_borda: 'redondo',
+    tema_base: 'light'
   });
+
+  useEffect(() => {
+    if (projeto && projeto.id) {
+      setConfigForm({
+        nome: projeto.nome || '',
+        titulo_pagina: projeto.titulo_pagina || '',
+        cor_primaria: projeto.cor_primaria || '#2563eb',
+        cor_destaque: projeto.cor_destaque || '#f59e0b',
+        slug: projeto.slug || '',
+        logo_url: projeto.logo_url || '',
+        estilo_borda: projeto.estilo_borda || 'redondo',
+        tema_base: projeto.tema_base || 'light'
+      });
+      fetchLocais();
+    }
+  }, [projeto]);
 
   // SINCRONIZADOR DE TEMA (Garante que o Dark Mode não resete ao recarregar)
   useEffect(() => {
