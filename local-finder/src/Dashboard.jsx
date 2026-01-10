@@ -33,14 +33,29 @@ export default function Dashboard({ projeto }) {
     tema_base: projeto?.tema_base || 'light'
   });
 
-  // --- MAPEAMENTO DE ÍCONES POR CATEGORIA ---
+// --- TRECHO ATUALIZADO (Ícones Sólidos/Preenchidos) ---
   const getIconeCategoria = (id) => {
+    // Configuração para ícone "Gordinho e Cheio":
+    // fill: preenche o interior
+    // strokeWidth: deixa o traço mais grosso (negrito)
+    const props = { size: 18, fill: "currentColor", strokeWidth: 2.5 };
+
     switch(id) {
-      case 'banho': return <Scissors size={16} />;
-      case 'vet': return <Stethoscope size={16} />;
-      case 'loja': return <ShoppingBag size={16} />;
-      case 'hotel': return <Home size={16} />;
-      default: return <Store size={16} />;
+      case 'banho': 
+        // Scissors com opacidade no fill para não virar um borrão total
+        return <Scissors {...props} fillOpacity={0.5} />;
+      
+      case 'vet': 
+        return <Stethoscope {...props} fillOpacity={0.5} />;
+      
+      case 'loja': 
+        return <ShoppingBag {...props} />; // A sacola fica ótima totalmente cheia
+      
+      case 'hotel': 
+        return <Home {...props} />; // A casa também fica ótima cheia
+      
+      default: 
+        return <Store {...props} />;
     }
   };
 
