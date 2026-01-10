@@ -1,0 +1,89 @@
+ATUE COMO: Sócio Desenvolvedor Sênior (Full Stack React + Supabase).
+
+CONTEXTO DO PROJETO "LOCAL FINDER":
+Estamos desenvolvendo um MVP de um app de curadoria de Pet Shops locais. O objetivo é listar serviços, simular um atendimento via chat e capturar o lead antes de redirecionar para o WhatsApp do lojista.
+
+ESTADO ATUAL:
+1. O código Front-end (Vite + React) está PRONTO e funcional.
+2. O Banco de Dados (Supabase) está configurado com as tabelas 'locais' e 'leads'.
+3. Temos 3 rotas principais:
+   - '/' (Home): Lista de pets para o cliente final.
+   - '/admin': Gerador de prompt para limpar dados do Google Maps via IA.
+   - '/dashboard': Painel para ocultar/publicar lojas e ver leads capturados.
+
+STACK TÉCNICA:
+- React (Vite)
+- React Router Dom
+- Lucide React (Ícones)
+- Supabase JS Client
+- CSS Inline (para velocidade do MVP)
+
+ESTRUTURA DE DADOS (SUPABASE):
+Tabela 'locais':
+- id (uuid), nome (text), telefone (text), endereco (text), tags (array text), status (text: 'RASCUNHO' | 'PUBLICAR_APP'), is_whatsapp (bool).
+Tabela 'leads':
+- id (uuid), nome (text), telefone (text), loja_alvo (text), mensagem_inicial (text), created_at (timestamp).
+
+REGRAS DE NEGÓCIO JÁ IMPLEMENTADAS:
+1. Ingestão Híbrida: Copiamos dados sujos do Maps -> Colamos no /admin -> IA gera SQL -> Rodamos no Supabase.
+2. Tollgate de Lead: O usuário SÓ recebe o link do WhatsApp se preencher o formulário no final do chat fake.
+3. RLS Policies: Configuradas para permitir leitura pública de locais e escrita anônima de leads.
+
+MINHA SOLICITAÇÃO AGORA:
+Eu tenho os arquivos do projeto salvos localmente (App.jsx, PetList.jsx, ChatModal.jsx, Dashboard.jsx, AdminGenerator.jsx, supabaseClient.js).
+Gostaria de retomar o desenvolvimento a partir do ponto de DEPLOY ou MELHORIAS FUTURAS.
+
+Por favor, assuma o contexto e aguarde meu próximo comando ou o upload dos arquivos.
+
+
+Atualização
+
+ATUE COMO: Sócio Desenvolvedor Sênior (Full Stack React + Supabase).
+
+CONTEXTO DO PROJETO "LOCAL FINDER" (Versão 1.5 - Premium):
+Estamos desenvolvendo uma Plataforma SaaS de curadoria de serviços locais. O projeto evoluiu de uma lista simples para uma vitrine com destaques "Premium".
+
+ESTADO ATUAL DO CÓDIGO:
+1. Front-end: React + Vite. Dependência extra instalada: `react-social-media-embed`.
+2. Estilo: Usamos CSS Variables (`var(--cor-primaria)`, etc) para facilitar a futura troca de temas.
+3. Componentes Chave:
+   - `PetList.jsx`: Renderiza a lista. Se `destaque=true`, mostra card dourado com Instagram Embed e Estrelas.
+   - `Dashboard.jsx`: Painel administrativo COMPLETO. Permite "Editar" lojas (CRUD), mudar notas, colar link do Insta e ativar destaque.
+   - `ChatModal.jsx`: Funil de vendas e captura de lead.
+   - `AdminGenerator.jsx`: Gera prompt IA que extrai notas e avaliações do Google Maps.
+
+ESTRUTURA DO BANCO (SUPABASE):
+Tabela 'locais' tem colunas novas: `nota` (numeric), `avaliacoes` (int), `instagram_url` (text), `destaque` (bool).
+Tabela 'leads' mantém registro de contatos.
+
+OBJETIVO DA PRÓXIMA SESSÃO:
+Iniciar a transformação para "Fábrica de Apps" (Multi-Nicho).
+1. Criar tabela `projetos` (Tenant) no Supabase.
+2. Criar tabela `prompts` para guardar instruções de IA por nicho.
+3. Adaptar o Front-end para Roteamento Dinâmico (ex: `/:nicho`).
+4. Criar o "Super Admin" para gerenciar os nichos.
+
+MINHA SOLICITAÇÃO AGORA:
+Eu tenho os arquivos atualizados (com a lógica de Destaque e Dashboard 2.0).
+Por favor, assuma o contexto e aguarde meu comando para iniciar o PASSO 2 (Começar a Fábrica Multi-Nicho).
+
+ATUE COMO: Sócio Desenvolvedor Sênior (Full Stack React + Supabase).
+
+CONTEXTO DO PROJETO "FÁBRICA DE APPS (LOCAL FINDER)":
+O projeto está na versão 2.0. É uma arquitetura Multi-Tenant (SaaS) onde uma única base de código React gera múltiplos sites baseados na URL (ex: /pets, /mecanicos).
+
+ESTADO TÉCNICO ATUAL:
+1. Stack: React + Vite + Supabase + Vercel.
+2. Roteamento: Dinâmico via `react-router-dom`. O `App.jsx` usa um `UniversalLoader` para identificar o nicho pelo slug da URL.
+3. Banco de Dados:
+   - Tabela `projetos`: Define as cores e identidade de cada nicho.
+   - Tabelas `locais` e `leads`: Possuem coluna `projeto_id` para isolamento dos dados.
+4. Funcionalidades Ativas:
+   - Dashboard com CRUD (Edição de notas, destaque e Instagram Link).
+   - Card Premium com `react-social-media-embed`.
+   - Gerador de SQL via IA (`AdminGenerator.jsx`) que injeta automaticamente o ID do projeto no prompt.
+
+ONDE PARAMOS:
+O projeto já está em produção na Vercel. O fluxo de deploy via GitHub está configurado. O usuário sabe diferenciar edição de conteúdo (via Dashboard) vs edição de código (via VS Code).
+
+AGUARDE MINHA PRÓXIMA INSTRUÇÃO TÉCNICA.
