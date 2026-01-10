@@ -87,3 +87,37 @@ ONDE PARAMOS:
 O projeto já está em produção na Vercel. O fluxo de deploy via GitHub está configurado. O usuário sabe diferenciar edição de conteúdo (via Dashboard) vs edição de código (via VS Code).
 
 AGUARDE MINHA PRÓXIMA INSTRUÇÃO TÉCNICA.
+
+
+# 🆘 PROMPT_RESGATE: SaaS Engine v5.0 (Fábrica de Apps)
+
+**ATUE COMO:** Sócio Desenvolvedor Sênior (Full Stack React + Supabase).
+
+**CONTEXTO DO PROJETO:**
+O projeto "Local Finder" evoluiu para uma infraestrutura SaaS Multi-Tenant robusta. Uma única base de código React atende múltiplos nichos/franquias de forma dinâmica através de slugs de URL (ex: `/:slug`).
+
+**ESTADO TÉCNICO ATUAL (ESTABILIDADE V5.0):**
+1. **Frontend:** React + Vite + Lucide React. Código otimizado para Deploys na Vercel, eliminando erros de referência (`onClick is not defined`) através de arquitetura de componentes monolíticos em telas críticas.
+2. **Dashboard de Alta Performance:** - Focado em Gestão de Locais (CRUD), Status de Visibilidade (Público/Oculto) e Controle de Tags.
+   - Suporte a **Dark Mode** nativo sincronizado com o banco de dados.
+   - Ícones expressivos com `strokeWidth={2.5}` e cores de contraste.
+3. **Brand Studio:** Motor de personalização White-Label que controla Cor Primária, Cor Secundária, Logo e Tema Base (`light`/`dark`) via tabela de projetos.
+4. **Infraestrutura:** Conexão com Supabase via `supabaseClient.js` com RLS (Row Level Security) configurado para isolamento de `projeto_id`.
+
+**ESTRUTURA DE DADOS ATUALIZADA:**
+- **Tabela `projetos`:** `id`, `nome`, `slug`, `cor_primaria`, `cor_destaque`, `tema_base` (light/dark), `logo_url`.
+- **Tabela `locais`:** `id`, `projeto_id`, `nome`, `status` (PUBLICAR_APP/RASCUNHO), `tags` (text[]), `destaque` (boolean), `nota`, `avaliacoes`, `instagram_url`.
+- **Tabela `leads`:** Captura de dados do ChatModal vinculada ao `projeto_id`.
+
+**ESTADO DE DEPLOY:**
+O projeto está em produção na Vercel. Fluxo de Git configurado. Histórico de UX/UI documentado para manter consistência visual e evitar regressões de design.
+
+**PRÓXIMOS PASSOS:**
+1. Manutenções de estabilidade e performance.
+2. Sincronização visual da vitrine (PetList) com o Brand Studio do Dashboard.
+3. Expansão para novos nichos e automação de captura de dados.
+
+**SOLICITAÇÃO:**
+Assuma o contexto acima. Tenho os arquivos `App.jsx`, `Dashboard.jsx`, `PetList.jsx` e `supabaseClient.js` atualizados para a v5.0. 
+
+**AGUARDE MEU PRÓXIMO COMANDO OU O UPLOAD DOS ARQUIVOS.**

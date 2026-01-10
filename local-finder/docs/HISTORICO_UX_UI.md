@@ -1,42 +1,44 @@
-# 🎨 Histórico de Melhorias UX/UI (SaaS Engine v3.0)
-**Data:** 10/01/2025
-**Foco:** Profissionalização Visual e Experiência do Usuário (Mobile First).
+# 🎨 Histórico de Melhorias UX/UI (SaaS Engine v5.0)
+**Data:** 10/01/2026
+**Foco:** Estabilidade de Build, Expressividade Visual e Robustez Operacional.
 
-## 1. O Novo Admin (Painel Guiado)
-Abandonamos a tela branca simples por um fluxo de trabalho visual para evitar erros operacionais.
+## 1. Evolução do Dashboard (Painel de Gestão)
+Após testes em diferentes navegadores (Firefox/Mobile), evoluímos do modelo "v3.0 experimental" para o **v5.0 High-Stability**.
 
 ### Mudanças Implementadas:
-* **Header Instrucional:** Adicionado um bloco de "Passo a Passo" no topo com ícones (Maps -> Captura -> URL).
-* **Feedback Visual:** Botões mudam de cor e estado quando o texto é colado ou copiado.
-* **Prompt V2.1:** Instruções refinadas para a IA capturar Latitude/Longitude da URL e forçar as tags padrão.
+* **Ícones de Ação Expressivos:** * Substituímos ícones finos por traços de espessura `2.5` (`Lucide-React`).
+    * Implementamos fundos coloridos pastéis para botões de ação (Azul para Editar, Vermelho para Excluir, Verde/Cinza para Visibilidade) para aumentar a velocidade de reconhecimento visual.
+* **Fim do Erro de Referência:** Otimização radical do código para remover sub-componentes que causavam falhas de renderização no Vercel (`onClick is not defined`).
+* **Arquitetura Monolítica Blindada:** Todo o dashboard foi consolidado em um fluxo de código direto para garantir que o compilador do Vite não perca referências de estado durante o build final.
 
-## 2. O App Frontend (Vitrine Mobile First)
-O objetivo foi remover a cara de "Site Amador" e trazer a estética de "Super App" (iFood/Uber).
+## 2. Experiência Visual e Estrutura
+Embora a interface tenha sido simplificada para focar em estabilidade, a qualidade visual dos componentes foi elevada.
 
 ### Elementos de Design:
-* **Sticky Header (Cabeçalho Grudado):**
-    * Os filtros de categoria acompanham a rolagem da tela.
-    * Uso de `overflow-x: auto` para rolagem horizontal estilo Stories.
-    * Fundo com gradiente (`linear-gradient`) para transição suave sobre o conteúdo.
-* **Cards "Clean":**
-    * Remoção de bordas duras. Uso de sombras suaves (`box-shadow`).
-    * Fundo geral cinza claro (`#f8fafc`) para destacar os cards brancos.
-    * **Botão Full Width:** O botão de ação ("Solicitar Atendimento") agora ocupa toda a base do card, facilitando o clique em mobile (Polegar).
-* **Tags Visuais:** Substituição de texto simples por "Pílulas" (Badges) arredondadas.
+* **Hierarquia de Cores Dinâmica:**
+    * Implementação de suporte a **Dark Mode** via banco de dados (`tema_base`).
+    * Uso de variáveis de estado que sincronizam a cor primária do projeto diretamente no cabeçalho e bordas de destaque.
+* **Cards de Gestão Operacional:**
+    * Borda esquerda indicativa: Cinza (Padrão), Azul (Modo Edição) ou Amarelo (Destaque VIP).
+    * Feedback de visibilidade: Itens com status "Oculto" recebem `opacity: 0.6` e badge visual para facilitar a triagem rápida pelo administrador.
 
-## 3. Brand Studio (Dashboard v3.0)
-Implementação de funcionalidades "White-Label" para permitir a venda da plataforma.
+## 3. App Frontend (Vitrine Mobile)
+Otimização para que a vitrine reflita as mudanças feitas no Dashboard em tempo real, mantendo o foco em conversão.
 
-* **Abas de Navegação:** Separação entre "Gestão Operacional" e "Configurações".
-* **Editor de Tema:** Permite alterar Título, Cor Primária e Cor de Destaque sem mexer no código.
-* **Preview em Tempo Real:** Um card falso exibe como as cores ficam antes de salvar.
+* **Sincronização de Tags:** As pílulas de categorias agora exibem ícones nítidos (Banho, Vet, Loja, Hotel) com stroke reforçado.
+* **Contraste Inteligente:** Ajuste de cores para garantir legibilidade em diferentes temas (Light/Dark).
 
 ---
 
-## 💡 Lições Aprendidas (Design System)
-1.  **Mobile First:** Sempre testar se o botão é clicável com o dedão e se a rolagem horizontal funciona sem barra de rolagem visível.
-2.  **Hierarquia de Cor:**
-    * `var(--cor-primaria)`: Usada apenas para elementos interativos (botões, ícones ativos).
-    * `#64748b` (Slate-500): Usado para textos secundários (endereço, descrições).
-    * `#1e293b` (Slate-800): Usado para títulos fortes.
-3.  **Scrollbars:** Ocultar a barra de rolagem nativa (`::-webkit-scrollbar { display: none }`) em mobile aumenta a percepção de "App Nativo".
+## 🛠️ Resolução de Crises (Log de Engenharia)
+Durante o ciclo v4.0 -> v5.0, resolvemos problemas críticos que travavam a experiência:
+1.  **Cache de Build:** Identificamos que o Vercel/Vite mantinha versões obsoletas de arquivos JS. Solução: Forçar o redeploy sem cache e simplificar a estrutura de eventos `onClick`.
+2.  **Persistência de Estado:** Corrigimos a falha onde o tema selecionado resetava ao atualizar a página, utilizando o padrão `useEffect` para sincronização imediata com os dados do Supabase.
+3.  **Compatibilidade de Navegador:** Ajustamos o código para ser 100% compatível com o Firefox, eliminando referências de componentes globais que não eram reconhecidas após a minificação do código.
+
+---
+
+## 💡 Lições Aprendidas (Design System v5.0)
+1.  **Simplicidade é Robustez:** Em dashboards administrativos, o uso de elementos HTML nativos com estilos diretos evita falhas de build e problemas de performance em dispositivos móveis.
+2.  **Feedback Visual de Status:** O uso de ícones com `strokeWidth: 2.5` e cores de fundo contrastantes (red/blue/green/slate) reduz a carga cognitiva do usuário.
+3.  **Imutabilidade de Dados:** Sempre ler a configuração de cores e temas diretamente da fonte de verdade (Banco de Dados) para evitar inconsistências visuais entre o Dashboard e o App final.

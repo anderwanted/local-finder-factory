@@ -1,45 +1,56 @@
+# 🐾 Manual de Operação: Franquia Pet Finder
+**Versão:** 2026.1 - SaaS Engine v5.0
+**Objetivo:** Guia prático para gestão de rede, cadastro de parceiros e padronização visual.
 
-# 🏭 Manual da Franquia (Local Finder Engine)
-**Objetivo:** Guia para replicar o modelo de negócios em novos nichos.
+---
 
-## 1. O Conceito "Fábrica"
-Este software não é apenas um site, é um motor capaz de gerar múltiplos portais de curadoria.
-* **Tenant:** O nicho (ex: Pets, Barbearia).
-* **Identidade:** Definida no banco de dados (Cores, Títulos).
-* **Regra Única:** O código é o mesmo, o que muda são os dados e as configurações.
+## 1. Gestão de Parceiros (Dashboard)
+O Dashboard é o cérebro da sua operação. Através dele, você controla quais lojas aparecem na vitrine e o nível de destaque de cada uma.
 
-## 2. Padrões de Taxonomia (Regra dos 4 Botões)
-Para manter o App simples e funcional (estilo iFood), todo nicho deve seguir a regra de simplificação de categorias.
-A IA deve ser treinada para converter a "bagunça" do mercado em 4 tags padrão.
+### Fluxo de Cadastro de Novos Locais:
+1.  **Captura de Dados:** Utilize o Google Maps para localizar o parceiro.
+2.  **Extração de Informações:** Utilize o prompt de IA para converter o texto do Google Maps em código SQL compatível.
+3.  **Inclusão no Banco:** Insira os dados no Supabase vinculado ao `projeto_id` da sua franquia.
+4.  **Ativação:** No Dashboard, localize a nova loja e clique no ícone do **Olho** para torná-la pública.
 
-### Exemplo: Nicho PETS (`/pets`)
-* **Botão 1 (Estética):** Tag `banho` (Engloba: banho, tosa, corte de unhas).
-* **Botão 2 (Saúde):** Tag `vet` (Engloba: clínica, hospital, vacina, cirurgia).
-* **Botão 3 (Varejo):** Tag `loja` (Engloba: ração, brinquedos, petshop).
-* **Botão 4 (Hospedagem):** Tag `hotel` (Engloba: creche, day care, hotelzinho).
+### Critérios de Destaque (VIP):
+* **Selo de Estrela:** Utilize apenas para parceiros que possuem contrato de destaque ou notas superiores a 4.8.
+* **Impacto Visual:** Lojas com destaque aparecem com borda dourada e prioridade na listagem do App.
 
-### Exemplo: Nicho BARBEARIA (`/barber`) - *Para Futuro*
-* **Botão 1:** Tag `corte` (Cabelo, máquina).
-* **Botão 2:** Tag `barba` (Barba, toalha quente).
-* **Botão 3:** Tag `quimica` (Progressiva, luzes).
-* **Botão 4:** Tag `dia_noivo`.
+---
 
-## 3. Hierarquia de Monetização
-O sistema reconhece automaticamente 3 níveis de locais:
-1.  **Oculto/Rascunho:** Capturado mas não validado. (Não aparece no App).
-2.  **Publicado (Standard):** Validado. Aparece na lista e na busca.
-3.  **VIP (Premium):**
-    * **Destaque:** `TRUE` no banco.
-    * **Visual:** Borda colorida, Selo de Recomendado.
-    * **Mídia:** Exibe vídeo do Instagram (Reels) direto no card.
-    * **Prova Social:** Exibe Nota e Avaliações.
+## 2. Identidade Visual (Brand Studio)
+A consistência da marca é o que gera confiança no usuário final.
 
-## 4. O Processo de Expansão (Passo a Passo)
-Para lançar um novo nicho, siga este roteiro:
-1.  **Banco de Dados:** Criar nova linha na tabela `projetos` (ex: slug `mecanicos`, cor `#EF4444`).
-2.  **Configuração IA:** Ajustar o `AdminGenerator` com as regras de tradução de tags daquele nicho.
-3.  **População:**
-    * Busca Manual no Google Maps (Curadoria Visual).
-    * Limpeza via IA.
-    * Ajuste Fino no Dashboard.
-4.  **Validação Visual:** Verificar se os ícones fazem sentido (futuramente parametrizar ícones via config).
+* **Cores da Marca:** * `Cor Primária`: Deve ser usada para os botões de ação e ícones de navegação.
+    * `Cor de Destaque`: Reservada para Badges, Promoções e Selos VIP.
+* **Logotipo:** Utilize sempre URLs de imagens com fundo transparente (PNG) ou hospedadas em serviços de alta velocidade para evitar quebras no carregamento do App.
+* **Tema Base:** Recomendamos o uso do tema `Light` para guias comerciais diurnos e o tema `Dark` para operações exclusivas de emergência/plantão 24h.
+
+---
+
+## 3. Classificação por Tags
+O sistema Pet Finder v5.0 utiliza 4 categorias principais. Cada parceiro deve ser classificado corretamente para garantir o funcionamento dos filtros:
+
+1.  **Banho:** Estética animal e higiene.
+2.  **Vet:** Clínicas, pronto-atendimento e especialidades médicas.
+3.  **Loja:** Petshops, venda de ração e acessórios.
+4.  **Hotel:** Daycare, hospedagem e adestramento.
+
+---
+
+## 4. Manutenção e Suporte
+Para garantir que o App rode perfeitamente em todos os dispositivos dos clientes:
+
+* **Limpeza de Cache:** Se realizar uma alteração visual e ela não aparecer de imediato, instrua o parceiro a realizar o comando `Ctrl + Shift + R` ou limpar os dados de site no navegador.
+* **Monitoramento:** Verifique semanalmente se as URLs do Instagram dos parceiros continuam ativas, pois o App utiliza essas rotas para conversão direta.
+
+---
+
+## 💡 Regras de Ouro do Franqueado
+1.  **Mobile-First:** Antes de aprovar um parceiro, verifique se a foto de capa e o nome dele estão legíveis em uma tela de celular.
+2.  **Dados Precisos:** Nunca publique uma loja sem endereço completo ou telefone de contato.
+3.  **Consistência:** Não altere a Cor Primária com frequência; isso confunde a base de usuários recorrentes.
+
+---
+© 2026 Pet Finder Factory - Sistema Gerenciador de Ecossistemas Pet.

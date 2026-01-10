@@ -157,3 +157,79 @@ As únicas tags permitidas pelo sistema (para os botões funcionarem) são:
 1. **Ingestão IA:** O prompt agora converte automaticamente termos como "Clínica" para `vet`.
 2. **Dashboard:** O campo de tags agora usa **Checkboxes** para evitar erros de digitação.
 3. **Geolocalização:** O Banco está preparado para receber Latitude/Longitude (via URL do Maps) para futuro recurso de "Perto de Mim".
+
+
+# 🛠️ Manual Técnico: SaaS Engine v5.0
+**Projeto:** Pet Finder Factory
+**Arquitetura:** React + Vite + Supabase
+**Hospedagem:** Vercel
+
+---
+
+## 1. Arquitetura de Dados (Supabase)
+
+O sistema baseia-se em uma estrutura relacional de duas tabelas principais. Para o funcionamento correto das versões v4.0+, as colunas abaixo devem existir:
+
+### Tabela `projetos`
+* `id`: uuid (Primary Key)
+* `nome`: text
+* `slug`: text (Unique - ex: 'minha-franquia')
+* `cor_primaria`: text (Hexadecimal)
+* `cor_destaque`: text (Hexadecimal)
+* `tema_base`: text ('light' ou 'dark')
+* `logo_url`: text (URL pública)
+
+### Tabela `locais`
+* `id`: uuid (Primary Key)
+* `projeto_id`: uuid (Foreign Key -> projetos.id)
+* `nome`: text
+* `status`: text ('PUBLICAR_APP' ou 'RASCUNHO')
+* `tags`: _text (Array de strings: ['banho', 'vet', etc])
+* `destaque`: boolean (Status VIP)
+* `nota`: float8
+* `avaliacoes`: int8
+
+---
+
+## 2. Padrões de Componentização (Dashboard)
+
+Para evitar erros de `ReferenceError` durante a minificação do código no Vercel, seguimos estas diretrizes:
+
+* **Componentes Monolíticos:** Em telas críticas de administração, preferimos manter sub-elementos dentro do mesmo arquivo para garantir o escopo das variáveis de evento (`onClick`, `onChange`).
+* **Estilização Inline:** Utilizamos estilos via objetos JS para garantir que o tema dinâmico (Dark/Light) seja aplicado sem delay de carregamento de CSS externo.
+* **Ícones (Lucide):** Padronização técnica com `size={22}` e `strokeWidth={2.5}` para garantir legibilidade em telas de alta densidade (Retina/Mobile).
+
+---
+
+## 3. Pipeline de Deploy e Cache
+
+O Vercel utiliza um sistema agressivo de cache. Caso o código seja atualizado mas o erro persista:
+
+1.  **Redeploy Manual:** No painel da Vercel, acione o `Redeploy` e **desmarque** a opção "Use existing Build Cache".
+2.  **Versioning de Assets:** O Vite gera arquivos como `index-XXXX.js`. Se o navegador tentar carregar um hash antigo, force o recarregamento via `Shift + F5`.
+3.  **Variáveis de Ambiente:** Garanta que as chaves `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` estejam configuradas nas configurações de ambiente da Vercel.
+
+---
+
+## 4. Troubleshooting (Resolução de Erros)
+
+| Erro | Causa Provável | Solução |
+| :--- | :--- | :--- |
+| `onClick is not defined` | Componente filho fora do escopo ou erro de build | Mover a lógica do botão para o componente principal. |
+| `Theme reset (F5)` | Falta de useEffect de sincronização | Garantir que o `useState` seja atualizado via `useEffect` ao receber as props do banco. |
+| `Column not found` | Schema do Supabase desatualizado | Rodar o comando `ALTER TABLE` no SQL Editor do Supabase. |
+| `CORS Error` | Domínio do Vercel não autorizado | Adicionar a URL do site nas configurações de API do Supabase. |
+
+---
+
+## 5. Script de SQL para Migração (Upgrade v5.0)
+
+```sql
+-- Rodar este script se estiver vindo de uma versão inferior à v3.0
+ALTER TABLE projetos ADD COLUMN IF NOT EXISTS tema_base text DEFAULT 'light';
+ALTER TABLE projetos ADD COLUMN IF NOT EXISTS cor_primaria text DEFAULT '#2563eb';
+ALTER TABLE projetos ADD COLUMN IF NOT EXISTS cor_destaque text DEFAULT '#f59e0b';
+ALTER TABLE projetos ADD COLUMN IF NOT EXISTS logo_url text;
+
+-- Garante que a coluna de tags seja um array de texto
+ALTER TABLE locais ALTER COLUMN tags SET DATA TYPE text[] USING tags::text[];
