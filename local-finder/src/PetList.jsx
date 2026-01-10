@@ -1,21 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient'; 
-import { MessageCircle, MapPin, Store, Star, Award } from 'lucide-react';
+import { MessageCircle, MapPin, Store, Star, Award, Scissors, Stethoscope, ShoppingBag, Home, X } from 'lucide-react';
 import ChatModal from './ChatModal';
 import { InstagramEmbed } from 'react-social-media-embed';
 
-// Recebemos o 'projeto' vindo do App.jsx
 export default function PetList({ projeto }) {
   const [locais, setLocais] = useState([]);
+  const [locaisFiltrados, setLocaisFiltrados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedLocal, setSelectedLocal] = useState(null);
+  
+  // Estado do Filtro (Começa vazio = mostra tudo)
+  const [filtroAtivo, setFiltroAtivo] = useState(null);
 
-  // --- TEMA DINÂMICO (Vem do Banco) ---
+  // --- TEMA DINÂMICO ---
   const tema = {
-    '--cor-primaria': projeto.cor_primaria || '#2563eb', 
-    '--cor-destaque': projeto.cor_destaque || '#f59e0b',
+    '--cor-primaria': projeto?.cor_primaria || '#2563eb', 
+    '--cor-destaque': projeto?.cor_destaque || '#f59e0b',
     '--bg-app': '#f8fafc'
   };
+
+  // --- CONFIGURAÇÃO DOS BOTÕES (CATEGORIAS) ---
+  const categorias = [
+    { id: 'banho', label: 'Banho & Tosa', icon: <Scissors size={24} /> },
+    { id: 'vet',   label: 'Veterinário',  icon: <Stethoscope size={24} /> },
+    { id: 'loja',  label: 'Pet Shop',     icon: <ShoppingBag size={24} /> },
+    { id: 'hotel', label: 'Hotel/Creche', icon: <Home size={24} /> },
+  ];
 
   useEffect(() => {
     async function buscarLocais() {
@@ -25,7 +36,7 @@ export default function PetList({ projeto }) {
         .from('locais')
         .select('*')
         .eq('status', 'PUBLICAR_APP')
-        .eq('projeto_id', projeto.id) // 🔒 O CADEADO: Só traz dados deste projeto
+        .eq('projeto_id', projeto.id)
         .order('destaque', { ascending: false }) 
         .order('created_at', { ascending: false });
 
@@ -34,13 +45,26 @@ export default function PetList({ projeto }) {
         setLocais([]); 
       } else {
         setLocais(data || []);
+        setLocaisFiltrados(data || []); // Inicialmente mostra tudo
       }
       setLoading(false);
     }
     
-    // Se o projeto mudar, busca de novo
     if (projeto?.id) buscarLocais();
   }, [projeto]);
+
+  // --- A MÁGICA DO FILTRO ---
+  useEffect(() => {
+    if (!filtroAtivo) {
+      setLocaisFiltrados(locais); // Se não tem filtro, mostra tudo
+    } else {
+      // Filtra apenas se a tag do local incluir a categoria clicada
+      const filtrados = locais.filter(local => 
+        local.tags && local.tags.includes(filtroAtivo)
+      );
+      setLocaisFiltrados(filtrados);
+    }
+  }, [filtroAtivo, locais]);
 
   return (
     <div style={{ 
@@ -51,25 +75,93 @@ export default function PetList({ projeto }) {
       fontFamily: 'sans-serif' 
     }}>
       
-      <header style={{ marginBottom: '30px', textAlign: 'center', maxWidth: '600px', margin: '0 auto 30px' }}>
-        {/* Título vem do Banco agora */}
-        <h1 style={{ fontSize: '2rem', marginBottom: '10px', color: '#1e293b' }}>
-          {projeto.titulo_pagina || projeto.nome}
+      {/* --- CABEÇALHO HERO --- */}
+      <header style={{ marginBottom: '20px', textAlign: 'center' }}>
+        <h1 style={{ fontSize: '1.8rem', color: '#1e293b', marginBottom: '5px' }}>
+          {projeto.titulo_pagina || 'Pet Finder'}
         </h1>
-        <p style={{ color: '#64748b' }}>Encontre os melhores serviços locais.</p>
+        <p style={{ color: '#64748b', fontSize: '14px' }}>
+          Os melhores cuidados para seu amigo.
+        </p>
       </header>
+
+      {/* --- BARRA DE NAVEGAÇÃO VISUAL (BOTÕES) --- */}
+      <div style={{ 
+        display: 'flex', 
+        gap: '12px', 
+        overflowX: 'auto', 
+        paddingBottom: '10px', 
+        marginBottom: '20px',
+        justifyContent: 'center', // Centraliza no Desktop
+        flexWrap: 'wrap'          // Quebra linha se tela for pequena
+      }}>
+        
+        {/* Botão de Limpar Filtro (Só aparece se tiver filtro ativo) */}
+        {filtroAtivo && (
+          <button 
+            onClick={() => setFiltroAtivo(null)}
+            style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px',
+              border: 'none', background: 'transparent', cursor: 'pointer', minWidth: '60px'
+            }}
+          >
+            <div style={{
+              width: '50px', height: '50px', borderRadius: '50%', 
+              background: '#e2e8f0', color: '#64748b',
+              display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }}>
+              <X size={20} />
+            </div>
+            <span style={{fontSize: '12px', fontWeight: 'bold', color: '#64748b'}}>Todos</span>
+          </button>
+        )}
+
+        {/* Botões das Categorias */}
+        {categorias.map((cat) => {
+          const isAtivo = filtroAtivo === cat.id;
+          return (
+            <button 
+              key={cat.id}
+              onClick={() => setFiltroAtivo(isAtivo ? null : cat.id)} // Clica de novo pra desmarcar
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px',
+                border: 'none', background: 'transparent', cursor: 'pointer', minWidth: '70px'
+              }}
+            >
+              <div style={{
+                width: '55px', height: '55px', borderRadius: '20px', // Formato "App"
+                background: isAtivo ? 'var(--cor-primaria)' : 'white',
+                color: isAtivo ? 'white' : '#64748b',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: isAtivo ? '0 4px 10px rgba(37, 99, 235, 0.3)' : '0 2px 5px rgba(0,0,0,0.05)',
+                transition: 'all 0.2s ease'
+              }}>
+                {cat.icon}
+              </div>
+              <span style={{
+                fontSize: '12px', fontWeight: 'bold', 
+                color: isAtivo ? 'var(--cor-primaria)' : '#64748b'
+              }}>
+                {cat.label}
+              </span>
+            </button>
+          )
+        })}
+      </div>
 
       {loading && <p style={{textAlign: 'center', color: '#666'}}>Carregando...</p>}
       
-      {!loading && locais.length === 0 && (
-        <div style={{textAlign: 'center', padding: '40px', background: '#fff', borderRadius: '10px', maxWidth: '600px', margin: '0 auto'}}>
-          <Store size={40} color="#ccc" />
-          <p>Nenhum local cadastrado neste nicho ainda.</p>
+      {!loading && locaisFiltrados.length === 0 && (
+        <div style={{textAlign: 'center', padding: '40px', color: '#94a3b8'}}>
+          <Store size={40} style={{marginBottom: '10px', opacity: 0.5}} />
+          <p>Nenhum local encontrado nesta categoria.</p>
+          {filtroAtivo && <button onClick={() => setFiltroAtivo(null)} style={{color: 'var(--cor-primaria)', background:'none', border:'none', textDecoration:'underline', cursor:'pointer'}}>Ver todos</button>}
         </div>
       )}
 
+      {/* LISTA DE CARDS */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '600px', margin: '0 auto' }}>
-        {locais.map((local) => {
+        {locaisFiltrados.map((local) => {
           const isVip = local.destaque; 
           return (
             <div key={local.id} style={{
@@ -107,8 +199,9 @@ export default function PetList({ projeto }) {
                 <span>{local.endereco || "Endereço não informado"}</span>
               </div>
 
+              {/* Tags visuais */}
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '15px' }}>
-                {local.tags && local.tags.slice(0, 4).map(tag => (
+                {local.tags && local.tags.map(tag => (
                   <span key={tag} style={{
                     background: '#f1f5f9', color: '#475569', fontSize: '11px', padding: '4px 8px', borderRadius: '6px', textTransform: 'capitalize'
                   }}>
@@ -143,7 +236,6 @@ export default function PetList({ projeto }) {
         })}
       </div>
 
-      {/* Passamos o 'projeto' para o Modal também, pois ele precisa salvar o Lead com o ID certo */}
       {selectedLocal && (
         <ChatModal 
           local={selectedLocal} 

@@ -97,3 +97,39 @@ O Local Finder é uma **Plataforma de Curadoria Premium** que conecta clientes a
 2.  Clica no ícone de **Lápis** no card da loja.
 3.  Insere Nota, Avaliações, Link do Instagram e marca "Destaque".
 4.  Salva -> O App final atualiza instantaneamente com o layout Premium.
+
+
+# 🏭 Fábrica de Apps (Local Finder Engine) - Documentação v2.0
+**Status:** Em Produção (Vercel) | **Arquitetura:** Multi-Tenant (Multi-Nicho)
+
+## 1. Visão Geral
+O projeto evoluiu de um site único para uma **Fábrica de Plataformas de Curadoria**. O mesmo código-fonte agora gera múltiplos aplicativos (ex: `/pets`, `/mecanicos`, `/barber`), diferenciados por configurações no Banco de Dados (Cores, Títulos, Dados).
+A monetização foca no modelo "Premium": estabelecimentos pagam para ter **Destaque Visual** e **Mídia Embarcada** (Instagram).
+
+## 2. Regras de Negócio & Funcionalidades
+1.  **Multi-Tenancy (Fábrica):**
+    * A rota `/` exibe os nichos disponíveis.
+    * A rota `/:nicho` (ex: `/pets`) carrega o App com a identidade visual e dados daquele nicho específico.
+2.  **Hierarquia Premium:**
+    * **VIP:** Borda colorida, Selo, Nota/Avaliações e Embed de Instagram.
+    * **Standard:** Card simples.
+3.  **Gestão (Dashboard):**
+    * Cada nicho tem seu painel: `/:nicho/dashboard`.
+    * Permite edição "No-Code": Alterar notas, promover a Destaque e colar links do Instagram.
+    * **Isolamento:** O Gestor de Pets não vê leads de Mecânicos.
+4.  **Ingestão IA:** O `AdminGenerator` cria prompts SQL customizados por nicho para popular o banco rapidamente via ChatGPT/Gemini.
+
+## 3. Stack Tecnológico
+* **Front:** React (Vite), React Router Dom (Roteamento Dinâmico).
+* **Back/DB:** Supabase (PostgreSQL).
+* **Deploy:** Vercel (Integração Contínua com GitHub).
+* **Bibliotecas Chave:** `lucide-react` (ícones), `react-social-media-embed` (Instagram).
+
+## 4. Estrutura de Banco de Dados (Supabase)
+* **`projetos` (A Mãe):** `id`, `slug` (url), `cor_primaria`, `cor_destaque`, `nome`.
+* **`locais` (Os Filhos):** `id`, `nome`, `nota`, `avaliacoes`, `instagram_url`, `destaque`, `projeto_id` (FK).
+* **`leads` (O Ouro):** `id`, `nome`, `telefone`, `projeto_id` (FK).
+
+## 5. Fluxo de Trabalho (Deploy)
+* **Conteúdo (Dados):** Edita-se direto no Dashboard em Produção.
+* **Código (Estrutura):** Edita no Localhost -> Commit no Git -> Vercel atualiza automático.

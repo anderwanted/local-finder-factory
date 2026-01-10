@@ -1,28 +1,42 @@
 import React, { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
 
-// Recebe 'projeto' via props
 export default function AdminGenerator({ projeto }) {
   const [rawInput, setRawInput] = useState('');
   const [copied, setCopied] = useState(false);
 
-  // O Prompt agora é DINÂMICO. Ele injeta o ID do projeto automaticamente.
+  // --- PROMPT BLINDADO V2.0 (Com GPS e Tags Padrão) ---
   const PROMPT_MESTRE = `
 Atue como Engenheiro de Dados Sênior.
-Contexto: Estamos populando o banco de dados do projeto "${projeto?.nome || 'Geral'}".
-ID do Projeto (Obrigatório): '${projeto?.id}'
+Contexto: Estamos populando o banco do projeto "${projeto?.nome || 'Geral'}" (ID: '${projeto?.id}').
 
-Analise os dados brutos e gere INSERT INTO para PostgreSQL.
+ANALISE O TEXTO SUJO E A URL ABAIXO PARA GERAR UM 'UPSERT' SQL.
 
-Regras:
-1. Tabela: 'locais'.
-2. Colunas: nome, telefone, endereco, site, niche, origem, is_whatsapp, tags, nota, avaliacoes, destaque, projeto_id.
-3. Telefone: Formato 5511999999999.
-4. Regra VIP: SE (nota >= 4.5 E avaliacoes >= 50) ENTÃO destaque = TRUE.
-5. IMPORTANTE: Todas as linhas DEVEM ter a coluna 'projeto_id' com o valor '${projeto?.id}'.
-6. Use UPSERT.
+1. REGRAS DE TAGS (Rigoroso):
+   Analise o texto e categorize APENAS com estas tags permitidas:
+   - 'banho' -> Se tiver banho, tosa, estética.
+   - 'vet'   -> Se for clínica, hospital, vacinas, cirurgia.
+   - 'loja'  -> Se vender ração, acessórios, brinquedos.
+   - 'hotel' -> Se tiver hospedagem ou creche.
+   *Um local pode ter várias tags. Ex: ARRAY['banho', 'vet']*
 
-DADOS BRUTOS:
+2. REGRAS DE EXTRAÇÃO:
+   - Nome, Telefone (formato 5511...), Endereço.
+   - Nota e Avaliações (números).
+   - Latitude/Longitude: Tente extrair da URL (procure padrões como @-23.xxx,-46.xxx). Se não achar, use NULL.
+   - Destaque: TRUE se (nota >= 4.8 e avaliacoes > 40).
+
+3. SAÍDA ESPERADA (SQL):
+   INSERT INTO locais (nome, telefone, endereco, nota, avaliacoes, destaque, tags, latitude, longitude, projeto_id)
+   VALUES (...)
+   ON CONFLICT (nome, endereco) DO UPDATE SET
+   tags = EXCLUDED.tags,
+   nota = EXCLUDED.nota,
+   avaliacoes = EXCLUDED.avaliacoes,
+   latitude = EXCLUDED.latitude,
+   longitude = EXCLUDED.longitude;
+
+DADOS BRUTOS (TEXTO + URL):
 `;
 
   const handleCopy = () => {
@@ -36,15 +50,15 @@ DADOS BRUTOS:
 
   return (
     <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
-      <h2 style={{color: projeto.cor_primaria}}>⚙️ Gerador: {projeto.nome}</h2>
+      <h2 style={{color: projeto.cor_primaria}}>⚙️ Gerador V2: {projeto.nome}</h2>
       <p style={{ fontSize: '14px', color: '#666' }}>
-        Este prompt já vai embutir o ID correto do projeto. É só colar na IA e rodar o SQL.
+        Agora a IA padroniza as tags (banho, vet, loja, hotel) e busca GPS na URL.
       </p>
       
       <textarea
         value={rawInput}
         onChange={(e) => setRawInput(e.target.value)}
-        placeholder={`Cole dados de ${projeto.nome} aqui...`}
+        placeholder={`Cole o texto + URL aqui...`}
         style={{ width: '100%', height: '200px', padding: '10px', marginBottom: '10px', borderRadius: '8px', border: '1px solid #ccc' }}
       />
 
@@ -52,12 +66,12 @@ DADOS BRUTOS:
         onClick={handleCopy}
         style={{
           width: '100%', padding: '15px',
-          background: copied ? '#22c55e' : projeto.cor_primaria, // Usa a cor do nicho!
+          background: copied ? '#22c55e' : projeto.cor_primaria,
           color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px'
         }}
       >
-        {copied ? <><Check /> Copiado!</> : <><Copy /> Gerar Prompt para {projeto.nome}</>}
+        {copied ? <><Check /> Copiado!</> : <><Copy /> Gerar Prompt Padrão</>}
       </button>
     </div>
   );

@@ -66,3 +66,24 @@ Iniciar a transformação para "Fábrica de Apps" (Multi-Nicho).
 MINHA SOLICITAÇÃO AGORA:
 Eu tenho os arquivos atualizados (com a lógica de Destaque e Dashboard 2.0).
 Por favor, assuma o contexto e aguarde meu comando para iniciar o PASSO 2 (Começar a Fábrica Multi-Nicho).
+
+ATUE COMO: Sócio Desenvolvedor Sênior (Full Stack React + Supabase).
+
+CONTEXTO DO PROJETO "FÁBRICA DE APPS (LOCAL FINDER)":
+O projeto está na versão 2.0. É uma arquitetura Multi-Tenant (SaaS) onde uma única base de código React gera múltiplos sites baseados na URL (ex: /pets, /mecanicos).
+
+ESTADO TÉCNICO ATUAL:
+1. Stack: React + Vite + Supabase + Vercel.
+2. Roteamento: Dinâmico via `react-router-dom`. O `App.jsx` usa um `UniversalLoader` para identificar o nicho pelo slug da URL.
+3. Banco de Dados:
+   - Tabela `projetos`: Define as cores e identidade de cada nicho.
+   - Tabelas `locais` e `leads`: Possuem coluna `projeto_id` para isolamento dos dados.
+4. Funcionalidades Ativas:
+   - Dashboard com CRUD (Edição de notas, destaque e Instagram Link).
+   - Card Premium com `react-social-media-embed`.
+   - Gerador de SQL via IA (`AdminGenerator.jsx`) que injeta automaticamente o ID do projeto no prompt.
+
+ONDE PARAMOS:
+O projeto já está em produção na Vercel. O fluxo de deploy via GitHub está configurado. O usuário sabe diferenciar edição de conteúdo (via Dashboard) vs edição de código (via VS Code).
+
+AGUARDE MINHA PRÓXIMA INSTRUÇÃO TÉCNICA.
