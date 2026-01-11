@@ -87,17 +87,32 @@ export default function PetList({ projeto }) {
               <X size={18} />
             </button>
           )}
-          {categorias.map((cat) => {
-            const isAtivo = filtroAtivo === cat.id;
-            return (
-              <button key={cat.id} onClick={() => setFiltroAtivo(isAtivo ? null : cat.id)} style={{
-                flexShrink: 0, padding: '0 16px', height: '45px', borderRadius: 'var(--radius-btn)',
+         {categorias.map((cat) => {
+          const isAtivo = filtroAtivo === cat.id;
+          return (
+            <button 
+              key={cat.id} 
+              onClick={() => setFiltroAtivo(isAtivo ? null : cat.id)} 
+              style={{
+                flexShrink: 0, 
+                padding: '0 16px', 
+                height: '45px', 
+                borderRadius: 'var(--radius-btn)',
+                cursor: 'pointer', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '8px',
+                background: isAtivo ? 'var(--cor-primaria)' : 'var(--bg-card)',
+                color: isAtivo ? '#fff' : 'var(--text-secondary)',
+                fontWeight: '600', 
+                fontSize: '14px',
                 border: isAtivo ? 'none' : '1px solid var(--border-color)'
-              }}>
-                {cat.icon} {cat.label}
-              </button>
-            )
-          })}
+              }}
+            >
+              {cat.icon} {cat.label}
+            </button>
+          )
+        })}
         </div>
       </div>
 
