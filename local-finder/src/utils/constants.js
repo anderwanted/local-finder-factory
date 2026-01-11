@@ -1,4 +1,3 @@
-
 // src/utils/constants.js
 
 export const TAGS_OFICIAIS = [
@@ -26,7 +25,6 @@ export const THEME_COLORS = {
   success: '#22c55e'
 };
 
-// Função helper para gerar tema dinâmico
 export const getTheme = (projeto) => ({
   primary: projeto?.cor_primaria || THEME_COLORS.primary,
   bg: THEME_COLORS.bg,

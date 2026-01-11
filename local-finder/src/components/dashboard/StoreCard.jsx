@@ -15,7 +15,6 @@ export default function StoreCard({ local, theme, onToggleStatus, onEdit, onDele
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         
-        {/* Info da Loja */}
         <div>
           <div style={{ 
             fontWeight: 'bold', 
@@ -36,10 +35,8 @@ export default function StoreCard({ local, theme, onToggleStatus, onEdit, onDele
           </div>
         </div>
 
-        {/* Ações */}
         <div style={{ display: 'flex', gap: '8px' }}>
           
-          {/* Toggle Visibilidade */}
           <button
             onClick={() => onToggleStatus(local)}
             style={{
@@ -59,7 +56,6 @@ export default function StoreCard({ local, theme, onToggleStatus, onEdit, onDele
             {isVisible ? <Eye size={18} /> : <EyeOff size={18} />}
           </button>
 
-          {/* Editar */}
           <button
             onClick={() => onEdit(local)}
             style={{
@@ -79,7 +75,6 @@ export default function StoreCard({ local, theme, onToggleStatus, onEdit, onDele
             <Edit size={18} />
           </button>
 
-          {/* Deletar */}
           <button
             onClick={() => onDelete(local.id)}
             style={{

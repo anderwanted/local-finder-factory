@@ -1,4 +1,3 @@
-
 // src/components/dashboard/StoreCardEdit.jsx
 import React, { useState } from 'react';
 import { TAGS_OFICIAIS } from '../../utils/constants';
@@ -33,12 +32,10 @@ export default function StoreCardEdit({ local, theme, onSave, onCancel }) {
     }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
         
-        {/* Título */}
         <div style={{ fontWeight: 'bold', fontSize: '14px' }}>
           Editando: {local.nome}
         </div>
 
-        {/* Campo Nome */}
         <input
           value={formData.nome}
           onChange={e => setFormData({ ...formData, nome: e.target.value })}
@@ -52,7 +49,6 @@ export default function StoreCardEdit({ local, theme, onSave, onCancel }) {
           placeholder="Nome do local"
         />
 
-        {/* Seletor de Tags */}
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           {TAGS_OFICIAIS.map(tag => (
             <button
@@ -74,7 +70,6 @@ export default function StoreCardEdit({ local, theme, onSave, onCancel }) {
           ))}
         </div>
 
-        {/* Botões de Ação */}
         <div style={{ display: 'flex', gap: '10px' }}>
           <button
             onClick={handleSubmit}

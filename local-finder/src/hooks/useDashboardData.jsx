@@ -1,4 +1,3 @@
-
 // src/hooks/useDashboardData.jsx
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
@@ -8,7 +7,6 @@ export function useDashboardData(projetoId) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Buscar dados iniciais
   const fetchLocais = async () => {
     if (!projetoId) return;
     
@@ -33,7 +31,6 @@ export function useDashboardData(projetoId) {
     }
   };
 
-  // Toggle de visibilidade (Publicar/Ocultar)
   const toggleStatus = async (local) => {
     const novoStatus = local.status === 'PUBLICAR_APP' ? 'RASCUNHO' : 'PUBLICAR_APP';
     
@@ -54,7 +51,6 @@ export function useDashboardData(projetoId) {
     }
   };
 
-  // Atualizar local (edição)
   const updateLocal = async (id, updates) => {
     try {
       const { error } = await supabase
@@ -64,14 +60,13 @@ export function useDashboardData(projetoId) {
 
       if (error) throw error;
 
-      await fetchLocais(); // Recarrega a lista
+      await fetchLocais();
     } catch (err) {
       console.error('Erro ao atualizar local:', err);
       throw err;
     }
   };
 
-  // Deletar local
   const deleteLocal = async (id) => {
     try {
       const { error } = await supabase
@@ -88,7 +83,6 @@ export function useDashboardData(projetoId) {
     }
   };
 
-  // Carrega dados ao montar
   useEffect(() => {
     fetchLocais();
   }, [projetoId]);
