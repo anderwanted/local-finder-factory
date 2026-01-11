@@ -1,5 +1,5 @@
 RELATÓRIO TÉCNICO DO PROJETO
-Data: 10/01/2026, 12:13:11
+Data: 11/01/2026, 00:21:41
 
 --- PACKAGE.JSON ---
 {
@@ -30,13 +30,15 @@ Data: 10/01/2026, 12:13:11
 
 --- ARQUIVO: src/AdminGenerator.jsx ---
 import React, { useState } from 'react';
-import { Copy, Check } from 'lucide-react';
+import { Copy, Check, MapPin, MousePointer, Globe, ArrowRight } from 'lucide-react';
 
 export default function AdminGenerator({ projeto }) {
   const [rawInput, setRawInput] = useState('');
   const [copied, setCopied] = useState(false);
 
-  // --- PROMPT BLINDADO V2.0 (Com GPS e Tags Padrão) ---
+  const corTema = projeto?.cor_primaria || '#2563eb';
+
+  // --- PROMPT BLINDADO V2.1 ---
   const PROMPT_MESTRE = `
 Atue como Engenheiro de Dados Sênior.
 Contexto: Estamos populando o banco do projeto "${projeto?.nome || 'Geral'}" (ID: '${projeto?.id}').
@@ -80,32 +82,95 @@ DADOS BRUTOS (TEXTO + URL):
   if (!projeto) return <p>Erro: Projeto não identificado.</p>;
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
-      <h2 style={{color: projeto.cor_primaria}}>⚙️ Gerador V2: {projeto.nome}</h2>
-      <p style={{ fontSize: '14px', color: '#666' }}>
-        Agora a IA padroniza as tags (banho, vet, loja, hotel) e busca GPS na URL.
-      </p>
+    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px', fontFamily: 'sans-serif', color: '#334155' }}>
       
-      <textarea
-        value={rawInput}
-        onChange={(e) => setRawInput(e.target.value)}
-        placeholder={`Cole o texto + URL aqui...`}
-        style={{ width: '100%', height: '200px', padding: '10px', marginBottom: '10px', borderRadius: '8px', border: '1px solid #ccc' }}
-      />
+      {/* HEADER DE INSTRUÇÕES */}
+      <div style={{ background: 'white', padding: '25px', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', marginBottom: '25px', borderLeft: `6px solid ${corTema}` }}>
+        <h2 style={{ color: '#1e293b', marginTop: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Globe size={24} color={corTema} />
+          Gerador de Dados Inteligente
+        </h2>
+        <p style={{ color: '#64748b', fontSize: '14px' }}>
+          Siga o fluxo abaixo para popular o app <strong>{projeto.nome}</strong> com precisão.
+        </p>
+        
+        {/* STEPS VISUAIS */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginTop: '20px' }}>
+          
+          <StepCard 
+            icon={<MapPin size={20} />} 
+            title="1. Google Maps" 
+            text="Pesquise o local e CLIQUE NO PINO para abrir os detalhes."
+            color={corTema}
+          />
+          
+          <StepCard 
+            icon={<MousePointer size={20} />} 
+            title="2. Captura Total" 
+            text="Dê Ctrl+A na aba lateral esquerda e copie todo o texto."
+            color={corTema}
+          />
+          
+          <StepCard 
+            icon={<Globe size={20} />} 
+            title="3. URL GPS" 
+            text="Copie também o link do navegador para pegar a latitude."
+            color={corTema}
+          />
 
-      <button
-        onClick={handleCopy}
-        style={{
-          width: '100%', padding: '15px',
-          background: copied ? '#22c55e' : projeto.cor_primaria,
-          color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px'
-        }}
-      >
-        {copied ? <><Check /> Copiado!</> : <><Copy /> Gerar Prompt Padrão</>}
-      </button>
+        </div>
+      </div>
+      
+      {/* ÁREA DE AÇÃO */}
+      <div style={{ position: 'relative' }}>
+        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px' }}>
+          Cole tudo aqui (Texto Bagunçado + URL):
+        </label>
+        
+        <textarea
+          value={rawInput}
+          onChange={(e) => setRawInput(e.target.value)}
+          placeholder={`Exemplo:\nPet Shop do Zé\n4.8 estrelas\nRua das Flores, 123\n\nhttps://google.com/maps/...`}
+          style={{ 
+            width: '100%', height: '200px', padding: '15px', 
+            borderRadius: '12px', border: '2px solid #e2e8f0', 
+            fontSize: '14px', fontFamily: 'monospace', resize: 'vertical',
+            outlineColor: corTema
+          }}
+        />
+
+        <div style={{ marginTop: '15px' }}>
+          <button
+            onClick={handleCopy}
+            disabled={!rawInput}
+            style={{
+              width: '100%', padding: '16px',
+              background: copied ? '#22c55e' : (rawInput ? corTema : '#cbd5e1'),
+              color: 'white', border: 'none', borderRadius: '12px', 
+              fontWeight: 'bold', fontSize: '16px', cursor: rawInput ? 'pointer' : 'not-allowed',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+              transition: 'all 0.2s', boxShadow: rawInput ? '0 4px 12px rgba(0,0,0,0.15)' : 'none'
+            }}
+          >
+            {copied ? <><Check /> Prompt Copiado! Cole na IA.</> : <><Copy /> Gerar Comando SQL</>}
+            {!copied && rawInput && <ArrowRight size={20} />}
+          </button>
+        </div>
+      </div>
     </div>
   );
+}
+
+// Componente visualzinho dos passos
+function StepCard({ icon, title, text, color }) {
+  return (
+    <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: color, fontWeight: 'bold' }}>
+        {icon} {title}
+      </div>
+      <p style={{ margin: 0, fontSize: '12px', color: '#64748b', lineHeight: '1.4' }}>{text}</p>
+    </div>
+  )
 }
 ----------------------------------
 
@@ -445,22 +510,32 @@ export default function ChatModal({ local, projeto, onClose }) {
 import React, { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
 import { 
-  Trash2, Edit, Save, X, CheckSquare, Square, 
-  Eye, EyeOff, Filter, Star, List, Layers 
+  Trash2, Edit, Save, Eye, EyeOff, Star, ExternalLink, 
+  Store, CheckSquare, Square, X, Scissors, Stethoscope, 
+  ShoppingBag, Home, Search
 } from 'lucide-react';
 
 export default function Dashboard({ projeto }) {
+  // --- ESTADOS ---
   const [locais, setLocais] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
+  const [filtroStatus, setFiltroStatus] = useState('todos'); 
+  const [filtroCategoria, setFiltroCategoria] = useState(null);
 
-  // --- ESTADOS DOS FILTROS ---
-  const [filtroStatus, setFiltroStatus] = useState('todos'); // 'todos', 'publicados', 'ocultos'
-  const [filtroCategoria, setFiltroCategoria] = useState(null); // null ou id da tag
-  const [filtroVip, setFiltroVip] = useState(false); // boolean
+  // Cores fixas de alta qualidade para garantir que NADA quebre
+  const theme = {
+    primary: projeto?.cor_primaria || '#2563eb',
+    bg: '#f8fafc',
+    card: '#ffffff',
+    text: '#1e293b',
+    textSec: '#64748b',
+    border: '#e2e8f0',
+    danger: '#ef4444',
+    success: '#22c55e'
+  };
 
-  // Tags Oficiais
   const TAGS_OFICIAIS = [
     { id: 'banho', label: 'Banho', color: '#3b82f6' },
     { id: 'vet',   label: 'Vet',   color: '#10b981' },
@@ -468,46 +543,21 @@ export default function Dashboard({ projeto }) {
     { id: 'hotel', label: 'Hotel', color: '#8b5cf6' }
   ];
 
-  const corPrimaria = projeto?.cor_primaria || '#2563eb';
-
   useEffect(() => {
-    if (projeto?.id) fetchLocais();
+    if (projeto?.id) buscarDados();
   }, [projeto]);
 
-  async function fetchLocais() {
+  async function buscarDados() {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('locais')
       .select('*')
       .eq('projeto_id', projeto.id)
       .order('created_at', { ascending: false });
-
-    if (error) console.error('Erro:', error);
-    else setLocais(data || []);
+    setLocais(data || []);
     setLoading(false);
   }
 
-  // --- LÓGICA DE FILTRAGEM ---
-  const locaisFiltrados = locais.filter(local => {
-    // 1. Filtro de Status
-    if (filtroStatus === 'publicados' && local.status !== 'PUBLICAR_APP') return false;
-    if (filtroStatus === 'ocultos' && local.status === 'PUBLICAR_APP') return false;
-
-    // 2. Filtro VIP
-    if (filtroVip && !local.destaque) return false;
-
-    // 3. Filtro de Categoria
-    if (filtroCategoria && !local.tags?.includes(filtroCategoria)) return false;
-
-    return true;
-  });
-
-  // Contadores para os botões
-  const countPublicados = locais.filter(l => l.status === 'PUBLICAR_APP').length;
-  const countOcultos = locais.filter(l => l.status !== 'PUBLICAR_APP').length;
-  const countVips = locais.filter(l => l.destaque).length;
-
-  // --- AÇÕES DO CRUD ---
   async function toggleStatus(local) {
     const novoStatus = local.status === 'PUBLICAR_APP' ? 'RASCUNHO' : 'PUBLICAR_APP';
     const { error } = await supabase.from('locais').update({ status: novoStatus }).eq('id', local.id);
@@ -516,205 +566,128 @@ export default function Dashboard({ projeto }) {
     }
   }
 
-  async function handleUpdate() {
+  async function handleUpdateLocal() {
     const { error } = await supabase.from('locais').update({
         nome: editForm.nome,
-        nota: editForm.nota,
-        avaliacoes: editForm.avaliacoes,
-        instagram_url: editForm.instagram_url,
         destaque: editForm.destaque,
         tags: editForm.tags 
       }).eq('id', editingId);
-
+    
     if (!error) {
       setEditingId(null);
-      fetchLocais();
+      buscarDados();
     }
   }
 
   async function handleDelete(id) {
-    if(!window.confirm("Apagar permanentemente?")) return;
+    if(!window.confirm("Tem certeza que deseja excluir esta loja?")) return;
     const { error } = await supabase.from('locais').delete().eq('id', id);
-    if (!error) fetchLocais();
+    if (!error) buscarDados();
   }
 
   const toggleTagForm = (tagId) => {
     const tagsAtuais = editForm.tags || [];
-    if (tagsAtuais.includes(tagId)) setEditForm({ ...editForm, tags: tagsAtuais.filter(t => t !== tagId) });
-    else setEditForm({ ...editForm, tags: [...tagsAtuais, tagId] });
+    setEditForm({ ...editForm, tags: tagsAtuais.includes(tagId) ? tagsAtuais.filter(t => t !== tagId) : [...tagsAtuais, tagId] });
   };
 
-  const iniciarEdicao = (local) => {
-    setEditingId(local.id);
-    setEditForm({ ...local, tags: local.tags || [] }); 
-  };
+  // Filtragem lógica
+  const filtrados = locais.filter(l => {
+    if (filtroStatus === 'publicados' && l.status !== 'PUBLICAR_APP') return false;
+    if (filtroStatus === 'ocultos' && l.status === 'PUBLICAR_APP') return false;
+    if (filtroCategoria && !l.tags?.includes(filtroCategoria)) return false;
+    return true;
+  });
+
+  if (!projeto) return <div style={{padding: 50, textAlign: 'center'}}>Carregando...</div>;
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1000px', margin: '0 auto', fontFamily: 'sans-serif', background: '#f8fafc', minHeight: '100vh' }}>
+    <div style={{ background: theme.bg, minHeight: '100vh', color: theme.text, padding: '20px', fontFamily: 'sans-serif' }}>
       
-      {/* HEADER */}
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', background:'white', padding:'20px', borderRadius:'12px', boxShadow:'0 2px 5px rgba(0,0,0,0.05)' }}>
-        <div>
-           <h1 style={{ color: corPrimaria, margin: 0, fontSize: '1.5rem' }}>Gestão: {projeto.nome}</h1>
-           <p style={{ margin: '5px 0 0 0', fontSize: '13px', color: '#64748b' }}>Total de {locais.length} locais cadastrados</p>
+      {/* HEADER SIMPLIFICADO */}
+      <header style={{ background: theme.card, borderRadius: '12px', border: `1px solid ${theme.border}`, padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <div style={{ width: '40px', height: '40px', background: theme.primary, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+            <Store size={22} />
+          </div>
+          <h1 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 'bold' }}>{projeto.nome}</h1>
         </div>
-        <button onClick={() => window.location.href = `/${projeto.slug}`} style={{ padding: '10px 20px', cursor: 'pointer', background: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', fontWeight:'bold', color: '#475569', display:'flex', alignItems:'center', gap:'8px' }}>
-           <ExternalLinkIcon /> Ver App
+        <button onClick={() => window.location.href = `/${projeto.slug}`} style={{ padding: '8px 16px', background: 'white', border: `1px solid ${theme.border}`, borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <ExternalLink size={16} /> Ver App
         </button>
       </header>
 
-      {/* --- BARRA DE FILTROS (DASHBOARD CONTROL) --- */}
-      <div style={{ marginBottom: '25px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+      {/* ÁREA DE GESTÃO */}
+      <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
         
-        {/* Linha 1: Status e VIP */}
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          {/* Botões de Status (Tabs) */}
-          <div style={{ background: '#e2e8f0', padding: '4px', borderRadius: '8px', display: 'flex', gap: '4px' }}>
-            <FilterButton active={filtroStatus === 'todos'} onClick={() => setFiltroStatus('todos')}>
-              Todos ({locais.length})
-            </FilterButton>
-            <FilterButton active={filtroStatus === 'publicados'} onClick={() => setFiltroStatus('publicados')}>
-              🟢 No Ar ({countPublicados})
-            </FilterButton>
-            <FilterButton active={filtroStatus === 'ocultos'} onClick={() => setFiltroStatus('ocultos')}>
-              🔴 Ocultos ({countOcultos})
-            </FilterButton>
+        {/* BARRA DE FILTROS */}
+        <div style={{ display: 'flex', gap: '15px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ display: 'flex', background: '#e2e8f0', padding: '4px', borderRadius: '8px' }}>
+            {['todos', 'publicados', 'ocultos'].map(s => (
+              <button key={s} onClick={() => setFiltroStatus(s)} style={{ padding: '6px 12px', border: 'none', borderRadius: '6px', cursor: 'pointer', background: filtroStatus === s ? 'white' : 'transparent', color: theme.text, fontWeight: 'bold', fontSize: '11px', boxShadow: filtroStatus === s ? '0 1px 2px rgba(0,0,0,0.1)' : 'none' }}>
+                {s.toUpperCase()}
+              </button>
+            ))}
           </div>
-
-          {/* Botão VIP */}
-          <button 
-            onClick={() => setFiltroVip(!filtroVip)}
-            style={{
-              padding: '8px 16px', borderRadius: '8px', border: filtroVip ? '2px solid #f59e0b' : '1px solid #e2e8f0',
-              background: filtroVip ? '#fffbeb' : 'white', color: filtroVip ? '#b45309' : '#64748b',
-              cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px'
-            }}
-          >
-            <Star size={16} fill={filtroVip ? "currentColor" : "none"} />
-            {filtroVip ? `Exibindo VIPs (${countVips})` : 'Filtrar VIPs'}
-          </button>
-        </div>
-
-        {/* Linha 2: Categorias */}
-        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '5px' }}>
-           <button 
-             onClick={() => setFiltroCategoria(null)}
-             style={{
-               padding: '6px 12px', borderRadius: '20px', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold',
-               background: filtroCategoria === null ? '#334155' : '#cbd5e1', color: 'white'
-             }}
-           >
-             Todas as Categorias
-           </button>
-           {TAGS_OFICIAIS.map(tag => (
-             <button
-               key={tag.id}
-               onClick={() => setFiltroCategoria(filtroCategoria === tag.id ? null : tag.id)}
-               style={{
-                 padding: '6px 12px', borderRadius: '20px', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold',
-                 background: filtroCategoria === tag.id ? tag.color : 'white',
-                 color: filtroCategoria === tag.id ? 'white' : '#64748b',
-                 boxShadow: filtroCategoria === tag.id ? '0 2px 5px rgba(0,0,0,0.2)' : '0 1px 2px rgba(0,0,0,0.1)'
-               }}
-             >
-               {tag.label}
-             </button>
-           ))}
-        </div>
-      </div>
-
-      {/* --- LISTA DE RESULTADOS --- */}
-      {loading ? <p>Carregando...</p> : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           
-          {locaisFiltrados.length === 0 && (
-            <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8', background: 'white', borderRadius: '12px' }}>
-              <Filter size={40} style={{ opacity: 0.2, marginBottom: '10px' }} />
-              <p>Nenhum local encontrado com esses filtros.</p>
-              <button onClick={() => {setFiltroStatus('todos'); setFiltroVip(false); setFiltroCategoria(null)}} style={{color: corPrimaria, background:'none', border:'none', cursor:'pointer', textDecoration:'underline'}}>Limpar Filtros</button>
-            </div>
-          )}
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {TAGS_OFICIAIS.map(tag => (
+              <button key={tag.id} onClick={() => setFiltroCategoria(filtroCategoria === tag.id ? null : tag.id)} style={{ padding: '6px 12px', borderRadius: '20px', border: `1px solid ${filtroCategoria === tag.id ? tag.color : theme.border}`, background: filtroCategoria === tag.id ? tag.color : 'white', color: filtroCategoria === tag.id ? 'white' : theme.textSec, cursor: 'pointer', fontSize: '11px', fontWeight: 'bold' }}>
+                {tag.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
-          {locaisFiltrados.map(local => {
+        {/* LISTA DE LOJAS */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {loading ? (
+            <p style={{ textAlign: 'center', padding: '40px' }}>Carregando dados...</p>
+          ) : filtrados.map(local => {
             const isVisible = local.status === 'PUBLICAR_APP';
             const isEditing = editingId === local.id;
 
             return (
-              <div key={local.id} style={{ 
-                padding: '20px', background: 'white', borderRadius: '10px', 
-                borderLeft: isEditing ? `4px solid ${corPrimaria}` : (local.destaque ? '4px solid #f59e0b' : '4px solid transparent'),
-                opacity: (isVisible || isEditing) ? 1 : 0.6,
-                boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-              }}>
-                
+              <div key={local.id} style={{ background: theme.card, borderRadius: '12px', border: `1px solid ${theme.border}`, padding: '16px', transition: 'all 0.2s', boxShadow: isEditing ? '0 4px 12px rgba(0,0,0,0.05)' : 'none' }}>
                 {isEditing ? (
-                  // --- MODO EDIÇÃO (Mantido igual, mas simplificado visualmente) ---
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                      <input value={editForm.nome} onChange={e => setEditForm({...editForm, nome: e.target.value})} style={{ flex: 1, padding: '10px', fontWeight: 'bold', border: '1px solid #cbd5e1', borderRadius: '6px' }} />
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#fffbeb', padding: '10px', borderRadius: '6px', cursor: 'pointer', border: '1px solid #fcd34d' }}>
-                        <input type="checkbox" checked={editForm.destaque} onChange={e => setEditForm({...editForm, destaque: e.target.checked})} />
-                        <span style={{fontWeight:'bold', color: '#b45309', fontSize: '13px'}}>VIP</span>
-                      </label>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: '10px' }}>
-                      <input type="number" step="0.1" value={editForm.nota} onChange={e => setEditForm({...editForm, nota: e.target.value})} placeholder="Nota" style={{ padding: '8px', border: '1px solid #cbd5e1', borderRadius: '6px' }} />
-                      <input type="number" value={editForm.avaliacoes} onChange={e => setEditForm({...editForm, avaliacoes: e.target.value})} placeholder="Avaliações" style={{ padding: '8px', border: '1px solid #cbd5e1', borderRadius: '6px' }} />
-                      <input type="text" value={editForm.instagram_url} onChange={e => setEditForm({...editForm, instagram_url: e.target.value})} placeholder="Instagram URL" style={{ padding: '8px', border: '1px solid #cbd5e1', borderRadius: '6px' }} />
-                    </div>
-
-                    {/* CHECKBOXES */}
-                    <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <div style={{ fontWeight: 'bold', fontSize: '14px' }}>Editando: {local.nome}</div>
+                    <input value={editForm.nome} onChange={e => setEditForm({...editForm, nome: e.target.value})} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: `1px solid ${theme.border}` }} />
+                    
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                       {TAGS_OFICIAIS.map(tag => (
-                        <div key={tag.id} onClick={() => toggleTagForm(tag.id)} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', padding: '4px 10px', borderRadius: '15px', background: editForm.tags?.includes(tag.id) ? tag.color : 'white', color: editForm.tags?.includes(tag.id) ? 'white' : '#64748b', fontSize: '12px', fontWeight: 'bold', border: editForm.tags?.includes(tag.id) ? 'none' : '1px solid #cbd5e1' }}>
-                          {editForm.tags?.includes(tag.id) ? <CheckSquare size={14} /> : <Square size={14} />} {tag.label}
-                        </div>
+                        <button key={tag.id} onClick={() => toggleTagForm(tag.id)} style={{ padding: '6px 10px', borderRadius: '6px', border: `1px solid ${theme.border}`, background: editForm.tags?.includes(tag.id) ? tag.color : 'white', color: editForm.tags?.includes(tag.id) ? 'white' : theme.textSec, cursor: 'pointer', fontSize: '11px' }}>
+                          {tag.label}
+                        </button>
                       ))}
                     </div>
 
                     <div style={{ display: 'flex', gap: '10px' }}>
-                      <button onClick={handleUpdate} style={{ flex: 1, padding: '10px', background: '#22c55e', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', display:'flex', alignItems:'center', justifyContent:'center', gap:'5px' }}><Save size={16} /> Salvar</button>
-                      <button onClick={() => setEditingId(null)} style={{ padding: '10px 20px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>Cancelar</button>
+                      <button onClick={handleUpdateLocal} style={{ flex: 1, padding: '10px', background: theme.success, color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>Salvar</button>
+                      <button onClick={() => setEditingId(null)} style={{ padding: '10px 20px', background: '#f1f5f9', color: theme.text, border: 'none', borderRadius: '6px', cursor: 'pointer' }}>Cancelar</button>
                     </div>
                   </div>
                 ) : (
-                  // --- MODO VISUALIZAÇÃO (Card Limpo) ---
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                      <h3 style={{ margin: '0 0 5px 0', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px' }}>
+                      <div style={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {local.nome}
                         {local.destaque && <Star size={14} fill="#f59e0b" color="#f59e0b" />}
-                        {!isVisible && <span style={{fontSize:'10px', background:'#e2e8f0', padding:'2px 6px', borderRadius:'4px', color:'#64748b', fontWeight:'bold'}}>OCULTO</span>}
-                      </h3>
-                      
-                      <div style={{ fontSize: '12px', color: '#64748b', display: 'flex', gap: '10px', marginBottom: '8px' }}>
-                        <span>⭐ {local.nota} ({local.avaliacoes})</span>
-                        <span style={{maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>📍 {local.endereco}</span>
                       </div>
-
-                      <div style={{ display: 'flex', gap: '5px' }}>
-                        {local.tags && local.tags.map(t => {
-                           const tagInfo = TAGS_OFICIAIS.find(to => to.id === t);
-                           return (
-                            <span key={t} style={{ fontSize: '10px', background: tagInfo ? tagInfo.color : '#cbd5e1', padding: '2px 8px', borderRadius: '10px', color: 'white', fontWeight: 'bold' }}>
-                              {tagInfo ? tagInfo.label : t}
-                            </span>
-                           )
-                        })}
+                      <div style={{ fontSize: '12px', color: theme.textSec, marginTop: '4px' }}>
+                        {local.endereco || 'Sem endereço cadastrado'}
                       </div>
                     </div>
 
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <ActionButton onClick={() => toggleStatus(local)} color={isVisible ? '#64748b' : '#ef4444'} title={isVisible ? "Ocultar" : "Publicar"}>
+                      <button onClick={() => toggleStatus(local)} style={{ width: '38px', height: '38px', borderRadius: '8px', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: isVisible ? '#f1f5f9' : '#fee2e2', color: isVisible ? theme.textSec : theme.danger }}>
                         {isVisible ? <Eye size={18} /> : <EyeOff size={18} />}
-                      </ActionButton>
-                      <ActionButton onClick={() => iniciarEdicao(local)} color={corPrimaria} title="Editar">
+                      </button>
+                      <button onClick={() => { setEditingId(local.id); setEditForm(local); }} style={{ width: '38px', height: '38px', borderRadius: '8px', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#dbeafe', color: '#2563eb' }}>
                         <Edit size={18} />
-                      </ActionButton>
-                      <ActionButton onClick={() => handleDelete(local.id)} color="#ef4444" title="Excluir">
+                      </button>
+                      <button onClick={() => handleDelete(local.id)} style={{ width: '38px', height: '38px', borderRadius: '8px', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: '#fef2f2', color: theme.danger }}>
                         <Trash2 size={18} />
-                      </ActionButton>
+                      </button>
                     </div>
                   </div>
                 )}
@@ -722,41 +695,9 @@ export default function Dashboard({ projeto }) {
             );
           })}
         </div>
-      )}
+      </div>
     </div>
   );
-}
-
-// --- Componentes Auxiliares para Estilo ---
-function FilterButton({ active, onClick, children }) {
-  return (
-    <button onClick={onClick} style={{
-      padding: '8px 16px', borderRadius: '6px', border: 'none', cursor: 'pointer',
-      background: active ? 'white' : 'transparent',
-      color: active ? '#1e293b' : '#64748b',
-      fontWeight: active ? 'bold' : 'normal',
-      boxShadow: active ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-      fontSize: '13px', transition: 'all 0.2s'
-    }}>
-      {children}
-    </button>
-  );
-}
-
-function ActionButton({ onClick, color, children, title }) {
-  return (
-    <button onClick={onClick} title={title} style={{
-      width: '36px', height: '36px', borderRadius: '8px', border: `1px solid ${color}20`,
-      background: `${color}10`, color: color, cursor: 'pointer',
-      display: 'flex', alignItems: 'center', justifyContent: 'center'
-    }}>
-      {children}
-    </button>
-  );
-}
-
-function ExternalLinkIcon() {
-    return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>;
 }
 ----------------------------------
 
@@ -772,240 +713,158 @@ export default function PetList({ projeto }) {
   const [locaisFiltrados, setLocaisFiltrados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedLocal, setSelectedLocal] = useState(null);
-  
-  // Estado do Filtro (Começa vazio = mostra tudo)
   const [filtroAtivo, setFiltroAtivo] = useState(null);
 
-  // --- TEMA DINÂMICO ---
+  // --- LÓGICA DE TEMAS E DARK MODE ---
+  const isDark = projeto?.tema_base === 'dark';
+  const radius = projeto?.estilo_borda === 'quadrado' ? '0px' : (projeto?.estilo_borda === 'pilula' ? '100px' : '16px'); // Borda dos botões
+  const radiusCard = projeto?.estilo_borda === 'quadrado' ? '0px' : '20px'; // Cards sempre um pouco arredondados ou quadrados
+
   const tema = {
+    // Cores Dinâmicas
+    '--bg-app': isDark ? '#0f172a' : '#f8fafc',         // Fundo Principal (Dark: Slate 900)
+    '--bg-card': isDark ? '#1e293b' : '#ffffff',        // Fundo Card (Dark: Slate 800)
+    '--text-primary': isDark ? '#f1f5f9' : '#1e293b',   // Texto Principal
+    '--text-secondary': isDark ? '#94a3b8' : '#64748b', // Texto Secundário
+    '--border-color': isDark ? '#334155' : '#e2e8f0',   // Bordas
+    
+    // Cores da Marca
     '--cor-primaria': projeto?.cor_primaria || '#2563eb', 
     '--cor-destaque': projeto?.cor_destaque || '#f59e0b',
-    '--bg-app': '#f8fafc'
+    
+    // Formas
+    '--radius-btn': radius,
+    '--radius-card': radiusCard,
+    
+    // Sombras
+    '--shadow-card': isDark ? '0 10px 15px -3px rgba(0, 0, 0, 0.5)' : '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
   };
 
-  // --- CONFIGURAÇÃO DOS BOTÕES (CATEGORIAS) ---
   const categorias = [
-    { id: 'banho', label: 'Banho & Tosa', icon: <Scissors size={24} /> },
-    { id: 'vet',   label: 'Veterinário',  icon: <Stethoscope size={24} /> },
-    { id: 'loja',  label: 'Pet Shop',     icon: <ShoppingBag size={24} /> },
-    { id: 'hotel', label: 'Hotel/Creche', icon: <Home size={24} /> },
+    { id: 'banho', label: 'Banho', icon: <Scissors size={20} /> },
+    { id: 'vet',   label: 'Vet',   icon: <Stethoscope size={20} /> },
+    { id: 'loja',  label: 'Loja',  icon: <ShoppingBag size={20} /> },
+    { id: 'hotel', label: 'Hotel', icon: <Home size={20} /> },
   ];
 
   useEffect(() => {
     async function buscarLocais() {
       setLoading(true);
-      
-      const { data, error } = await supabase
-        .from('locais')
-        .select('*')
-        .eq('status', 'PUBLICAR_APP')
-        .eq('projeto_id', projeto.id)
-        .order('destaque', { ascending: false }) 
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error("Erro ao buscar:", error); 
-        setLocais([]); 
-      } else {
-        setLocais(data || []);
-        setLocaisFiltrados(data || []); // Inicialmente mostra tudo
-      }
+      const { data } = await supabase.from('locais').select('*').eq('status', 'PUBLICAR_APP').eq('projeto_id', projeto.id).order('destaque', { ascending: false });
+      setLocais(data || []);
+      setLocaisFiltrados(data || []);
       setLoading(false);
     }
-    
     if (projeto?.id) buscarLocais();
   }, [projeto]);
 
-  // --- A MÁGICA DO FILTRO ---
   useEffect(() => {
-    if (!filtroAtivo) {
-      setLocaisFiltrados(locais); // Se não tem filtro, mostra tudo
-    } else {
-      // Filtra apenas se a tag do local incluir a categoria clicada
-      const filtrados = locais.filter(local => 
-        local.tags && local.tags.includes(filtroAtivo)
-      );
-      setLocaisFiltrados(filtrados);
-    }
+    if (!filtroAtivo) setLocaisFiltrados(locais);
+    else setLocaisFiltrados(locais.filter(local => local.tags && local.tags.includes(filtroAtivo)));
   }, [filtroAtivo, locais]);
 
   return (
-    <div style={{ 
-      ...tema, 
-      background: 'var(--bg-app)', 
-      minHeight: '100vh',
-      padding: '20px', 
-      fontFamily: 'sans-serif' 
-    }}>
+    <div style={{ ...tema, background: 'var(--bg-app)', color: 'var(--text-primary)', minHeight: '100vh', fontFamily: 'sans-serif', transition: 'background 0.3s' }}>
       
-      {/* --- CABEÇALHO HERO --- */}
-      <header style={{ marginBottom: '20px', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '1.8rem', color: '#1e293b', marginBottom: '5px' }}>
-          {projeto.titulo_pagina || 'Pet Finder'}
-        </h1>
-        <p style={{ color: '#64748b', fontSize: '14px' }}>
-          Os melhores cuidados para seu amigo.
-        </p>
-      </header>
-
-      {/* --- BARRA DE NAVEGAÇÃO VISUAL (BOTÕES) --- */}
+      {/* HEADER STICKY */}
       <div style={{ 
-        display: 'flex', 
-        gap: '12px', 
-        overflowX: 'auto', 
-        paddingBottom: '10px', 
-        marginBottom: '20px',
-        justifyContent: 'center', // Centraliza no Desktop
-        flexWrap: 'wrap'          // Quebra linha se tela for pequena
+        position: 'sticky', top: 0, zIndex: 50, 
+        background: isDark ? 'rgba(15, 23, 42, 0.9)' : 'rgba(255,255,255,0.95)', // Blur effect fake
+        backdropFilter: 'blur(10px)',
+        borderBottom: '1px solid var(--border-color)',
+        paddingBottom: '10px'
       }}>
         
-        {/* Botão de Limpar Filtro (Só aparece se tiver filtro ativo) */}
-        {filtroAtivo && (
-          <button 
-            onClick={() => setFiltroAtivo(null)}
-            style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px',
-              border: 'none', background: 'transparent', cursor: 'pointer', minWidth: '60px'
-            }}
-          >
-            <div style={{
-              width: '50px', height: '50px', borderRadius: '50%', 
-              background: '#e2e8f0', color: '#64748b',
-              display: 'flex', alignItems: 'center', justifyContent: 'center'
-            }}>
-              <X size={20} />
-            </div>
-            <span style={{fontSize: '12px', fontWeight: 'bold', color: '#64748b'}}>Todos</span>
-          </button>
-        )}
+        <header style={{ padding: '20px 20px 10px 20px', textAlign: 'left' }}>
+          {projeto.logo_url ? (
+             <img src={projeto.logo_url} alt={projeto.nome} style={{height: '40px', objectFit:'contain', display:'block'}} />
+          ) : (
+             <h1 style={{ fontSize: '1.6rem', margin: '0', fontWeight: '800' }}>{projeto.titulo_pagina || 'App Local'}</h1>
+          )}
+          {!projeto.logo_url && <p style={{ color: 'var(--text-secondary)', fontSize: '14px', margin: '4px 0 0 0' }}>Encontre o melhor serviço.</p>}
+        </header>
 
-        {/* Botões das Categorias */}
-        {categorias.map((cat) => {
-          const isAtivo = filtroAtivo === cat.id;
-          return (
-            <button 
-              key={cat.id}
-              onClick={() => setFiltroAtivo(isAtivo ? null : cat.id)} // Clica de novo pra desmarcar
-              style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px',
-                border: 'none', background: 'transparent', cursor: 'pointer', minWidth: '70px'
-              }}
-            >
-              <div style={{
-                width: '55px', height: '55px', borderRadius: '20px', // Formato "App"
-                background: isAtivo ? 'var(--cor-primaria)' : 'white',
-                color: isAtivo ? 'white' : '#64748b',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: isAtivo ? '0 4px 10px rgba(37, 99, 235, 0.3)' : '0 2px 5px rgba(0,0,0,0.05)',
-                transition: 'all 0.2s ease'
-              }}>
-                {cat.icon}
-              </div>
-              <span style={{
-                fontSize: '12px', fontWeight: 'bold', 
-                color: isAtivo ? 'var(--cor-primaria)' : '#64748b'
-              }}>
-                {cat.label}
-              </span>
+        {/* Barra Categorias */}
+        <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', padding: '10px 20px', scrollbarWidth: 'none' }}>
+          {filtroAtivo && (
+            <button onClick={() => setFiltroAtivo(null)} style={{ flexShrink: 0, padding: '0 12px', height: '45px', borderRadius: 'var(--radius-btn)', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+              <X size={18} />
             </button>
-          )
-        })}
+          )}
+          {categorias.map((cat) => {
+            const isAtivo = filtroAtivo === cat.id;
+            return (
+              <button key={cat.id} onClick={() => setFiltroAtivo(isAtivo ? null : cat.id)} style={{
+                flexShrink: 0, padding: '0 16px', height: '45px', borderRadius: 'var(--radius-btn)',
+                border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
+                background: isAtivo ? 'var(--cor-primaria)' : 'var(--bg-card)',
+                color: isAtivo ? '#fff' : 'var(--text-secondary)',
+                fontWeight: '600', fontSize: '14px',
+                border: isAtivo ? 'none' : '1px solid var(--border-color)'
+              }}>
+                {cat.icon} {cat.label}
+              </button>
+            )
+          })}
+        </div>
       </div>
 
-      {loading && <p style={{textAlign: 'center', color: '#666'}}>Carregando...</p>}
-      
-      {!loading && locaisFiltrados.length === 0 && (
-        <div style={{textAlign: 'center', padding: '40px', color: '#94a3b8'}}>
-          <Store size={40} style={{marginBottom: '10px', opacity: 0.5}} />
-          <p>Nenhum local encontrado nesta categoria.</p>
-          {filtroAtivo && <button onClick={() => setFiltroAtivo(null)} style={{color: 'var(--cor-primaria)', background:'none', border:'none', textDecoration:'underline', cursor:'pointer'}}>Ver todos</button>}
-        </div>
-      )}
+      {/* LISTA */}
+      <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {loading && <p style={{textAlign:'center', color:'var(--text-secondary)'}}>Carregando...</p>}
 
-      {/* LISTA DE CARDS */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '600px', margin: '0 auto' }}>
         {locaisFiltrados.map((local) => {
           const isVip = local.destaque; 
           return (
             <div key={local.id} style={{
-              border: isVip ? '2px solid var(--cor-destaque)' : '1px solid #e2e8f0',
-              borderRadius: '16px', padding: '20px', background: 'white',
-              boxShadow: isVip ? '0 10px 15px -3px rgba(0,0,0,0.1)' : '0 1px 3px rgba(0,0,0,0.1)',
-              position: 'relative', overflow: 'hidden'
+              background: 'var(--bg-card)', borderRadius: 'var(--radius-card)', overflow: 'hidden',
+              boxShadow: isVip ? `0 0 0 2px var(--cor-destaque), var(--shadow-card)` : 'var(--shadow-card)',
+              position: 'relative'
             }}>
               
               {isVip && (
-                <div style={{
-                  position: 'absolute', top: 0, right: 0, 
-                  background: 'var(--cor-destaque)', color: 'white',
-                  padding: '4px 12px', borderBottomLeftRadius: '10px',
-                  fontSize: '11px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px'
-                }}>
-                  <Award size={12} /> RECOMENDADO
+                <div style={{ background: 'var(--cor-destaque)', color: '#fff', fontSize: '10px', fontWeight: 'bold', padding: '4px 10px', position: 'absolute', top: 0, right: 0, borderBottomLeftRadius: '12px', zIndex: 10 }}>
+                  <Award size={12} style={{verticalAlign:'middle'}} /> VIP
                 </div>
               )}
 
-              <div style={{marginBottom: '10px'}}>
-                <h3 style={{ margin: '0 0 5px 0', fontSize: '1.2rem', color: '#1e293b', paddingRight: '90px' }}>{local.nome}</h3>
-                {(local.nota > 0) && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '14px', color: 'var(--cor-destaque)', fontWeight: 'bold' }}>
-                    <span style={{background: '#fffbeb', padding: '2px 6px', borderRadius: '4px', display:'flex', alignItems:'center', gap:'4px'}}>
-                      {local.nota} <Star size={14} fill="currentColor" />
+              <div style={{ padding: '20px' }}>
+                <h3 style={{ margin: '0 0 4px 0', fontSize: '1.25rem', fontWeight: '700', paddingRight: '20px' }}>{local.nome}</h3>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', color: 'var(--text-secondary)', fontSize: '13px', marginBottom: '16px' }}>
+                  <MapPin size={16} style={{flexShrink: 0, marginTop: '2px'}} />
+                  <span>{local.endereco || "Endereço não informado"}</span>
+                </div>
+
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  {local.tags && local.tags.map(tag => (
+                    <span key={tag} style={{ background: isDark ? '#334155' : '#f1f5f9', color: 'var(--text-secondary)', fontSize: '11px', fontWeight: '600', padding: '4px 10px', borderRadius: 'var(--radius-btn)' }}>
+                      {tag.replace('_', ' ')}
                     </span>
-                    <span style={{color: '#94a3b8', fontWeight: 'normal', fontSize: '12px'}}>({local.avaliacoes} avaliações)</span>
+                  ))}
+                </div>
+
+                {isVip && local.instagram_url && (
+                  <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border-color)', marginTop: '15px' }}>
+                     <InstagramEmbed url={local.instagram_url} width="100%" />
                   </div>
                 )}
               </div>
-              
-              <div style={{ display: 'flex', gap: '8px', color: '#64748b', fontSize: '13px', marginBottom: '15px' }}>
-                <MapPin size={16} style={{flexShrink: 0}} />
-                <span>{local.endereco || "Endereço não informado"}</span>
-              </div>
 
-              {/* Tags visuais */}
-              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '15px' }}>
-                {local.tags && local.tags.map(tag => (
-                  <span key={tag} style={{
-                    background: '#f1f5f9', color: '#475569', fontSize: '11px', padding: '4px 8px', borderRadius: '6px', textTransform: 'capitalize'
-                  }}>
-                    {tag.replace('_', ' ')}
-                  </span>
-                ))}
-              </div>
-
-              {isVip && local.instagram_url && (
-                <div style={{ marginBottom: '15px', borderRadius: '12px', overflow: 'hidden', border: '1px solid #eee' }}>
-                  <div style={{display: 'flex', justifyContent: 'center', background: '#fafafa'}}>
-                    <InstagramEmbed url={local.instagram_url} width="100%" style={{maxWidth: '100%'}} captioned={false} />
-                  </div>
-                </div>
-              )}
-
-              <button 
-                onClick={() => setSelectedLocal(local)}
-                style={{
-                  width: '100%', padding: '14px',
-                  background: isVip ? 'var(--cor-destaque)' : 'var(--cor-primaria)',
-                  color: 'white', border: 'none', borderRadius: '10px', fontWeight: 'bold',
-                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                  fontSize: '15px', boxShadow: isVip ? '0 4px 6px -1px rgba(0,0,0,0.1)' : 'none'
-                }}
-              >
-                <MessageCircle size={20} />
-                {isVip ? 'Falar com Especialista' : 'Falar com Atendente'}
+              <button onClick={() => setSelectedLocal(local)} style={{
+                  width: '100%', padding: '16px', border: 'none', cursor: 'pointer',
+                  background: isVip ? 'var(--cor-destaque)' : (isDark ? '#334155' : '#f1f5f9'),
+                  color: isVip ? '#fff' : 'var(--cor-primaria)',
+                  fontSize: '15px', fontWeight: '700',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+                }}>
+                <MessageCircle size={20} /> Solicitar
               </button>
             </div>
           );
         })}
       </div>
 
-      {selectedLocal && (
-        <ChatModal 
-          local={selectedLocal} 
-          projeto={projeto}
-          onClose={() => setSelectedLocal(null)} 
-        />
-      )}
+      {selectedLocal && <ChatModal local={selectedLocal} projeto={projeto} onClose={() => setSelectedLocal(null)} />}
     </div>
   );
 }
@@ -1081,6 +940,28 @@ button:focus-visible {
   }
 }
 
+/* Esconde a barra de rolagem mas mantém a função de scroll */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Para navegadores mobile, esconde totalmente para parecer App */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    display: none;
+  }
+}
 ----------------------------------
 
 --- ARQUIVO: src/main.jsx ---
