@@ -35,3 +35,42 @@ export const getTheme = (projeto) => ({
   danger: THEME_COLORS.danger,
   success: THEME_COLORS.success
 });
+
+export const FILTROS_APP = [
+  {
+    id: 'categoria',
+    label: 'Categoria',
+    description: 'Banho, Vet, Loja, Hotel',
+    group: 'filtro'
+  },
+  {
+    id: 'bem_avaliados',
+    label: 'Bem avaliados ⭐',
+    description: 'Nota ≥ 4.5 e pelo menos 40 avaliações',
+    group: 'filtro'
+  },
+  {
+    id: 'com_instagram',
+    label: 'Com Instagram 📸',
+    description: 'Exibe apenas lojas com Instagram',
+    group: 'filtro'
+  },
+  {
+    id: 'ordenar_melhor_nota',
+    label: 'Ordenar por melhor nota',
+    description: 'Usuário pode priorizar qualidade',
+    group: 'ordenacao'
+  },
+  {
+    id: 'ordenar_mais_avaliados',
+    label: 'Ordenar por mais avaliados',
+    description: 'Usuário pode priorizar popularidade',
+    group: 'ordenacao'
+  }
+];
+
+export const DEFAULT_FILTROS_APP = [
+  'categoria',
+  'bem_avaliados',
+  'com_instagram'
+];

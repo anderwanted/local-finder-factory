@@ -8,6 +8,9 @@ import FilterBar from './components/dashboard/FilterBar';
 import StoreCard from './components/dashboard/StoreCard';
 import StoreCardEdit from './components/dashboard/StoreCardEdit';
 import EmptyState from './components/dashboard/EmptyState';
+import ProjectFiltersPanel from './components/dashboard/ProjectFiltersPanel';
+
+
 
 export default function Dashboard({ projeto }) {
   const [editingId, setEditingId] = useState(null);
@@ -88,6 +91,16 @@ export default function Dashboard({ projeto }) {
       
       {/* HEADER */}
       <DashboardHeader projeto={projeto} theme={theme} />
+
+    <ProjectFiltersPanel
+      projeto={projeto}
+      theme={theme}
+      onUpdate={(filtros) => {
+        projeto.filtros_ativos = filtros;
+      }}
+    />
+
+
 
       {/* CONTENT AREA */}
       <div style={{ maxWidth: '1000px', margin: '0 auto' }}>

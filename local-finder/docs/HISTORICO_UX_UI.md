@@ -8,7 +8,7 @@ Objetivo:
 - Preservar a lógica original da experiência
 - Explicar *por que* as decisões foram tomadas
 - Permitir evolução sem perda de identidade
-- Ajudar IAs a não “reinventarem” a interface
+- Ajudar IAs a não "reinventarem" a interface
 
 ⚠️ Este documento contém **trechos controladores imutáveis**.
 Eles representam a visão original da experiência do usuário.
@@ -54,7 +54,7 @@ Tudo em poucos segundos.
    - Não é comparação técnica
 
 4. **Interface Invisível**
-   - UX não deve “chamar atenção”
+   - UX não deve "chamar atenção"
    - O serviço local é o protagonista
 
 ---
@@ -192,12 +192,11 @@ Forma correta:
 
 Este histórico garante que o projeto **evolua sem perder simplicidade**.
 
-
 ---
 
 ## 🔄 Refatoração de Código (Janeiro 2026)
 
-### Data: 11/01/2026
+### Data: 15/01/2026
 
 ### Tipo de Mudança: **Refatoração Técnica (Sem Impacto Visual)**
 
@@ -245,6 +244,18 @@ Esta refatoração **NÃO** altera nenhum dos princípios originais de UX defini
 Refatoração de código pode (e deve) ser feita **sem alterar a experiência do usuário**. A separação clara entre "código interno" e "interface externa" permite evolução técnica sem impacto no produto.
 
 ---
+
+## Sprint — Ajustes de Curadoria e Filtros
+
+Foram realizados ajustes na experiência de filtros do aplicativo com foco em clareza e confiança do usuário.
+
+Principais decisões:
+- Inclusão de um estado explícito “Todos” na barra de categorias, evitando ambiguidades sobre como resetar filtros.
+- Filtros de qualidade (ex: presença no Instagram, reputação) passaram a atuar como **priorização**, e não como exclusão total de resultados.
+- Redução da possibilidade de listas vazias sem explicação clara para o usuário.
+
+Essas decisões reforçam a percepção de curadoria editorial e melhoram a experiência de exploração da lista de estabelecimentos.
+
 
 ## 📌 Nota Importante sobre Futuras Mudanças
 

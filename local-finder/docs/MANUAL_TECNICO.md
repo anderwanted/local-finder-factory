@@ -681,6 +681,27 @@ graph LR
 16. StoreCard exibe nome atualizado
 ```
 
+## Filtros, Curadoria e Arquitetura de Dados
+
+A arquitetura do frontend separa claramente três responsabilidades:
+
+1. **Busca de dados**
+   - Os dados são carregados do Supabase e armazenados no estado `locais`.
+   - Este estado contém os dados brutos, sem qualquer filtragem ou ordenação editorial.
+
+2. **Curadoria e filtros**
+   - A curadoria é aplicada em um estado separado (`locaisFiltrados`).
+   - Filtros e ordenações reagem apenas a mudanças de estado, nunca durante a busca.
+   - Isso evita efeitos colaterais, estados vazios inesperados e dependências ocultas.
+
+3. **Controle editorial**
+   - O campo `projetos.filtros_ativos` atua como uma feature flag editorial.
+   - O frontend lê esse campo para decidir quais filtros e ordenações são exibidos ao usuário.
+   - Nenhuma lógica condicional de curadoria é aplicada no backend.
+
+Essa separação garante estabilidade, facilidade de evolução e testes editoriais sem refatoração estrutural.
+
+
 **Total de passos:** 16
 **Tempo médio:** ~500ms (incluindo latência de rede)
 

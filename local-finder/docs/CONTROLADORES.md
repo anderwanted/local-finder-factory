@@ -18,7 +18,31 @@ Este arquivo **não descreve o projeto em si**, apenas **as regras de leitura e 
 
 O projeto utiliza os seguintes arquivos como **memória oficial**:
 
-### 1. HISTORICO_UX_UI.md
+### 1. PLANEJAMENTO_PRODUTO.md
+**O que é:**
+- Documento de estratégia de produto
+- Critérios de decisão para novas features
+- Limites de escopo e foco
+
+**Função:**
+- Responder "devemos fazer isso agora, depois ou nunca?"
+- Evitar scope creep (crescimento descontrolado)
+- Manter foco no nicho atual
+- Proteger arquitetura de mudanças arriscadas
+
+**Trechos de Controle:**
+- PRINCÍPIOS DE ARQUITETURA (IMUTÁVEIS)
+- PADRÃO DE EVOLUÇÃO SEGURA
+- LIMITES E RESTRIÇÕES
+
+Esses trechos:
+- Definem os limites técnicos e estratégicos
+- Só mudam se houver mudança de estratégia do negócio
+- Protegem contra feature creep
+
+---
+
+### 2. HISTORICO_UX_UI.md
 **O que é:**
 - Registro das decisões de experiência do usuário e interface
 
@@ -28,8 +52,8 @@ O projeto utiliza os seguintes arquivos como **memória oficial**:
 - Preservar a lógica da experiência
 
 **Trechos de Controle:**
-- IDEIA ORIGINAL
-- PRINCÍPIOS
+- PRINCÍPIOS ORIGINAIS DE UX
+- OBJETIVO DA EXPERIÊNCIA
 - NÚCLEO
 
 Esses trechos:
@@ -39,7 +63,7 @@ Esses trechos:
 
 ---
 
-### 2. MANUAL_FRANQUIA.md
+### 3. MANUAL_FRANQUIA.md
 **O que é:**
 - Documento de modelo de negócio
 - Guia para expansão, nichos e operação
@@ -50,9 +74,9 @@ Esses trechos:
 - Orientar replicação (multi-nicho / franquia)
 
 **Trechos de Controle:**
-- BASE DO MODELO
+- MODELO DE NEGÓCIO ORIGINAL
 - PRINCÍPIOS DE NEGÓCIO
-- IDEIA CENTRAL
+- REGRA FUNDAMENTAL
 
 Esses trechos:
 - São estáveis
@@ -61,7 +85,7 @@ Esses trechos:
 
 ---
 
-### 3. MANUAL_TECNICO.md
+### 4. MANUAL_TECNICO.md
 **O que é:**
 - Documento técnico vivo
 - Registro da arquitetura e decisões de código
@@ -85,7 +109,7 @@ A partir deste manual, podem ser colados **outputs de scripts**, trechos de cód
 
 ---
 
-### 4. PROMPT_RESGATE.md
+### 5. PROMPT_RESGATE.md
 **O que é:**
 - Prompt de reentrada de contexto para IA
 
@@ -104,6 +128,19 @@ Esse documento:
 
 ---
 
+## 🗺️ MAPA DE DOCUMENTOS (QUANDO USAR CADA UM)
+
+| Pergunta | Documento |
+|----------|-----------|
+| "Devemos fazer essa feature?" | PLANEJAMENTO_PRODUTO.md |
+| "Por que a UX é assim?" | HISTORICO_UX_UI.md |
+| "Como ganhamos dinheiro?" | MANUAL_FRANQUIA.md |
+| "Como está implementado?" | MANUAL_TECNICO.md |
+| "Perdi o contexto, como resgatar?" | PROMPT_RESGATE.md |
+| "Como atualizo a documentação?" | CONTROLADORES.md (este) |
+
+---
+
 ## 🧭 INSTRUÇÃO DE CONTROLE — INÍCIO DE CONVERSA
 
 > **Este trecho pode ser colado no início de qualquer conversa com IA**
@@ -111,6 +148,7 @@ Esse documento:
 Vou começar a falar sobre um projeto em andamento.
 
 Existem arquivos `.md` que servem como referência principal:
+- PLANEJAMENTO_PRODUTO.md
 - HISTORICO_UX_UI.md
 - MANUAL_FRANQUIA.md
 - MANUAL_TECNICO.md
@@ -157,19 +195,19 @@ Se alguma mudança for necessária em um trecho imutável:
 - Evolução é permitida
 - Reinterpretação da base não é
 
-
 ---
 
-## 🔍 Verificação de Integridade (Janeiro 2026)
+## 📋 Verificação de Integridade (Janeiro 2026)
 
-### Data da Verificação: 11/01/2026
+### Data da Verificação: 15/01/2026
 
-### Motivo: Refatoração completa do Dashboard
+### Motivo: Refatoração completa do Dashboard + Adição de PLANEJAMENTO_PRODUTO.md
 
 #### Status dos Documentos Controlados
 
 | Documento | Status | Trechos Imutáveis | Ação Necessária |
 |-----------|--------|-------------------|-----------------|
+| **PLANEJAMENTO_PRODUTO.md** | 🆕 Criado | Definidos | Adicionado ao sistema |
 | **HISTORICO_UX_UI.md** | ✅ Íntegro | Preservados | Nenhuma |
 | **MANUAL_FRANQUIA.md** | ✅ Íntegro | Preservados | Nenhuma |
 | **MANUAL_TECNICO.md** | ✅ Atualizado | N/A (pode evoluir) | Documentação adicionada |
@@ -179,12 +217,29 @@ Se alguma mudança for necessária em um trecho imutável:
 
 **Verificado que:**
 
-✅ Nenhum trecho imutável foi alterado
-✅ Núcleos dos documentos permanecem intactos
-✅ Mudanças foram apenas em seções evolutivas
-✅ Documentação reflete estado real do código
+✅ Nenhum trecho imutável foi alterado  
+✅ Núcleos dos documentos permanecem intactos  
+✅ Mudanças foram apenas em seções evolutivas  
+✅ Documentação reflete estado real do código  
+✅ Novo documento complementa (não substitui) os existentes
 
 #### Detalhamento da Verificação
+
+##### PLANEJAMENTO_PRODUTO.md (NOVO)
+**Motivo da Criação:**
+- Separar estratégia de produto da governança técnica
+- Criar filtro de decisão para novas features
+- Documentar limites e restrições do projeto
+
+**Relação com outros documentos:**
+- Complementa MANUAL_FRANQUIA.md (não substitui)
+- Define critérios para decisões técnicas
+- Protege arquitetura documentada em MANUAL_TECNICO.md
+
+**Trechos Imutáveis Definidos:**
+- "PRINCÍPIOS DE ARQUITETURA (IMUTÁVEIS)"
+- "PADRÃO DE EVOLUÇÃO SEGURA"
+- "LIMITES E RESTRIÇÕES"
 
 ##### HISTORICO_UX_UI.md
 **Trechos Verificados:**
@@ -232,11 +287,13 @@ Se alguma mudança for necessária em um trecho imutável:
 2. ✅ Núcleos imutáveis permaneceram protegidos
 3. ✅ Apenas seções evolutivas foram modificadas
 4. ✅ Documentação técnica foi atualizada adequadamente
+5. ✅ Novo documento complementa sem conflitar
 
 **Processo validado:** 
 - Mudanças técnicas podem ocorrer SEM alterar núcleos de UX e negócio
 - O sistema de "trechos controladores" efetivamente protege a visão original
 - Documentação evolutiva permite crescimento sem perda de identidade
+- Documentos podem ser adicionados quando necessário sem quebrar governança
 
 ---
 
@@ -254,6 +311,9 @@ Se alguma mudança for necessária em um trecho imutável:
 
 ---
 
+- A definição de quais filtros são exibidos no aplicativo é controlada exclusivamente pelo Dashboard, por meio do campo `projetos.filtros_ativos`.
+
+
 ## 📋 Checklist de Verificação (Template)
 
 Use este checklist em futuras verificações:
@@ -261,6 +321,7 @@ Use este checklist em futuras verificações:
 Data: _____/_____/_____
 Motivo da Verificação: ________________________
 
+[ ] PLANEJAMENTO_PRODUTO.md - Trechos imutáveis verificados
 [ ] HISTORICO_UX_UI.md - Trechos imutáveis verificados
 [ ] MANUAL_FRANQUIA.md - Trechos imutáveis verificados
 [ ] MANUAL_TECNICO.md - Atualizado se necessário
@@ -275,11 +336,11 @@ Aprovado por: ________________________
 
 ## ✅ Declaração de Integridade
 
-**Declaro que em 11/01/2026:**
+**Declaro que em 15/01/2026:**
 
-O projeto passou por refatoração técnica significativa (Dashboard modular) e **TODOS os documentos de governança foram verificados e permanecem em conformidade** com as regras estabelecidas em CONTROLADORES.md.
+O projeto passou por refatoração técnica significativa (Dashboard modular) e adição de documento estratégico (PLANEJAMENTO_PRODUTO.md). **TODOS os documentos de governança foram verificados e permanecem em conformidade** com as regras estabelecidas em CONTROLADORES.md.
 
-Nenhum núcleo imutável foi violado.
+Nenhum núcleo imutável foi violado.  
 O sistema de governança está funcionando conforme esperado.
 
 ---

@@ -1,15 +1,30 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from './supabaseClient'; 
+import { supabase } from './supabaseClient';
 import { MessageCircle, MapPin, Store, Star, Award, Scissors, Stethoscope, ShoppingBag, Home, X } from 'lucide-react';
 import ChatModal from './ChatModal';
 import { InstagramEmbed } from 'react-social-media-embed';
 
+const DEFAULT_FILTROS_APP = ['categoria', 'bem_avaliados', 'com_instagram'];
+
+const getFiltrosAtivos = (projeto) => {
+  if (Array.isArray(projeto?.filtros_ativos) && projeto.filtros_ativos.length > 0) {
+    return projeto.filtros_ativos;
+  }
+  return DEFAULT_FILTROS_APP;
+};
+
+
 export default function PetList({ projeto }) {
+  const [ordenacao, setOrdenacao] = useState(null); 
+  // 'melhor_nota' | 'mais_avaliados' | null
   const [locais, setLocais] = useState([]);
   const [locaisFiltrados, setLocaisFiltrados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedLocal, setSelectedLocal] = useState(null);
   const [filtroAtivo, setFiltroAtivo] = useState(null);
+  const filtrosAtivos = getFiltrosAtivos(projeto);
+  const hasFiltro = (id) => filtrosAtivos.includes(id);
+
 
   // --- LÓGICA DE TEMAS E DARK MODE ---
   const isDark = projeto?.tema_base === 'dark';
@@ -43,21 +58,70 @@ export default function PetList({ projeto }) {
     { id: 'hotel', label: 'Hotel', icon: <Home size={20} /> },
   ];
 
-  useEffect(() => {
-    async function buscarLocais() {
-      setLoading(true);
-      const { data } = await supabase.from('locais').select('*').eq('status', 'PUBLICAR_APP').eq('projeto_id', projeto.id).order('destaque', { ascending: false });
-      setLocais(data || []);
-      setLocaisFiltrados(data || []);
-      setLoading(false);
-    }
-    if (projeto?.id) buscarLocais();
-  }, [projeto]);
+useEffect(() => {
+  async function buscarLocais() {
+    setLoading(true);
 
-  useEffect(() => {
-    if (!filtroAtivo) setLocaisFiltrados(locais);
-    else setLocaisFiltrados(locais.filter(local => local.tags && local.tags.includes(filtroAtivo)));
-  }, [filtroAtivo, locais]);
+    const { data, error } = await supabase
+      .from('locais')
+      .select('*')
+      .eq('projeto_id', projeto.id);
+
+    console.log('Resultado Supabase:', data, error);
+
+    setLocais(data || []);
+    setLocaisFiltrados(data || []);
+    setLoading(false);
+  }
+
+  if (projeto?.id) {
+    buscarLocais();
+  }
+}, [projeto]);
+
+useEffect(() => {
+  // Sempre começa com tudo
+  let resultado = [...locais];
+
+  // 🏷 Categoria
+if (hasFiltro('categoria') && filtroAtivo) {
+  resultado = resultado.filter(
+    l =>
+      Array.isArray(l.tags) &&
+      l.tags.map(t => t.toLowerCase()).includes(filtroAtivo.toLowerCase())
+  );
+}
+
+  // ⭐ Bem avaliados (versão segura)
+if (hasFiltro('bem_avaliados')) {
+  resultado.sort((a, b) => {
+    const scoreA = (a.nota || 0) * (a.avaliacoes || 0);
+    const scoreB = (b.nota || 0) * (b.avaliacoes || 0);
+    return scoreB - scoreA;
+  });
+}
+
+
+  // 📸 Com Instagram
+if (hasFiltro('com_instagram')) {
+  resultado.sort((a, b) => {
+    if (!!b.instagram_url === !!a.instagram_url) return 0;
+    return b.instagram_url ? 1 : -1;
+  });
+}
+
+  // 🔃 Ordenação
+  if (ordenacao === 'melhor_nota' && hasFiltro('ordenar_melhor_nota')) {
+    resultado.sort((a, b) => Number(b.nota || 0) - Number(a.nota || 0));
+  }
+
+  if (ordenacao === 'mais_avaliados' && hasFiltro('ordenar_mais_avaliados')) {
+    resultado.sort((a, b) => Number(b.avaliacoes || 0) - Number(a.avaliacoes || 0));
+  }
+
+  setLocaisFiltrados(resultado);
+}, [locais, filtroAtivo, ordenacao, filtrosAtivos]);
+
 
   return (
     <div style={{ ...tema, background: 'var(--bg-app)', color: 'var(--text-primary)', minHeight: '100vh', fontFamily: 'sans-serif', transition: 'background 0.3s' }}>
@@ -80,40 +144,114 @@ export default function PetList({ projeto }) {
           {!projeto.logo_url && <p style={{ color: 'var(--text-secondary)', fontSize: '14px', margin: '4px 0 0 0' }}>Encontre o melhor serviço.</p>}
         </header>
 
-        {/* Barra Categorias */}
-        <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', padding: '10px 20px', scrollbarWidth: 'none' }}>
-          {filtroAtivo && (
-            <button onClick={() => setFiltroAtivo(null)} style={{ flexShrink: 0, padding: '0 12px', height: '45px', borderRadius: 'var(--radius-btn)', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-              <X size={18} />
-            </button>
+                  {(hasFiltro('ordenar_melhor_nota') || hasFiltro('ordenar_mais_avaliados')) && (
+            <div style={{ padding: '0 20px 10px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                Ordenar por:
+              </span>
+
+              {hasFiltro('ordenar_melhor_nota') && (
+                <button onClick={() => setOrdenacao('melhor_nota')}>
+                  ⭐ Melhor nota
+                </button>
+              )}
+
+              {hasFiltro('ordenar_mais_avaliados') && (
+                <button onClick={() => setOrdenacao('mais_avaliados')}>
+                  📈 Mais avaliados
+                </button>
+              )}
+            </div>
           )}
-         {categorias.map((cat) => {
-          const isAtivo = filtroAtivo === cat.id;
-          return (
-            <button 
-              key={cat.id} 
-              onClick={() => setFiltroAtivo(isAtivo ? null : cat.id)} 
-              style={{
-                flexShrink: 0, 
-                padding: '0 16px', 
-                height: '45px', 
-                borderRadius: 'var(--radius-btn)',
-                cursor: 'pointer', 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '8px',
-                background: isAtivo ? 'var(--cor-primaria)' : 'var(--bg-card)',
-                color: isAtivo ? '#fff' : 'var(--text-secondary)',
-                fontWeight: '600', 
-                fontSize: '14px',
-                border: isAtivo ? 'none' : '1px solid var(--border-color)'
-              }}
-            >
-              {cat.icon} {cat.label}
-            </button>
-          )
-        })}
-        </div>
+
+
+
+          
+        {/* Barra Categorias */}
+        {hasFiltro('categoria') && (
+          <div
+            style={{
+              display: 'flex',
+              gap: '12px',
+              overflowX: 'auto',
+              padding: '10px 20px',
+              scrollbarWidth: 'none'
+            }}
+          >
+            {filtroAtivo && (
+              <button
+                onClick={() => setFiltroAtivo(null)}
+                style={{
+                  flexShrink: 0,
+                  padding: '0 12px',
+                  height: '45px',
+                  borderRadius: 'var(--radius-btn)',
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-card)',
+                  color: 'var(--text-secondary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  cursor: 'pointer'
+                }}
+              >
+                <X size={18} />
+              </button>
+            )}
+
+            <button
+          onClick={() => setFiltroAtivo(null)}
+          style={{
+            flexShrink: 0,
+            padding: '0 16px',
+            height: '45px',
+            borderRadius: 'var(--radius-btn)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            background: filtroAtivo === null ? 'var(--cor-primaria)' : 'var(--bg-card)',
+            color: filtroAtivo === null ? '#fff' : 'var(--text-secondary)',
+            fontWeight: '600',
+            fontSize: '14px',
+            border: filtroAtivo === null ? 'none' : '1px solid var(--border-color)'
+          }}
+        >
+          <Store size={16} /> Todos
+        </button>
+
+
+            {categorias.map((cat) => {
+              const isAtivo = filtroAtivo === cat.id;
+
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setFiltroAtivo(isAtivo ? null : cat.id)}
+                  style={{
+                    flexShrink: 0,
+                    padding: '0 16px',
+                    height: '45px',
+                    borderRadius: 'var(--radius-btn)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    background: isAtivo ? 'var(--cor-primaria)' : 'var(--bg-card)',
+                    color: isAtivo ? '#fff' : 'var(--text-secondary)',
+                    fontWeight: '600',
+                    fontSize: '14px',
+                    border: isAtivo ? 'none' : '1px solid var(--border-color)'
+                  }}
+                >
+                  {cat.icon} {cat.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+
+        
       </div>
 
       {/* LISTA */}
