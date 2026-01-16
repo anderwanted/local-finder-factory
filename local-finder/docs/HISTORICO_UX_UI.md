@@ -191,3 +191,69 @@ Forma correta:
   → Garante continuidade com IA
 
 Este histórico garante que o projeto **evolua sem perder simplicidade**.
+
+
+---
+
+## 🔄 Refatoração de Código (Janeiro 2026)
+
+### Data: 11/01/2026
+
+### Tipo de Mudança: **Refatoração Técnica (Sem Impacto Visual)**
+
+#### Contexto
+O Dashboard passou por uma refatoração completa da arquitetura de código, migrando de um arquivo monolítico para uma estrutura modular baseada em componentes e hooks customizados.
+
+#### O Que Mudou (Código)
+- Dashboard.jsx dividido em 5 componentes menores
+- Lógica extraída para hooks customizados
+- Constantes centralizadas em arquivo único
+- Estrutura de pastas organizada (`utils/`, `hooks/`, `components/`)
+
+#### O Que NÃO Mudou (UX/UI)
+✅ **Nenhuma alteração visual ou de experiência do usuário foi feita.**
+
+Especificamente:
+- Layout permanece idêntico
+- Cores e estilos inalterados
+- Fluxo de uso exatamente igual
+- Performance mantida (ou melhorada)
+- Todos os filtros funcionam da mesma forma
+- Edição de lojas funciona igual
+- Estados vazios exibidos da mesma forma
+
+#### Motivação da Refatoração
+Esta mudança foi puramente técnica, visando:
+1. **Facilitar manutenção** - Isolar bugs em arquivos específicos
+2. **Permitir evolução** - Adicionar features sem quebrar código existente
+3. **Melhorar testabilidade** - Testar componentes isoladamente
+4. **Profissionalizar o código** - Seguir padrões de mercado
+
+#### Confirmação de Continuidade
+Esta refatoração **NÃO** altera nenhum dos princípios originais de UX definidos neste documento:
+- ✅ Mobile First - Mantido
+- ✅ Zero Fricção - Mantido
+- ✅ Ação > Informação - Mantido
+- ✅ Interface Invisível - Mantido
+
+#### Relação com Outros Documentos
+- **MANUAL_TECNICO.md** foi atualizado com a nova arquitetura
+- **MANUAL_FRANQUIA.md** permanece inalterado (modelo de negócio igual)
+- **PROMPT_RESGATE.md** permanece válido
+
+#### Aprendizado
+Refatoração de código pode (e deve) ser feita **sem alterar a experiência do usuário**. A separação clara entre "código interno" e "interface externa" permite evolução técnica sem impacto no produto.
+
+---
+
+## 📌 Nota Importante sobre Futuras Mudanças
+
+**Regra estabelecida:**
+
+Quando houver mudanças futuras, identificar claramente:
+
+- 🔧 **Refatoração Técnica** → Atualiza MANUAL_TECNICO.md (sem tocar em UX)
+- 🎨 **Mudança de Interface** → Atualiza HISTORICO_UX_UI.md + justifica decisão
+- 💼 **Mudança de Negócio** → Atualiza MANUAL_FRANQUIA.md + explica impacto
+
+Esta separação garante que o histórico permaneça claro e rastreável.
