@@ -1,15 +1,67 @@
-// src/hooks/useDashboardData.jsx
+// ======================================================
+// 📄 useDashboardData.jsx
+// Hook de dados do Dashboard (CRUD + Estado)
+// ======================================================
+
+// ======================================================
+// 🔹 DEPENDÊNCIAS
+// ======================================================
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 
+// ======================================================
+// 🔹 HOOK: useDashboardData
+// ======================================================
+//
+// 🎯 INTENÇÃO GERAL
+// Centralizar TODA a lógica de dados do Dashboard:
+// - Buscar locais
+// - Atualizar status (publicar / ocultar)
+// - Editar dados do local
+// - Excluir local
+//
+// 🧠 MODELO MENTAL
+// - O Dashboard consome dados
+// - Este hook controla:
+//   • estado
+//   • loading
+//   • erro
+//   • sincronização com o banco
+//
+// 🔒 CONTRATO
+// - Nenhum JSX aqui
+// - Nenhuma regra de filtro
+// - Nenhuma regra de ordenação
+// - Apenas dados e efeitos colaterais
+//
 export function useDashboardData(projetoId) {
+
+  // ==============================
+  // 🔹 ESTADOS PRINCIPAIS
+  // ==============================
+  //
+  // locais  → lista de estabelecimentos do projeto
+  // loading → estado global de carregamento
+  // error   → erro simples (string)
+  //
   const [locais, setLocais] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // ==============================
+  // 🔹 FETCH DE LOCAIS
+  // ==============================
+  //
+  // 🎯 Intenção:
+  // Buscar todos os locais vinculados ao projeto
+  //
+  // 🛡️ Falha segura:
+  // - Não quebra UI
+  // - Retorna lista vazia
+  //
   const fetchLocais = async () => {
     if (!projetoId) return;
-    
+
     setLoading(true);
     setError(null);
 
@@ -21,7 +73,7 @@ export function useDashboardData(projetoId) {
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
-      
+
       setLocais(data || []);
     } catch (err) {
       setError(err.message);
@@ -31,9 +83,27 @@ export function useDashboardData(projetoId) {
     }
   };
 
+  // ==============================
+  // 🔹 TOGGLE DE STATUS (PUBLICAR / OCULTAR)
+  // ==============================
+  //
+  // 🎯 Intenção:
+  // Alternar visibilidade do local no app
+  //
+  // 🧠 Regra:
+  // PUBLICAR_APP ↔ RASCUNHO
+  //
+  // 🔒 Contrato:
+  // - Atualiza banco
+  // - Atualiza estado local
+  // - Não refaz fetch completo
+  //
   const toggleStatus = async (local) => {
-    const novoStatus = local.status === 'PUBLICAR_APP' ? 'RASCUNHO' : 'PUBLICAR_APP';
-    
+    const novoStatus =
+      local.status === 'PUBLICAR_APP'
+        ? 'RASCUNHO'
+        : 'PUBLICAR_APP';
+
     try {
       const { error } = await supabase
         .from('locais')
@@ -42,8 +112,11 @@ export function useDashboardData(projetoId) {
 
       if (error) throw error;
 
-      setLocais(locais.map(l => 
-        l.id === local.id ? { ...l, status: novoStatus } : l
+      // Atualização otimista do estado
+      setLocais(locais.map(l =>
+        l.id === local.id
+          ? { ...l, status: novoStatus }
+          : l
       ));
     } catch (err) {
       console.error('Erro ao atualizar status:', err);
@@ -51,6 +124,17 @@ export function useDashboardData(projetoId) {
     }
   };
 
+  // ==============================
+  // 🔹 ATUALIZAR LOCAL (EDIÇÃO)
+  // ==============================
+  //
+  // 🎯 Intenção:
+  // Atualizar dados do local (nome, tags, destaque, etc)
+  //
+  // 🧠 Decisão:
+  // Após update → refetch completo
+  // (garante consistência total)
+  //
   const updateLocal = async (id, updates) => {
     try {
       const { error } = await supabase
@@ -67,6 +151,17 @@ export function useDashboardData(projetoId) {
     }
   };
 
+  // ==============================
+  // 🔹 EXCLUIR LOCAL
+  // ==============================
+  //
+  // 🎯 Intenção:
+  // Remover definitivamente o local
+  //
+  // 🧠 Estratégia:
+  // - Deleta no banco
+  // - Remove do estado local
+  //
   const deleteLocal = async (id) => {
     try {
       const { error } = await supabase
@@ -83,10 +178,23 @@ export function useDashboardData(projetoId) {
     }
   };
 
+  // ==============================
+  // 🔹 EFEITO DE INICIALIZAÇÃO
+  // ==============================
+  //
+  // 🎯 Intenção:
+  // Recarregar locais sempre que o projeto mudar
+  //
   useEffect(() => {
     fetchLocais();
   }, [projetoId]);
 
+  // ==============================
+  // 🔹 API DO HOOK (RETORNO)
+  // ==============================
+  //
+  // Tudo que o Dashboard pode fazer com dados
+  //
   return {
     locais,
     loading,

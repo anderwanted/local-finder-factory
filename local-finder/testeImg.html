@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet Cards Ultra-Full - Senior UI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-body: #f1f5f9;
+            --whatsapp: #25D366;
+            --primary: #4f46e5;
+            --text-main: #0f172a;
+            --text-sub: #64748b;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-body);
+            padding: 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            justify-items: center;
+        }
+
+        /* --- ANIMAÇÕES --- */
+        @keyframes scan { 0% { left: -150%; } 100% { left: 150%; } }
+        @keyframes shake { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+        /* --- ESTRUTURA BASE --- */
+        .card {
+            width: 100%;
+            max-width: 380px;
+            background: #fff;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        .card::after {
+            content: ""; position: absolute; top: 0; width: 60px; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
+            transform: skewX(-25deg); animation: scan 5s infinite; pointer-events: none;
+        }
+
+        /* IMAGENS COM HOVER */
+        .img-box { position: relative; height: 210px; overflow: hidden; }
+        .img-main, .img-hover { width: 100%; height: 100%; object-fit: cover; position: absolute; transition: 0.6s ease; }
+        .img-hover { opacity: 0; }
+        .card:hover .img-main { opacity: 0; }
+        .card:hover .img-hover { opacity: 1; transform: scale(1.1); }
+
+        /* CONTEÚDO RECHEADO */
+        .content { padding: 24px; flex-grow: 1; }
+        
+        /* Badges de Topo */
+        .top-badges { display: flex; justify-content: space-between; margin-bottom: 12px; }
+        .badge { font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 6px; text-transform: uppercase; }
+        .badge-open { background: #ecfdf5; color: #059669; }
+        .badge-dist { background: #f1f5f9; color: #475569; }
+
+        .title { font-size: 20px; font-weight: 700; color: var(--text-main); margin: 0; }
+        .rating-row { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 14px; font-weight: 600; }
+        .rating-row span { color: var(--text-sub); font-weight: 400; }
+
+        /* Grid de Informações Extras */
+        .info-grid { 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; 
+            margin: 15px 0; padding: 12px 0; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9;
+        }
+        .info-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-sub); }
+        .info-item i { color: var(--primary); width: 14px; }
+
+        /* BOTÃO WHATSAPP */
+        .btn-wa {
+            background: var(--whatsapp); color: #fff; text-decoration: none;
+            padding: 14px; border-radius: 12px; display: flex; align-items: center;
+            justify-content: center; gap: 10px; font-weight: 700; margin-top: 10px;
+        }
+        .card:hover .btn-wa { animation: shake 0.6s infinite; }
+
+        /* --- ESTILOS ESPECÍFICOS --- */
+        .classic { border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
+        .minimal { border: 1.5px solid #e2e8f0; border-radius: 20px; box-shadow: none; }
+        .glass { background: rgba(255,255,255,0.7); backdrop-filter: blur(15px); border: 1px solid #fff; border-radius: 28px; }
+        .brutal { border: 4px solid #000; box-shadow: 10px 10px 0 #000; border-radius: 0; }
+        .horizontal { flex-direction: row; max-width: 550px; border-radius: 24px; }
+        .horizontal .img-box { width: 220px; height: auto; }
+    </style>
+</head>
+<body>
+
+    <article class="card classic">
+        <div class="img-box">
+            <img src="https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?q=80&w=400" class="img-main">
+            <img src="https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?q=80&w=400" class="img-hover">
+        </div>
+        <div class="content">
+            <div class="top-badges">
+                <span class="badge badge-open">Aberto agora</span>
+                <span class="badge badge-dist"><i class="fa-solid fa-location-dot"></i> 1.5 km</span>
+            </div>
+            <h2 class="title">Maxi Pet Center</h2>
+            <div class="rating-row">⭐ 4.9 <span>(240 avaliações)</span></div>
+            
+            <div class="info-grid">
+                <div class="info-item"><i class="fa-solid fa-clock"></i> Até às 20h</div>
+                <div class="info-item"><i class="fa-solid fa-scissors"></i> Banho e Tosa</div>
+                <div class="info-item"><i class="fa-solid fa-car"></i> Estacionamento</div>
+                <div class="info-item"><i class="fa-solid fa-file-medical"></i> Veterinário</div>
+            </div>
+
+            <a href="https://wa.me/5511999999999?text=Olá, quero agendar um banho!" class="btn-wa">
+                <i class="fab fa-whatsapp"></i> Falar no WhatsApp
+            </a>
+        </div>
+    </article>
+
+    <article class="card minimal">
+        <div class="img-box">
+            <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?q=80&w=400" class="img-main">
+            <img src="https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?q=80&w=400" class="img-hover">
+        </div>
+        <div class="content">
+            <div class="top-badges">
+                <span class="badge" style="background: #fef3c7; color: #d97706;">Destaque da região</span>
+            </div>
+            <h2 class="title">Cão Feliz Shop</h2>
+            <div class="rating-row">⭐ 4.7 <span>(89)</span></div>
+            
+            <div class="info-grid">
+                <div class="info-item"><i class="fa-solid fa-truck"></i> Delivery Grátis</div>
+                <div class="info-item"><i class="fa-solid fa-bone"></i> Rações Premium</div>
+            </div>
+
+            <a href="#" class="btn-wa" style="background:#128C7E"><i class="fab fa-whatsapp"></i> Pedir agora</a>
+        </div>
+    </article>
+
+    <article class="card glass">
+        <div class="img-box">
+            <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=400" class="img-main">
+            <img src="https://images.unsplash.com/photo-1495360010541-f48722b34f7d?q=80&w=400" class="img-hover">
+        </div>
+        <div class="content">
+            <h2 class="title">Gato Nobre</h2>
+            <p style="font-size: 13px; color: var(--text-sub); margin: 5px 0;">Especialistas em Felinos e Comportamento</p>
+            
+            <div class="info-grid" style="border-color: rgba(255,255,255,0.5)">
+                <div class="info-item"><i class="fa-solid fa-cat"></i> Gatil Exclusivo</div>
+                <div class="info-item"><i class="fa-solid fa-shield-cat"></i> Sem Cães</div>
+            </div>
+
+            <a href="#" class="btn-wa" style="background:rgba(0,0,0,0.8)"><i class="fab fa-whatsapp"></i> Consultoria</a>
+        </div>
+    </article>
+
+    <article class="card brutal">
+        <div class="img-box">
+            <img src="https://images.unsplash.com/photo-1576201836106-db1758fd1c97?q=80&w=400" class="img-main">
+            <img src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=400" class="img-hover">
+        </div>
+        <div class="content">
+            <h2 class="title">BRUTUS VET</h2>
+            <div class="rating-row" style="background:#000; color:#fff; display:inline-flex; padding: 2px 8px; margin-top: 5px;">⭐ 5.0</div>
+            
+            <div class="info-grid" style="border: 2px solid #000;">
+                <div class="info-item" style="color:#000; font-weight:800;">🏥 UTI MÓVEL</div>
+                <div class="info-item" style="color:#000; font-weight:800;">💉 EXAMES</div>
+            </div>
+
+            <a href="#" class="btn-wa" style="background:#ff4757; border:3px solid #000; border-radius:0; box-shadow: 4px 4px 0 #000; color:#fff;">
+                <i class="fa-solid fa-truck-medical"></i> SOCORRO IMEDIATO
+            </a>
+        </div>
+    </article>
+
+    <article class="card classic horizontal">
+        <div class="img-box">
+            <img src="https://images.unsplash.com/photo-1544568100-847a948585b9?q=80&w=400" class="img-main">
+            <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?q=80&w=400" class="img-hover">
+        </div>
+        <div class="content">
+            <div class="top-badges">
+                <span class="badge badge-dist">0.8 km</span>
+            </div>
+            <h2 class="title">Dog Style Móvel</h2>
+            <p class="sub">Vamos até sua casa!</p>
+            <div class="info-grid">
+                <div class="info-item"><i class="fa-solid fa-van-shuttle"></i> Unidade Móvel</div>
+                <div class="info-item"><i class="fa-solid fa-soap"></i> Banho Premium</div>
+            </div>
+            <a href="#" class="btn-wa"><i class="fab fa-whatsapp"></i> Chamar Van</a>
+        </div>
+    </article>
+
+</body>
+</html>

@@ -1,8 +1,45 @@
-// src/Dashboard.jsx
+// ======================================================
+// 📄 Dashboard.jsx
+// Painel Administrativo do Projeto
+// ======================================================
+//
+// 🎯 PROPÓSITO
+// - Centralizar o controle do projeto
+// - Alternar entre:
+//   • Configuração do App
+//   • Gestão de Lojas (CRUD)
+//
+// 🧠 MODELO MENTAL
+// - Dashboard é um ORQUESTRADOR
+// - Ele NÃO:
+//   ❌ busca dados direto
+//   ❌ filtra manualmente
+//   ❌ renderiza lógica complexa
+//
+// - Ele APENAS:
+//   ✅ conecta hooks
+//   ✅ distribui props
+//   ✅ decide o modo visual
+//
+// 🔒 CONTRATO
+// - Nenhuma query direta aqui
+// - Nenhuma regra de negócio pesada
+// - Hooks fazem o trabalho sujo
+//
+
+// ======================================================
+// 🔹 DEPENDÊNCIAS
+// ======================================================
 import React, { useState } from 'react';
+
+// Hooks
 import { useDashboardData } from './hooks/useDashboardData';
 import { useDashboardFilters } from './hooks/useDashboardFilters';
+
+// Utils
 import { getTheme } from './utils/constants';
+
+// Componentes
 import DashboardHeader from './components/dashboard/DashboardHeader';
 import FilterBar from './components/dashboard/FilterBar';
 import StoreCard from './components/dashboard/StoreCard';
@@ -10,12 +47,32 @@ import StoreCardEdit from './components/dashboard/StoreCardEdit';
 import EmptyState from './components/dashboard/EmptyState';
 import ProjectFiltersPanel from './components/dashboard/ProjectFiltersPanel';
 
+// ======================================================
+// 🔹 COMPONENTE: Dashboard
+// ======================================================
+//
+// 🔑 PROPS
+// - projeto → objeto completo do projeto (slug, cores, filtros, etc)
+//
 export default function Dashboard({ projeto }) {
-  const [modoDashboard, setModoDashboard] = useState('config'); // 'config' | 'lista'
+
+  // ==============================
+  // 🔹 ESTADOS DE CONTROLE
+  // ==============================
+  //
+  // modoDashboard:
+  // - 'config' → configurações do app
+  // - 'lista'  → gerenciamento das lojas
+  //
+  const [modoDashboard, setModoDashboard] = useState('config');
   const [editingId, setEditingId] = useState(null);
+
+  // Tema visual baseado no projeto
   const theme = getTheme(projeto);
 
-  // Hook de dados
+  // ==============================
+  // 🔹 HOOK: DADOS (CRUD)
+  // ==============================
   const {
     locais,
     loading,
@@ -25,17 +82,26 @@ export default function Dashboard({ projeto }) {
     deleteLocal
   } = useDashboardData(projeto?.id);
 
-  // Hook de filtros
+  // ==============================
+  // 🔹 HOOK: FILTROS + ORDENAÇÃO
+  // ==============================
   const {
     filtroStatus,
     setFiltroStatus,
     filtroCategoria,
     setFiltroCategoria,
     locaisFiltrados
-  } = useDashboardFilters(locais);
+  } = useDashboardFilters(
+    locais,
+    projeto?.filtros_ativos || []
+  );
 
-  // Handlers
-  const handleEdit = (local) => setEditingId(local.id);
+  // ==============================
+  // 🔹 HANDLERS (AÇÕES DO USUÁRIO)
+  // ==============================
+  const handleEdit = (local) => {
+    setEditingId(local.id);
+  };
 
   const handleSave = async (id, updates) => {
     await updateLocal(id, updates);
@@ -51,6 +117,9 @@ export default function Dashboard({ projeto }) {
     await toggleStatus(local);
   };
 
+  // ==============================
+  // 🔹 FALLBACK DE SEGURANÇA
+  // ==============================
   if (!projeto) {
     return (
       <div style={{ padding: 50, textAlign: 'center' }}>
@@ -59,6 +128,9 @@ export default function Dashboard({ projeto }) {
     );
   }
 
+  // ==============================
+  // 🔹 RENDERIZAÇÃO
+  // ==============================
   return (
     <div
       style={{
@@ -69,10 +141,38 @@ export default function Dashboard({ projeto }) {
         fontFamily: 'sans-serif'
       }}
     >
-      {/* HEADER */}
+
+      {/* =====================================
+          🔴 BLOCOS DE TESTE (DEBUG)
+          (podem ser removidos depois)
+      ====================================== */}
+      <div style={{ background: 'purple', color: 'white', padding: '40px' }}>
+        TESTE: DASHBOARD JSX
+      </div>
+
+      {/* =====================================
+          🔹 HEADER DO DASHBOARD
+      ====================================== */}
       <DashboardHeader projeto={projeto} theme={theme} />
 
-      {/* TOGGLE */}
+      <div style={{ background: 'blue', color: 'white', padding: '20px' }}>
+        TESTE: DASHBOARD ESTÁ RENDERIZANDO
+      </div>
+
+      {/* =====================================
+          🔹 PAINEL GLOBAL DE FILTROS DO APP
+          (sempre visível no topo)
+      ====================================== */}
+      <ProjectFiltersPanel
+        projeto={projeto}
+        theme={theme}
+        onUpdate={() => {}}
+      />
+
+      {/* =====================================
+          🔹 TOGGLE DE MODO
+          (Configuração ↔ Lista)
+      ====================================== */}
       <div style={{ display: 'flex', gap: '8px', padding: '0 20px 20px' }}>
         <button
           onClick={() => setModoDashboard('config')}
@@ -117,20 +217,27 @@ export default function Dashboard({ projeto }) {
         </button>
       </div>
 
-      {/* MODO CONFIG */}
+      {/* =====================================
+          🔹 MODO: CONFIGURAÇÃO DO APP
+      ====================================== */}
       {modoDashboard === 'config' && (
         <ProjectFiltersPanel
           projeto={projeto}
           theme={theme}
           onUpdate={(filtros) => {
+            // atualização local do projeto
             projeto.filtros_ativos = filtros;
           }}
         />
       )}
 
-      {/* MODO LISTA */}
+      {/* =====================================
+          🔹 MODO: LISTA DE LOJAS
+      ====================================== */}
       {modoDashboard === 'lista' && (
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+
+          {/* BARRA DE FILTROS */}
           <FilterBar
             filtroStatus={filtroStatus}
             setFiltroStatus={setFiltroStatus}
@@ -139,7 +246,9 @@ export default function Dashboard({ projeto }) {
             theme={theme}
           />
 
+          {/* LISTAGEM */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+
             {loading && (
               <p style={{ textAlign: 'center', padding: '40px' }}>
                 Carregando dados...

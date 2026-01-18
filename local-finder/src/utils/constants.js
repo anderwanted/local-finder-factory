@@ -1,5 +1,43 @@
-// src/utils/constants.js
+// ======================================================
+// 📄 constants.js
+// Constantes globais do App / Dashboard
+// ======================================================
+//
+// 🎯 PROPÓSITO DESTE ARQUIVO
+// Centralizar TODAS as constantes de domínio:
+// - Tags oficiais
+// - Status
+// - Tema
+// - Definição de filtros do app
+//
+// 🧠 MODELO MENTAL
+// - Nada aqui contém lógica
+// - Nada aqui acessa banco
+// - Tudo aqui é reutilizável entre projetos
+//
+// 🔒 CONTRATO
+// - Arquivo seguro para edição por humanos
+// - Mudanças aqui não quebram a aplicação
+// - Pode ser lido como documentação viva
+//
 
+// ======================================================
+// 🔹 TAGS OFICIAIS (CATEGORIAS)
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Definir as categorias possíveis de um local
+//
+// 🧠 USO
+// - Dashboard (edição do local)
+// - Filtros do app
+// - Cards visuais
+//
+// 🔒 CONTRATO
+// - id   → usado em código / banco
+// - label → exibido ao usuário
+// - color → identidade visual da tag
+//
 export const TAGS_OFICIAIS = [
   { id: 'banho', label: 'Banho', color: '#3b82f6' },
   { id: 'vet',   label: 'Vet',   color: '#10b981' },
@@ -7,13 +45,45 @@ export const TAGS_OFICIAIS = [
   { id: 'hotel', label: 'Hotel', color: '#8b5cf6' }
 ];
 
+// ======================================================
+// 🔹 STATUS DE FILTRO (UI)
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Controlar visualização no Dashboard
+//
+// 🧠 USO
+// - Filtro rápido: todos / publicados / ocultos
+//
 export const STATUS_FILTROS = ['todos', 'publicados', 'ocultos'];
 
+// ======================================================
+// 🔹 STATUS DE DADOS (BANCO)
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Padronizar valores usados no banco
+//
+// 🧠 USO
+// - Comparações
+// - Toggle de visibilidade
+//
 export const STATUS_TYPES = {
   PUBLICADO: 'PUBLICAR_APP',
   RASCUNHO: 'RASCUNHO'
 };
 
+// ======================================================
+// 🔹 TEMA PADRÃO DO SISTEMA
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Definir cores base do app
+//
+// 🧠 MODELO
+// - Pode ser sobrescrito por projeto
+// - Nunca depende de CSS externo
+//
 export const THEME_COLORS = {
   primary: '#2563eb',
   bg: '#f8fafc',
@@ -25,6 +95,17 @@ export const THEME_COLORS = {
   success: '#22c55e'
 };
 
+// ======================================================
+// 🔹 FUNÇÃO: getTheme
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Gerar tema final baseado no projeto
+//
+// 🧠 REGRA
+// - Projeto pode sobrescrever apenas cor primária
+// - Todo o resto permanece consistente
+//
 export const getTheme = (projeto) => ({
   primary: projeto?.cor_primaria || THEME_COLORS.primary,
   bg: THEME_COLORS.bg,
@@ -36,6 +117,23 @@ export const getTheme = (projeto) => ({
   success: THEME_COLORS.success
 });
 
+// ======================================================
+// 🔹 FILTROS DISPONÍVEIS NO APP
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Definir QUAIS filtros existem no sistema
+//
+// 🧠 MODELO MENTAL
+// - Código define o que é possível
+// - Dashboard decide o que está ativo
+//
+// 🔒 CONTRATO
+// - id           → chave técnica
+// - label        → nome exibido
+// - description  → explicação humana
+// - group        → filtro ou ordenação
+//
 export const FILTROS_APP = [
   {
     id: 'categoria',
@@ -69,6 +167,17 @@ export const FILTROS_APP = [
   }
 ];
 
+// ======================================================
+// 🔹 FILTROS PADRÃO ATIVOS (MVP)
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Garantir experiência mínima sem configuração
+//
+// 🧠 REGRA
+// - Aplicado quando projeto ainda não definiu filtros
+// - Pode ser alterado no dashboard
+//
 export const DEFAULT_FILTROS_APP = [
   'categoria',
   'bem_avaliados',
