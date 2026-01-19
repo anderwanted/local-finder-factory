@@ -1,5 +1,5 @@
 RELATÓRIO TÉCNICO DO PROJETO
-Data: 15/01/2026, 21:44:40
+Data: 18/01/2026, 22:41:21
 
 --- PACKAGE.JSON ---
 {
@@ -29,16 +29,69 @@ Data: 15/01/2026, 21:44:40
 --------------------
 
 --- ARQUIVO: src/AdminGenerator.jsx ---
+// ======================================================
+// 📄 AdminGenerator.jsx
+// Gerador de Prompt para Ingestão de Dados (Admin Tool)
+// ======================================================
+//
+// 🎯 PROPÓSITO
+// Facilitar a criação de dados estruturados (SQL UPSERT)
+// a partir de texto desorganizado + URL do Google Maps.
+//
+// 🧠 MODELO MENTAL
+// - O humano copia dados do Google Maps
+// - O sistema gera um PROMPT blindado
+// - A IA externa retorna SQL pronto
+//
+// 🔒 CONTRATO
+// - Não grava no banco
+// - Apenas gera texto
+// - Nunca executa SQL
+//
+
+// ======================================================
+// 🔹 DEPENDÊNCIAS
+// ======================================================
 import React, { useState } from 'react';
 import { Copy, Check, MapPin, MousePointer, Globe, ArrowRight } from 'lucide-react';
 
+// ======================================================
+// 🔹 COMPONENTE PRINCIPAL
+// ======================================================
 export default function AdminGenerator({ projeto }) {
+
+  // ==============================
+  // 🔹 ESTADOS
+  // ==============================
+  //
+  // rawInput → texto bruto colado pelo usuário
+  // copied   → feedback visual de cópia
+  //
   const [rawInput, setRawInput] = useState('');
   const [copied, setCopied] = useState(false);
 
+  // ==============================
+  // 🔹 TEMA DO PROJETO
+  // ==============================
+  //
+  // 🎯 Usa a cor primária do projeto
+  // 🔒 Fallback seguro
+  //
   const corTema = projeto?.cor_primaria || '#2563eb';
 
-  // --- PROMPT BLINDADO V2.1 ---
+  // ======================================================
+  // 🔹 PROMPT MESTRE (VERSÃO BLINDADA)
+  // ======================================================
+  //
+  // 🎯 INTENÇÃO
+  // Gerar um comando SQL consistente, padronizado e seguro
+  //
+  // 🧠 REGRAS
+  // - Tags fechadas
+  // - Extração rigorosa
+  // - Destaque calculado
+  // - UPSERT idempotente
+  //
   const PROMPT_MESTRE = `
 Atue como Engenheiro de Dados Sênior.
 Contexto: Estamos populando o banco do projeto "${projeto?.nome || 'Geral'}" (ID: '${projeto?.id}').
@@ -56,7 +109,8 @@ ANALISE O TEXTO SUJO E A URL ABAIXO PARA GERAR UM 'UPSERT' SQL.
 2. REGRAS DE EXTRAÇÃO:
    - Nome, Telefone (formato 5511...), Endereço.
    - Nota e Avaliações (números).
-   - Latitude/Longitude: Tente extrair da URL (procure padrões como @-23.xxx,-46.xxx). Se não achar, use NULL.
+   - Latitude/Longitude: Tente extrair da URL (procure padrões como @-23.xxx,-46.xxx).
+     Se não achar, use NULL.
    - Destaque: TRUE se (nota >= 4.8 e avaliacoes > 40).
 
 3. SAÍDA ESPERADA (SQL):
@@ -72,6 +126,13 @@ ANALISE O TEXTO SUJO E A URL ABAIXO PARA GERAR UM 'UPSERT' SQL.
 DADOS BRUTOS (TEXTO + URL):
 `;
 
+  // ==============================
+  // 🔹 AÇÃO: COPIAR PROMPT
+  // ==============================
+  //
+  // 🎯 Junta prompt + texto do usuário
+  // 🔒 Apenas copia para clipboard
+  //
   const handleCopy = () => {
     const fullText = `${PROMPT_MESTRE}\n${rawInput}`;
     navigator.clipboard.writeText(fullText);
@@ -79,80 +140,140 @@ DADOS BRUTOS (TEXTO + URL):
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // ==============================
+  // 🔹 FALLBACK DE SEGURANÇA
+  // ==============================
   if (!projeto) return <p>Erro: Projeto não identificado.</p>;
 
+  // ======================================================
+  // 🔹 RENDER
+  // ======================================================
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px', fontFamily: 'sans-serif', color: '#334155' }}>
-      
-      {/* HEADER DE INSTRUÇÕES */}
-      <div style={{ background: 'white', padding: '25px', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', marginBottom: '25px', borderLeft: `6px solid ${corTema}` }}>
-        <h2 style={{ color: '#1e293b', marginTop: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+    <div style={{
+      maxWidth: '800px',
+      margin: '0 auto',
+      padding: '20px',
+      fontFamily: 'sans-serif',
+      color: '#334155'
+    }}>
+
+      {/* ==========================================
+          🔹 HEADER INSTRUCIONAL
+         ========================================== */}
+      <div style={{
+        background: 'white',
+        padding: '25px',
+        borderRadius: '16px',
+        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+        marginBottom: '25px',
+        borderLeft: `6px solid ${corTema}`
+      }}>
+        <h2 style={{
+          color: '#1e293b',
+          marginTop: 0,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px'
+        }}>
           <Globe size={24} color={corTema} />
           Gerador de Dados Inteligente
         </h2>
+
         <p style={{ color: '#64748b', fontSize: '14px' }}>
           Siga o fluxo abaixo para popular o app <strong>{projeto.nome}</strong> com precisão.
         </p>
-        
-        {/* STEPS VISUAIS */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginTop: '20px' }}>
-          
-          <StepCard 
-            icon={<MapPin size={20} />} 
-            title="1. Google Maps" 
+
+        {/* ==============================
+            🔹 STEPS VISUAIS
+           ============================== */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '15px',
+          marginTop: '20px'
+        }}>
+          <StepCard
+            icon={<MapPin size={20} />}
+            title="1. Google Maps"
             text="Pesquise o local e CLIQUE NO PINO para abrir os detalhes."
             color={corTema}
           />
-          
-          <StepCard 
-            icon={<MousePointer size={20} />} 
-            title="2. Captura Total" 
+
+          <StepCard
+            icon={<MousePointer size={20} />}
+            title="2. Captura Total"
             text="Dê Ctrl+A na aba lateral esquerda e copie todo o texto."
             color={corTema}
           />
-          
-          <StepCard 
-            icon={<Globe size={20} />} 
-            title="3. URL GPS" 
+
+          <StepCard
+            icon={<Globe size={20} />}
+            title="3. URL GPS"
             text="Copie também o link do navegador para pegar a latitude."
             color={corTema}
           />
-
         </div>
       </div>
-      
-      {/* ÁREA DE AÇÃO */}
+
+      {/* ==========================================
+          🔹 ÁREA DE AÇÃO
+         ========================================== */}
       <div style={{ position: 'relative' }}>
-        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '14px' }}>
+        <label style={{
+          display: 'block',
+          marginBottom: '8px',
+          fontWeight: 'bold',
+          fontSize: '14px'
+        }}>
           Cole tudo aqui (Texto Bagunçado + URL):
         </label>
-        
+
         <textarea
           value={rawInput}
           onChange={(e) => setRawInput(e.target.value)}
           placeholder={`Exemplo:\nPet Shop do Zé\n4.8 estrelas\nRua das Flores, 123\n\nhttps://google.com/maps/...`}
-          style={{ 
-            width: '100%', height: '200px', padding: '15px', 
-            borderRadius: '12px', border: '2px solid #e2e8f0', 
-            fontSize: '14px', fontFamily: 'monospace', resize: 'vertical',
+          style={{
+            width: '100%',
+            height: '200px',
+            padding: '15px',
+            borderRadius: '12px',
+            border: '2px solid #e2e8f0',
+            fontSize: '14px',
+            fontFamily: 'monospace',
+            resize: 'vertical',
             outlineColor: corTema
           }}
         />
 
+        {/* ==============================
+            🔹 BOTÃO PRINCIPAL
+           ============================== */}
         <div style={{ marginTop: '15px' }}>
           <button
             onClick={handleCopy}
             disabled={!rawInput}
             style={{
-              width: '100%', padding: '16px',
+              width: '100%',
+              padding: '16px',
               background: copied ? '#22c55e' : (rawInput ? corTema : '#cbd5e1'),
-              color: 'white', border: 'none', borderRadius: '12px', 
-              fontWeight: 'bold', fontSize: '16px', cursor: rawInput ? 'pointer' : 'not-allowed',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-              transition: 'all 0.2s', boxShadow: rawInput ? '0 4px 12px rgba(0,0,0,0.15)' : 'none'
+              color: 'white',
+              border: 'none',
+              borderRadius: '12px',
+              fontWeight: 'bold',
+              fontSize: '16px',
+              cursor: rawInput ? 'pointer' : 'not-allowed',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px',
+              transition: 'all 0.2s',
+              boxShadow: rawInput ? '0 4px 12px rgba(0,0,0,0.15)' : 'none'
             }}
           >
-            {copied ? <><Check /> Prompt Copiado! Cole na IA.</> : <><Copy /> Gerar Comando SQL</>}
+            {copied
+              ? <><Check /> Prompt Copiado! Cole na IA.</>
+              : <><Copy /> Gerar Comando SQL</>
+            }
             {!copied && rawInput && <ArrowRight size={20} />}
           </button>
         </div>
@@ -161,20 +282,67 @@ DADOS BRUTOS (TEXTO + URL):
   );
 }
 
-// Componente visualzinho dos passos
+// ======================================================
+// 🔹 COMPONENTE AUXILIAR: StepCard
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Visualizar o fluxo de passos de forma didática
+//
 function StepCard({ icon, title, text, color }) {
   return (
-    <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: color, fontWeight: 'bold' }}>
+    <div style={{
+      background: '#f8fafc',
+      padding: '15px',
+      borderRadius: '10px',
+      border: '1px solid #e2e8f0'
+    }}>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        marginBottom: '8px',
+        color,
+        fontWeight: 'bold'
+      }}>
         {icon} {title}
       </div>
-      <p style={{ margin: 0, fontSize: '12px', color: '#64748b', lineHeight: '1.4' }}>{text}</p>
+      <p style={{
+        margin: 0,
+        fontSize: '12px',
+        color: '#64748b',
+        lineHeight: '1.4'
+      }}>
+        {text}
+      </p>
     </div>
-  )
+  );
 }
+
 ----------------------------------
 
 --- ARQUIVO: src/App.css ---
+/* ======================================================
+   📄 styles.css (ou index.css / App.css)
+   Estilos Globais Base do Projeto
+====================================================== */
+
+/* ======================================================
+   🔹 ROOT CONTAINER
+======================================================
+🎯 Intenção:
+Definir o container principal da aplicação React (#root)
+
+🧠 O que controla:
+- Largura máxima do app
+- Centralização horizontal
+- Espaçamento interno
+- Alinhamento de texto padrão
+
+🔒 Observações:
+- Este estilo impacta TODA a aplicação
+- Qualquer layout quebrado geralmente começa aqui
+*/
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -182,19 +350,75 @@ function StepCard({ icon, title, text, color }) {
   text-align: center;
 }
 
+/* ======================================================
+   🔹 LOGO BASE
+======================================================
+🎯 Intenção:
+Estilo padrão para logos (ex: Vite / React)
+
+🧠 O que controla:
+- Tamanho
+- Área de clique
+- Otimização de renderização (will-change)
+- Transição suave de hover
+
+🔒 Observações:
+- Não usar para logos de negócio
+- Apenas branding técnico/dev
+*/
 .logo {
   height: 6em;
   padding: 1.5em;
   will-change: filter;
   transition: filter 300ms;
 }
+
+/* ======================================================
+   🔹 LOGO — HOVER GENÉRICO
+======================================================
+🎯 Intenção:
+Feedback visual ao passar o mouse
+
+🧠 O que controla:
+- Drop shadow suave
+- Destaque visual
+
+🔒 Observações:
+- Cor genérica (azulada)
+*/
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
+/* ======================================================
+   🔹 LOGO — VARIAÇÃO REACT
+======================================================
+🎯 Intenção:
+Diferenciar logo do React visualmente
+
+🧠 O que controla:
+- Cor do glow no hover
+
+🔒 Observações:
+- Apenas visual
+*/
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
+/* ======================================================
+   🔹 ANIMAÇÃO: LOGO GIRANDO
+======================================================
+🎯 Intenção:
+Animação demonstrativa (exemplo / showcase)
+
+🧠 O que controla:
+- Rotação contínua
+- Usada apenas em ambientes de demo
+
+🔒 Observações:
+- Não usar em produção final
+*/
 @keyframes logo-spin {
   from {
     transform: rotate(0deg);
@@ -204,16 +428,53 @@ function StepCard({ icon, title, text, color }) {
   }
 }
 
+/* ======================================================
+   🔹 PREFERÊNCIA DE MOVIMENTO
+======================================================
+🎯 Intenção:
+Respeitar acessibilidade do usuário
+
+🧠 O que controla:
+- Só anima se o usuário NÃO tiver redução de movimento ativada
+
+🔒 Observações:
+- Boa prática obrigatória em apps modernos
+*/
 @media (prefers-reduced-motion: no-preference) {
   a:nth-of-type(2) .logo {
     animation: logo-spin infinite 20s linear;
   }
 }
 
+/* ======================================================
+   🔹 CARD GENÉRICO
+======================================================
+🎯 Intenção:
+Estilo base para cards de exemplo
+
+🧠 O que controla:
+- Espaçamento interno
+
+🔒 Observações:
+- Não confundir com StoreCard / Card do app
+*/
 .card {
   padding: 2em;
 }
 
+/* ======================================================
+   🔹 TEXTO AUXILIAR / DOCUMENTAÇÃO
+======================================================
+🎯 Intenção:
+Estilo para textos secundários (ex: links de docs)
+
+🧠 O que controla:
+- Cor neutra
+- Baixa hierarquia visual
+
+🔒 Observações:
+- Não usar para conteúdo principal
+*/
 .read-the-docs {
   color: #888;
 }
@@ -221,25 +482,76 @@ function StepCard({ icon, title, text, color }) {
 ----------------------------------
 
 --- ARQUIVO: src/App.jsx ---
+// ======================================================
+// 📄 App.jsx
+// Entry Point + Roteamento Global (Multi-Tenant)
+// ======================================================
+//
+// 🎯 PROPÓSITO DESTE ARQUIVO
+// - Definir TODAS as rotas do sistema
+// - Resolver qual app/nicho deve ser carregado
+// - Injetar configuração do projeto nas telas
+//
+// 🧠 MODELO MENTAL
+// - HomeFactory → lista de apps existentes
+// - UniversalLoader → resolve qual app carregar
+// - Telas nunca decidem contexto sozinhas
+//
+// 🔒 CONTRATO
+// - Nenhuma regra de negócio pesada aqui
+// - Nenhuma lógica de filtro
+// - Apenas orquestração e injeção de dados
+//
+
+// ======================================================
+// 🔹 DEPENDÊNCIAS
+// ======================================================
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useParams, Navigate } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link,
+  useParams
+} from 'react-router-dom';
+
 import { supabase } from './supabaseClient';
 import { FolderPlus } from 'lucide-react';
 
-// Importação das Telas
+// ======================================================
+// 🔹 TELAS DO SISTEMA
+// ======================================================
 import PetList from './PetList';
 import AdminGenerator from './AdminGenerator';
 import Dashboard from './Dashboard';
 
-// --- COMPONENTE CAMALEÃO (Carrega o App certo baseado na URL) ---
+// ======================================================
+// 🔹 COMPONENTE: UniversalLoader
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Resolver dinamicamente QUAL app deve ser carregado
+// com base na URL (/pets, /mecanicos, etc)
+//
+// 🧠 MODELO MENTAL
+// - URL define o nicho
+// - Nicho busca um projeto no banco
+// - Projeto injeta configuração nas telas
+//
+// 🔒 CONTRATO
+// - Se não encontrar projeto → erro controlado
+// - Nunca renderiza tela sem projeto válido
+//
 function UniversalLoader() {
-  const { nicho } = useParams(); // Pega o "pets" da URL
+  const { nicho } = useParams(); // slug do projeto
   const [projeto, setProjeto] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // ==============================
+  // 🔹 FETCH DO PROJETO
+  // ==============================
   useEffect(() => {
     async function carregarProjeto() {
-      // Busca as configs desse nicho no banco
       const { data, error } = await supabase
         .from('projetos')
         .select('*')
@@ -247,37 +559,79 @@ function UniversalLoader() {
         .single();
 
       if (error || !data) {
-        setProjeto(null); // Projeto não existe (404)
+        setProjeto(null); // 404 lógico
       } else {
         setProjeto(data);
       }
       setLoading(false);
     }
+
     carregarProjeto();
   }, [nicho]);
 
-  if (loading) return <div style={{padding:20}}>Carregando Fábrica...</div>;
-  
-  if (!projeto) return (
-    <div style={{padding:20, textAlign:'center'}}>
-      <h2>🚫 Nicho não encontrado</h2>
-      <Link to="/">Voltar para a Home</Link>
-    </div>
-  );
+  // ==============================
+  // 🔹 ESTADOS DE SEGURANÇA
+  // ==============================
+  if (loading) {
+    return <div style={{ padding: 20 }}>Carregando Fábrica…</div>;
+  }
 
-  // Se achou o projeto, renderiza o App "injetando" as configurações dele
+  if (!projeto) {
+    return (
+      <div style={{ padding: 20, textAlign: 'center' }}>
+        <h2>🚫 Nicho não encontrado</h2>
+        <Link to="/">Voltar para a Home</Link>
+      </div>
+    );
+  }
+
+  // ==============================
+  // 🔹 RENDERIZAÇÃO DO APP
+  // ==============================
+  //
+  // Projeto encontrado → injetamos config nas telas
+  //
   return (
     <div>
-      {/* Menu de Navegação Local (Só para testes) */}
-      <nav style={{ padding: '10px', background: '#f8fafc', borderBottom:'1px solid #eee', display: 'flex', gap: '15px', justifyContent:'center', fontSize:'14px' }}>
-         <Link to={`/${nicho}`} style={{fontWeight:'bold', color: projeto.cor_primaria}}>{projeto.nome}</Link>
-         <Link to={`/${nicho}/dashboard`} style={{color:'#64748b'}}>Dashboard</Link>
-         <Link to={`/${nicho}/admin`} style={{color:'#64748b'}}>Admin SQL</Link>
-         <Link to="/" style={{color:'#94a3b8'}}>🏠 Sair</Link>
+
+      {/* =====================================
+         🔹 MENU LOCAL (DEV / TESTES)
+      ====================================== */}
+      <nav
+        style={{
+          padding: '10px',
+          background: '#f8fafc',
+          borderBottom: '1px solid #eee',
+          display: 'flex',
+          gap: '15px',
+          justifyContent: 'center',
+          fontSize: '14px'
+        }}
+      >
+        <Link
+          to={`/${nicho}`}
+          style={{ fontWeight: 'bold', color: projeto.cor_primaria }}
+        >
+          {projeto.nome}
+        </Link>
+
+        <Link to={`/${nicho}/dashboard`} style={{ color: '#64748b' }}>
+          Dashboard
+        </Link>
+
+        <Link to={`/${nicho}/admin`} style={{ color: '#64748b' }}>
+          Admin SQL
+        </Link>
+
+        <Link to="/" style={{ color: '#94a3b8' }}>
+          🏠 Sair
+        </Link>
       </nav>
 
+      {/* =====================================
+         🔹 ROTAS DO PROJETO
+      ====================================== */}
       <Routes>
-        {/* Passamos o objeto 'projeto' para dentro das telas */}
         <Route path="/" element={<PetList projeto={projeto} />} />
         <Route path="/dashboard" element={<Dashboard projeto={projeto} />} />
         <Route path="/admin" element={<AdminGenerator projeto={projeto} />} />
@@ -286,216 +640,555 @@ function UniversalLoader() {
   );
 }
 
-// --- TELA INICIAL (LISTA DE NICHOS ATIVOS) ---
+// ======================================================
+// 🔹 TELA: HomeFactory
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Listar todos os projetos/nichos existentes
+//
+// 🧠 MODELO MENTAL
+// - Cada card = um app independente
+// - Clique → entra no app
+//
+// 🔒 CONTRATO
+// - Não cria projetos
+// - Apenas navega
+//
 function HomeFactory() {
   const [projetos, setProjetos] = useState([]);
 
   useEffect(() => {
-    supabase.from('projetos').select('*').then(({ data }) => setProjetos(data || []));
+    supabase
+      .from('projetos')
+      .select('*')
+      .then(({ data }) => setProjetos(data || []));
   }, []);
 
   return (
-    <div style={{ padding: '40px', maxWidth: '800px', margin: '0 auto', fontFamily: 'sans-serif' }}>
-      <h1 style={{textAlign:'center', marginBottom:'40px'}}>🏭 Fábrica de Apps</h1>
-      
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' }}>
-        {/* Lista os projetos que existem no banco */}
+    <div
+      style={{
+        padding: '40px',
+        maxWidth: '800px',
+        margin: '0 auto',
+        fontFamily: 'sans-serif'
+      }}
+    >
+      <h1 style={{ textAlign: 'center', marginBottom: '40px' }}>
+        🏭 Fábrica de Apps
+      </h1>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+          gap: '20px'
+        }}
+      >
+        {/* =============================
+           🔹 PROJETOS EXISTENTES
+        ============================== */}
         {projetos.map(proj => (
-          <Link key={proj.id} to={`/${proj.slug}`} style={{textDecoration:'none'}}>
-            <div style={{
-              padding: '30px', borderRadius: '12px', background: 'white',
-              border: '1px solid #e2e8f0', boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
-              textAlign: 'center', transition: 'transform 0.2s', cursor: 'pointer'
-            }}>
-              <div style={{fontSize:'40px', marginBottom:'10px'}}>🚀</div>
-              <h3 style={{margin:0, color:'#1e293b'}}>{proj.nome}</h3>
-              <span style={{fontSize:'12px', color:'#64748b'}}>/{proj.slug}</span>
+          <Link key={proj.id} to={`/${proj.slug}`} style={{ textDecoration: 'none' }}>
+            <div
+              style={{
+                padding: '30px',
+                borderRadius: '12px',
+                background: 'white',
+                border: '1px solid #e2e8f0',
+                boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+                textAlign: 'center',
+                transition: 'transform 0.2s',
+                cursor: 'pointer'
+              }}
+            >
+              <div style={{ fontSize: '40px', marginBottom: '10px' }}>🚀</div>
+              <h3 style={{ margin: 0, color: '#1e293b' }}>{proj.nome}</h3>
+              <span style={{ fontSize: '12px', color: '#64748b' }}>
+                /{proj.slug}
+              </span>
             </div>
           </Link>
         ))}
 
-        {/* Card Fake de "Criar Novo" */}
-        <div style={{
-          padding: '30px', borderRadius: '12px', border: '2px dashed #cbd5e1',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          color: '#94a3b8', cursor: 'not-allowed'
-        }}>
+        {/* =============================
+           🔹 CARD FUTURO (CRIAR NOVO)
+        ============================== */}
+        <div
+          style={{
+            padding: '30px',
+            borderRadius: '12px',
+            border: '2px dashed #cbd5e1',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#94a3b8',
+            cursor: 'not-allowed'
+          }}
+        >
           <FolderPlus size={32} />
-          <span style={{fontWeight:'bold', marginTop:'10px'}}>Novo Nicho</span>
-          <span style={{fontSize:'10px'}}>(Em breve no Painel)</span>
+          <span style={{ fontWeight: 'bold', marginTop: '10px' }}>
+            Novo Nicho
+          </span>
+          <span style={{ fontSize: '10px' }}>
+            (Em breve no Painel)
+          </span>
         </div>
       </div>
     </div>
   );
 }
 
+// ======================================================
+// 🔹 ROOT DO APP
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Definir roteamento global
+//
 export default function App() {
   return (
     <Router>
       <Routes>
-        {/* Rota Raiz: Mostra a Fábrica */}
+
+        {/* Home / Fábrica */}
         <Route path="/" element={<HomeFactory />} />
-        
-        {/* Rota Dinâmica: Captura /pets, /mecanicos, etc e joga pro Loader */}
+
+        {/* Apps Dinâmicos */}
         <Route path="/:nicho/*" element={<UniversalLoader />} />
+
       </Routes>
     </Router>
   );
 }
+
 ----------------------------------
 
 --- ARQUIVO: src/ChatModal.jsx ---
+// ======================================================
+// 📄 ChatModal.jsx
+// Modal de Conversa + Captura de Lead (WhatsApp)
+// ======================================================
+//
+// 🎯 PROPÓSITO
+// - Simular um chat inicial humanizado
+// - Qualificar o interesse do usuário
+// - Capturar lead (nome + telefone)
+// - Redirecionar para WhatsApp da loja
+//
+// 🧠 MODELO MENTAL
+// - Conversa guiada por etapas (steps)
+// - Bot inicia → usuário responde → lead é capturado
+// - Supabase registra o lead com vínculo ao projeto
+//
+// 🔒 CONTRATO
+// - Não decide regras de negócio do projeto
+// - Não decide layout global
+// - Apenas executa o fluxo de conversa
+//
+
+// ======================================================
+// 🔹 DEPENDÊNCIAS
+// ======================================================
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, X, User, Phone } from 'lucide-react';
-import { supabase } from './supabaseClient'; 
+import { supabase } from './supabaseClient';
 
-// Recebendo 'projeto' via props
+// ======================================================
+// 🔹 COMPONENTE: ChatModal
+// ======================================================
+//
+// 🔑 PROPS
+// - local   → loja que receberá o contato
+// - projeto → projeto/nicho (branding + vínculo)
+// - onClose → callback para fechar o modal
+//
 export default function ChatModal({ local, projeto, onClose }) {
-  const [step, setStep] = useState(0); 
+
+  // ==============================
+  // 🔹 ESTADOS PRINCIPAIS
+  // ==============================
+  //
+  // step:
+  // 0 → mensagem inicial do bot
+  // 1 → pergunta aberta do usuário
+  // 2 → coleta de dados (lead)
+  //
+  const [step, setStep] = useState(0);
   const [messages, setMessages] = useState([]);
   const [userInput, setUserInput] = useState('');
   const [leadData, setLeadData] = useState({ nome: '', telefone: '' });
   const [isSending, setIsSending] = useState(false);
-  
+
+  // Ref para auto-scroll
   const messagesEndRef = useRef(null);
 
+  // ==============================
+  // 🔹 BOOTSTRAP DA CONVERSA
+  // ==============================
+  //
+  // Inicia a conversa automaticamente
+  //
   useEffect(() => {
     if (step === 0) {
       setTimeout(() => {
         addBotMessage(`Olá! Sou o assistente virtual da ${local.nome}. 🐶`);
         setTimeout(() => {
-          addBotMessage("Como podemos te ajudar hoje?");
-          setStep(1); 
+          addBotMessage('Como podemos te ajudar hoje?');
+          setStep(1);
         }, 1000);
       }, 500);
     }
   }, [step, local.nome]);
 
+  // ==============================
+  // 🔹 AUTO-SCROLL
+  // ==============================
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, step]);
 
-  const addBotMessage = (text) => setMessages(prev => [...prev, { sender: 'bot', text }]);
-  const addUserMessage = (text) => setMessages(prev => [...prev, { sender: 'user', text }]);
+  // ==============================
+  // 🔹 HELPERS DE MENSAGEM
+  // ==============================
+  const addBotMessage = (text) =>
+    setMessages(prev => [...prev, { sender: 'bot', text }]);
 
+  const addUserMessage = (text) =>
+    setMessages(prev => [...prev, { sender: 'user', text }]);
+
+  // ==============================
+  // 🔹 ETAPA 1: PRIMEIRA INTERAÇÃO
+  // ==============================
+  //
+  // Usuário escreve livremente
+  // Bot responde e avança para coleta de lead
+  //
   const handleFirstInteraction = () => {
     if (!userInput.trim()) return;
+
     addUserMessage(userInput);
-    setUserInput(''); 
+    setUserInput('');
+
     setTimeout(() => {
-      addBotMessage("Perfeito! Vou transferir para um atendente humano.");
+      addBotMessage('Perfeito! Vou transferir para um atendente humano.');
       setTimeout(() => {
-        addBotMessage("Para isso, preciso só do seu Nome e WhatsApp.");
-        setStep(2); 
+        addBotMessage('Para isso, preciso só do seu Nome e WhatsApp.');
+        setStep(2);
       }, 1000);
     }, 800);
   };
 
+  // ==============================
+  // 🔹 ETAPA 2: ENVIO DO LEAD
+  // ==============================
+  //
+  // - Salva no Supabase
+  // - Vínculo com projeto + loja
+  // - Redireciona para WhatsApp
+  //
   const handleLeadSubmit = async (e) => {
     e.preventDefault();
-    if (!leadData.nome || !leadData.telefone) return alert("Preencha os dados!");
-    
-    setIsSending(true);
 
-    const { error } = await supabase.from('leads').insert({
-      nome: leadData.nome,
-      telefone: leadData.telefone,
-      loja_alvo: local.nome,
-      mensagem_inicial: messages.find(m => m.sender === 'user')?.text || 'Interesse geral',
-      projeto_id: projeto.id // 🔒 AQUI ESTÁ O SEGREDO
-    });
-
-    if (error) {
-      console.error("Erro Supabase:", error);
-      alert("Erro ao salvar lead!");
-      setIsSending(false);
-      return; 
+    if (!leadData.nome || !leadData.telefone) {
+      alert('Preencha os dados!');
+      return;
     }
 
-    addBotMessage("Tudo certo! Abrindo o WhatsApp...");
-    
+    setIsSending(true);
+
+    const { error } = await supabase
+      .from('leads')
+      .insert({
+        nome: leadData.nome,
+        telefone: leadData.telefone,
+        loja_alvo: local.nome,
+        mensagem_inicial:
+          messages.find(m => m.sender === 'user')?.text || 'Interesse geral',
+        projeto_id: projeto.id // 🔒 vínculo multi-tenant
+      });
+
+    if (error) {
+      console.error('Erro Supabase:', error);
+      alert('Erro ao salvar lead!');
+      setIsSending(false);
+      return;
+    }
+
+    addBotMessage('Tudo certo! Abrindo o WhatsApp…');
+
     setTimeout(() => {
-      const storePhone = local.telefone; 
+      const storePhone = local.telefone;
       const text = encodeURIComponent(
-        `Olá! Me chamo *${leadData.nome}*. Vim pelo ${projeto.nome} e gostaria de saber sobre: ${messages.find(m => m.sender === 'user')?.text}`
+        `Olá! Me chamo *${leadData.nome}*. Vim pelo ${projeto.nome} e gostaria de saber sobre: ${
+          messages.find(m => m.sender === 'user')?.text
+        }`
       );
-      window.open(`https://wa.me/${storePhone}?text=${text}`, '_blank');
-      onClose(); 
+
+      window.open(
+        `https://wa.me/${storePhone}?text=${text}`,
+        '_blank'
+      );
+
+      onClose();
     }, 1500);
   };
 
-  // Usamos as cores do projeto aqui também
+  // ==============================
+  // 🔹 BRANDING DO PROJETO
+  // ==============================
   const corBtn = projeto?.cor_primaria || '#075e54';
 
+  // ==============================
+  // 🔹 RENDERIZAÇÃO
+  // ==============================
   return (
-    <div style={{
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(0,0,0,0.6)', zIndex: 9999,
-      display: 'flex', alignItems: 'flex-end', justifyContent: 'center'
-    }}>
-      <div style={{
-        width: '100%', maxWidth: '500px', height: '85vh',
-        background: '#e5ddd5', 
-        display: 'flex', flexDirection: 'column',
-        borderTopLeftRadius: '20px', borderTopRightRadius: '20px',
-        overflow: 'hidden', boxShadow: '0 -4px 20px rgba(0,0,0,0.2)'
-      }}>
-        
-        <div style={{ padding: '15px', background: corBtn, color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
-             <div style={{width: '40px', height: '40px', borderRadius: '50%', background: 'white', display: 'flex', alignItems:'center', justifyContent:'center', color: corBtn, fontWeight:'bold'}}>
-               {local.nome.substring(0,2).toUpperCase()}
-             </div>
-             <div>
-               <div style={{fontWeight: 'bold', fontSize: '16px'}}>{local.nome}</div>
-               <div style={{fontSize: '12px', opacity: 0.9}}>Online agora</div>
-             </div>
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0,0,0,0.6)',
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'center'
+      }}
+    >
+      <div
+        style={{
+          width: '100%',
+          maxWidth: '500px',
+          height: '85vh',
+          background: '#e5ddd5',
+          display: 'flex',
+          flexDirection: 'column',
+          borderTopLeftRadius: '20px',
+          borderTopRightRadius: '20px',
+          overflow: 'hidden',
+          boxShadow: '0 -4px 20px rgba(0,0,0,0.2)'
+        }}
+      >
+
+        {/* ==========================
+           🔹 HEADER DO CHAT
+        =========================== */}
+        <div
+          style={{
+            padding: '15px',
+            background: corBtn,
+            color: 'white',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                background: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: corBtn,
+                fontWeight: 'bold'
+              }}
+            >
+              {local.nome.substring(0, 2).toUpperCase()}
+            </div>
+            <div>
+              <div style={{ fontWeight: 'bold', fontSize: '16px' }}>
+                {local.nome}
+              </div>
+              <div style={{ fontSize: '12px', opacity: 0.9 }}>
+                Online agora
+              </div>
+            </div>
           </div>
-          <button onClick={onClose} style={{background:'none', border:'none', color:'white', cursor:'pointer'}}><X size={24} /></button>
+
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer'
+            }}
+          >
+            <X size={24} />
+          </button>
         </div>
 
-        <div style={{ flex: 1, padding: '20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {/* ==========================
+           🔹 ÁREA DE MENSAGENS
+        =========================== */}
+        <div
+          style={{
+            flex: 1,
+            padding: '20px',
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px'
+          }}
+        >
           {messages.map((msg, idx) => (
-            <div key={idx} style={{
-              alignSelf: msg.sender === 'bot' ? 'flex-start' : 'flex-end',
-              background: msg.sender === 'bot' ? 'white' : '#dcf8c6',
-              padding: '12px 16px', borderRadius: '8px', maxWidth: '85%',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.1)', fontSize: '15px', lineHeight: '1.4'
-            }}>
+            <div
+              key={idx}
+              style={{
+                alignSelf:
+                  msg.sender === 'bot' ? 'flex-start' : 'flex-end',
+                background:
+                  msg.sender === 'bot' ? 'white' : '#dcf8c6',
+                padding: '12px 16px',
+                borderRadius: '8px',
+                maxWidth: '85%',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                fontSize: '15px',
+                lineHeight: '1.4'
+              }}
+            >
               {msg.text}
             </div>
           ))}
           <div ref={messagesEndRef} />
         </div>
 
+        {/* ==========================
+           🔹 INPUT / FORMULÁRIO
+        =========================== */}
         <div style={{ background: '#f0f0f0', padding: '10px' }}>
+
+          {/* ETAPA 1 */}
           {step === 1 && (
             <div style={{ display: 'flex', gap: '10px', padding: '5px' }}>
-              <input 
-                type="text" value={userInput} onChange={(e) => setUserInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleFirstInteraction()}
-                placeholder="Digite sua dúvida..." autoFocus
-                style={{ flex: 1, padding: '12px', borderRadius: '25px', border: '1px solid #ccc', outline: 'none' }}
+              <input
+                type="text"
+                value={userInput}
+                onChange={e => setUserInput(e.target.value)}
+                onKeyPress={e =>
+                  e.key === 'Enter' && handleFirstInteraction()
+                }
+                placeholder="Digite sua dúvida..."
+                autoFocus
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  borderRadius: '25px',
+                  border: '1px solid #ccc',
+                  outline: 'none'
+                }}
               />
-              <button onClick={handleFirstInteraction} style={{ background: corBtn, color: 'white', border: 'none', borderRadius: '50%', width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+              <button
+                onClick={handleFirstInteraction}
+                style={{
+                  background: corBtn,
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '45px',
+                  height: '45px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer'
+                }}
+              >
                 <Send size={20} />
               </button>
             </div>
           )}
 
+          {/* ETAPA 2 */}
           {step === 2 && (
-            <form onSubmit={handleLeadSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '10px', background: 'white', borderRadius: '15px' }}>
-              <div style={{display:'flex', alignItems:'center', gap:'10px', borderBottom:'1px solid #eee', padding:'5px'}}>
-                <User size={18} color="#666"/>
-                <input required placeholder="Seu Nome" value={leadData.nome} onChange={e => setLeadData({...leadData, nome: e.target.value})} style={{border:'none', outline:'none', width:'100%', padding:'8px'}} />
+            <form
+              onSubmit={handleLeadSubmit}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '10px',
+                padding: '10px',
+                background: 'white',
+                borderRadius: '15px'
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  borderBottom: '1px solid #eee',
+                  padding: '5px'
+                }}
+              >
+                <User size={18} color="#666" />
+                <input
+                  required
+                  placeholder="Seu Nome"
+                  value={leadData.nome}
+                  onChange={e =>
+                    setLeadData({ ...leadData, nome: e.target.value })
+                  }
+                  style={{
+                    border: 'none',
+                    outline: 'none',
+                    width: '100%',
+                    padding: '8px'
+                  }}
+                />
               </div>
-              <div style={{display:'flex', alignItems:'center', gap:'10px', borderBottom:'1px solid #eee', padding:'5px'}}>
-                <Phone size={18} color="#666"/>
-                <input required type="tel" placeholder="Seu WhatsApp (com DDD)" value={leadData.telefone} onChange={e => setLeadData({...leadData, telefone: e.target.value})} style={{border:'none', outline:'none', width:'100%', padding:'8px'}} />
+
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  borderBottom: '1px solid #eee',
+                  padding: '5px'
+                }}
+              >
+                <Phone size={18} color="#666" />
+                <input
+                  required
+                  type="tel"
+                  placeholder="Seu WhatsApp (com DDD)"
+                  value={leadData.telefone}
+                  onChange={e =>
+                    setLeadData({
+                      ...leadData,
+                      telefone: e.target.value
+                    })
+                  }
+                  style={{
+                    border: 'none',
+                    outline: 'none',
+                    width: '100%',
+                    padding: '8px'
+                  }}
+                />
               </div>
-              
-              <button type="submit" disabled={isSending} style={{ marginTop: '5px', background: '#25D366', color: 'white', fontWeight: 'bold', padding: '12px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '16px' }}>
-                {isSending ? 'Conectando...' : 'Iniciar Conversa no WhatsApp ➤'}
+
+              <button
+                type="submit"
+                disabled={isSending}
+                style={{
+                  marginTop: '5px',
+                  background: '#25D366',
+                  color: 'white',
+                  fontWeight: 'bold',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '16px'
+                }}
+              >
+                {isSending
+                  ? 'Conectando…'
+                  : 'Iniciar Conversa no WhatsApp ➤'}
               </button>
             </form>
           )}
@@ -504,395 +1197,740 @@ export default function ChatModal({ local, projeto, onClose }) {
     </div>
   );
 }
+
 ----------------------------------
 
 --- ARQUIVO: src/Dashboard.jsx ---
-// src/Dashboard.jsx (VERSÃO REFATORADA FINAL)
+// ======================================================
+// 📄 Dashboard.jsx
+// Painel Administrativo do Projeto
+// ======================================================
+//
+// 🎯 PROPÓSITO
+// - Centralizar o controle do projeto
+// - Alternar entre:
+//   • Configuração do App
+//   • Gestão de Lojas (CRUD)
+//
+// 🧠 MODELO MENTAL
+// - Dashboard é um ORQUESTRADOR
+// - Ele NÃO:
+//   ❌ busca dados direto
+//   ❌ filtra manualmente
+//   ❌ renderiza lógica complexa
+//
+// - Ele APENAS:
+//   ✅ conecta hooks
+//   ✅ distribui props
+//   ✅ decide o modo visual
+//
+// 🔒 CONTRATO
+// - Nenhuma query direta aqui
+// - Nenhuma regra de negócio pesada
+// - Hooks fazem o trabalho sujo
+//
+
+// ======================================================
+// 🔹 DEPENDÊNCIAS
+// ======================================================
 import React, { useState } from 'react';
+
+// Hooks
 import { useDashboardData } from './hooks/useDashboardData';
 import { useDashboardFilters } from './hooks/useDashboardFilters';
+
+// Utils
 import { getTheme } from './utils/constants';
+
+// Componentes
 import DashboardHeader from './components/dashboard/DashboardHeader';
 import FilterBar from './components/dashboard/FilterBar';
 import StoreCard from './components/dashboard/StoreCard';
 import StoreCardEdit from './components/dashboard/StoreCardEdit';
 import EmptyState from './components/dashboard/EmptyState';
+import ProjectFiltersPanel from './components/dashboard/ProjectFiltersPanel';
 
+// ======================================================
+// 🔹 COMPONENTE: Dashboard
+// ======================================================
+//
+// 🔑 PROPS
+// - projeto → objeto completo do projeto (slug, cores, filtros, etc)
+//
 export default function Dashboard({ projeto }) {
+
+  // ==============================
+  // 🔹 ESTADOS DE CONTROLE
+  // ==============================
+  //
+  // modoDashboard:
+  // - 'config' → configurações do app
+  // - 'lista'  → gerenciamento das lojas
+  //
+  const [modoDashboard, setModoDashboard] = useState('config');
   const [editingId, setEditingId] = useState(null);
+
+  // Tema visual baseado no projeto
   const theme = getTheme(projeto);
 
-  // Hook de dados (API)
-  const { 
-    locais, 
-    loading, 
+  // ==============================
+  // 🔹 HOOK: DADOS (CRUD)
+  // ==============================
+  const {
+    locais,
+    loading,
     error,
-    toggleStatus, 
-    updateLocal, 
-    deleteLocal 
+    toggleStatus,
+    updateLocal,
+    deleteLocal
   } = useDashboardData(projeto?.id);
 
-  // Hook de filtros (UI)
+  // ==============================
+  // 🔹 HOOK: FILTROS + ORDENAÇÃO
+  // ==============================
   const {
     filtroStatus,
     setFiltroStatus,
     filtroCategoria,
     setFiltroCategoria,
     locaisFiltrados
-  } = useDashboardFilters(locais);
+  } = useDashboardFilters(
+    locais,
+    projeto?.filtros_ativos || []
+  );
 
-  // Handlers
+  // ==============================
+  // 🔹 HANDLERS (AÇÕES DO USUÁRIO)
+  // ==============================
   const handleEdit = (local) => {
     setEditingId(local.id);
   };
 
   const handleSave = async (id, updates) => {
-    try {
-      await updateLocal(id, updates);
-      setEditingId(null);
-    } catch (err) {
-      alert('Erro ao salvar: ' + err.message);
-    }
+    await updateLocal(id, updates);
+    setEditingId(null);
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Tem certeza que deseja excluir esta loja?")) return;
-    
-    try {
-      await deleteLocal(id);
-    } catch (err) {
-      alert('Erro ao excluir: ' + err.message);
-    }
+    if (!window.confirm('Tem certeza que deseja excluir esta loja?')) return;
+    await deleteLocal(id);
   };
 
   const handleToggleStatus = async (local) => {
-    try {
-      await toggleStatus(local);
-    } catch (err) {
-      alert('Erro ao alterar status: ' + err.message);
-    }
+    await toggleStatus(local);
   };
 
-  // Loading inicial
+  // ==============================
+  // 🔹 FALLBACK DE SEGURANÇA
+  // ==============================
   if (!projeto) {
     return (
-      <div style={{ 
-        padding: 50, 
-        textAlign: 'center',
-        fontFamily: 'sans-serif' 
-      }}>
+      <div style={{ padding: 50, textAlign: 'center' }}>
         Carregando projeto...
       </div>
     );
   }
 
+  // ==============================
+  // 🔹 RENDERIZAÇÃO
+  // ==============================
   return (
-    <div style={{
-      background: theme.bg,
-      minHeight: '100vh',
-      color: theme.text,
-      padding: '20px',
-      fontFamily: 'sans-serif'
-    }}>
-      
-      {/* HEADER */}
+    <div
+      style={{
+        background: theme.bg,
+        minHeight: '100vh',
+        color: theme.text,
+        padding: '20px',
+        fontFamily: 'sans-serif'
+      }}
+    >
+
+      {/* =====================================
+          🔴 BLOCOS DE TESTE (DEBUG)
+          (podem ser removidos depois)
+      ====================================== */}
+      <div style={{ background: 'purple', color: 'white', padding: '40px' }}>
+        TESTE: DASHBOARD JSX
+      </div>
+
+      {/* =====================================
+          🔹 HEADER DO DASHBOARD
+      ====================================== */}
       <DashboardHeader projeto={projeto} theme={theme} />
 
-      {/* CONTENT AREA */}
-      <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-        
-        {/* FILTROS */}
-        <FilterBar
-          filtroStatus={filtroStatus}
-          setFiltroStatus={setFiltroStatus}
-          filtroCategoria={filtroCategoria}
-          setFiltroCategoria={setFiltroCategoria}
-          theme={theme}
-        />
-
-        {/* LISTA DE LOJAS */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          
-          {/* Loading State */}
-          {loading && (
-            <p style={{ 
-              textAlign: 'center', 
-              padding: '40px', 
-              color: theme.textSec 
-            }}>
-              Carregando dados...
-            </p>
-          )}
-
-          {/* Error State */}
-          {error && (
-            <div style={{
-              padding: '20px',
-              background: '#fee2e2',
-              border: '1px solid #fca5a5',
-              borderRadius: '8px',
-              color: '#991b1b',
-              textAlign: 'center'
-            }}>
-              Erro ao carregar dados: {error}
-            </div>
-          )}
-
-          {/* Empty State - Sem dados no projeto */}
-          {!loading && !error && locais.length === 0 && (
-            <EmptyState type="no-data" theme={theme} />
-          )}
-
-          {/* Empty State - Filtros sem resultado */}
-          {!loading && !error && locais.length > 0 && locaisFiltrados.length === 0 && (
-            <EmptyState type="filter" theme={theme} />
-          )}
-
-          {/* Lista de Lojas */}
-          {!loading && !error && locaisFiltrados.map(local => (
-            editingId === local.id ? (
-              <StoreCardEdit
-                key={local.id}
-                local={local}
-                theme={theme}
-                onSave={handleSave}
-                onCancel={() => setEditingId(null)}
-              />
-            ) : (
-              <StoreCard
-                key={local.id}
-                local={local}
-                theme={theme}
-                onToggleStatus={handleToggleStatus}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            )
-          ))}
-        </div>
+      <div style={{ background: 'blue', color: 'white', padding: '20px' }}>
+        TESTE: DASHBOARD ESTÁ RENDERIZANDO
       </div>
+
+      {/* =====================================
+          🔹 PAINEL GLOBAL DE FILTROS DO APP
+          (sempre visível no topo)
+      ====================================== */}
+      <ProjectFiltersPanel
+        projeto={projeto}
+        theme={theme}
+        onUpdate={() => {}}
+      />
+
+      {/* =====================================
+          🔹 TOGGLE DE MODO
+          (Configuração ↔ Lista)
+      ====================================== */}
+      <div style={{ display: 'flex', gap: '8px', padding: '0 20px 20px' }}>
+        <button
+          onClick={() => setModoDashboard('config')}
+          style={{
+            padding: '10px 16px',
+            borderRadius: 'var(--radius-btn)',
+            border: '1px solid var(--border-color)',
+            background:
+              modoDashboard === 'config'
+                ? 'var(--cor-primaria)'
+                : 'var(--bg-card)',
+            color:
+              modoDashboard === 'config'
+                ? '#fff'
+                : 'var(--text-secondary)',
+            fontWeight: 600,
+            cursor: 'pointer'
+          }}
+        >
+          ⚙️ Configurar App
+        </button>
+
+        <button
+          onClick={() => setModoDashboard('lista')}
+          style={{
+            padding: '10px 16px',
+            borderRadius: 'var(--radius-btn)',
+            border: '1px solid var(--border-color)',
+            background:
+              modoDashboard === 'lista'
+                ? 'var(--cor-primaria)'
+                : 'var(--bg-card)',
+            color:
+              modoDashboard === 'lista'
+                ? '#fff'
+                : 'var(--text-secondary)',
+            fontWeight: 600,
+            cursor: 'pointer'
+          }}
+        >
+          🏪 Ver Pet Shops
+        </button>
+      </div>
+
+      {/* =====================================
+          🔹 MODO: CONFIGURAÇÃO DO APP
+      ====================================== */}
+      {modoDashboard === 'config' && (
+        <ProjectFiltersPanel
+          projeto={projeto}
+          theme={theme}
+          onUpdate={(filtros) => {
+            // atualização local do projeto
+            projeto.filtros_ativos = filtros;
+          }}
+        />
+      )}
+
+      {/* =====================================
+          🔹 MODO: LISTA DE LOJAS
+      ====================================== */}
+      {modoDashboard === 'lista' && (
+        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+
+          {/* BARRA DE FILTROS */}
+          <FilterBar
+            filtroStatus={filtroStatus}
+            setFiltroStatus={setFiltroStatus}
+            filtroCategoria={filtroCategoria}
+            setFiltroCategoria={setFiltroCategoria}
+            theme={theme}
+          />
+
+          {/* LISTAGEM */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+
+            {loading && (
+              <p style={{ textAlign: 'center', padding: '40px' }}>
+                Carregando dados...
+              </p>
+            )}
+
+            {error && (
+              <div style={{ padding: '20px', color: 'red' }}>
+                Erro ao carregar dados: {error}
+              </div>
+            )}
+
+            {!loading && !error && locais.length === 0 && (
+              <EmptyState type="no-data" theme={theme} />
+            )}
+
+            {!loading &&
+              !error &&
+              locais.length > 0 &&
+              locaisFiltrados.length === 0 && (
+                <EmptyState type="filter" theme={theme} />
+              )}
+
+            {!loading &&
+              !error &&
+              locaisFiltrados.map((local) =>
+                editingId === local.id ? (
+                  <StoreCardEdit
+                    key={local.id}
+                    local={local}
+                    theme={theme}
+                    onSave={handleSave}
+                    onCancel={() => setEditingId(null)}
+                  />
+                ) : (
+                  <StoreCard
+                    key={local.id}
+                    local={local}
+                    theme={theme}
+                    onToggleStatus={handleToggleStatus}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                  />
+                )
+              )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
 ----------------------------------
 
 --- ARQUIVO: src/PetList.jsx ---
+// ======================================================
+// 📄 PetList.jsx
+// Página pública do App (Lista de estabelecimentos)
+// ======================================================
+//
+// 🎯 PAPEL DESTA TELA
+// - É a PRINCIPAL tela do usuário final
+// - Funciona como um "marketplace local"
+// - Cada CARD é uma mini landing page
+// - Conversão principal: WhatsApp
+//
+// 🧠 MODELO MENTAL
+// - Recebe o projeto já resolvido pelo Router
+// - Busca os locais do projeto
+// - Aplica filtros ATIVOS do projeto
+// - Renderiza cards + CTA
+//
+// 🔒 CONTRATO
+// - Nunca quebrar render
+// - Falhas silenciosas
+// - Sempre mostrar algo (ou Empty State)
+// - Mobile-first
+//
+
 import React, { useEffect, useState } from 'react';
-import { supabase } from './supabaseClient'; 
-import { MessageCircle, MapPin, Store, Star, Award, Scissors, Stethoscope, ShoppingBag, Home, X } from 'lucide-react';
+import { supabase } from './supabaseClient';
+
+// Ícones
+import {
+  MessageCircle,
+  MapPin,
+  Store,
+  Award
+} from 'lucide-react';
+
+// Modal de conversa (lead → WhatsApp)
 import ChatModal from './ChatModal';
+
+// Embed Instagram (VIP)
 import { InstagramEmbed } from 'react-social-media-embed';
 
-export default function PetList({ projeto }) {
-  const [locais, setLocais] = useState([]);
-  const [locaisFiltrados, setLocaisFiltrados] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedLocal, setSelectedLocal] = useState(null);
-  const [filtroAtivo, setFiltroAtivo] = useState(null);
-
-  // --- LÓGICA DE TEMAS E DARK MODE ---
-  const isDark = projeto?.tema_base === 'dark';
-  const radius = projeto?.estilo_borda === 'quadrado' ? '0px' : (projeto?.estilo_borda === 'pilula' ? '100px' : '16px'); // Borda dos botões
-  const radiusCard = projeto?.estilo_borda === 'quadrado' ? '0px' : '20px'; // Cards sempre um pouco arredondados ou quadrados
-
-  const tema = {
-    // Cores Dinâmicas
-    '--bg-app': isDark ? '#0f172a' : '#f8fafc',         // Fundo Principal (Dark: Slate 900)
-    '--bg-card': isDark ? '#1e293b' : '#ffffff',        // Fundo Card (Dark: Slate 800)
-    '--text-primary': isDark ? '#f1f5f9' : '#1e293b',   // Texto Principal
-    '--text-secondary': isDark ? '#94a3b8' : '#64748b', // Texto Secundário
-    '--border-color': isDark ? '#334155' : '#e2e8f0',   // Bordas
-    
-    // Cores da Marca
-    '--cor-primaria': projeto?.cor_primaria || '#2563eb', 
-    '--cor-destaque': projeto?.cor_destaque || '#f59e0b',
-    
-    // Formas
-    '--radius-btn': radius,
-    '--radius-card': radiusCard,
-    
-    // Sombras
-    '--shadow-card': isDark ? '0 10px 15px -3px rgba(0, 0, 0, 0.5)' : '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+// ======================================================
+// 🔹 PLACEHOLDER VISUAL (quando não existe logo)
+// ======================================================
+//
+// 🎯 Intenção:
+// - Evitar cards “quebrados”
+// - Garantir identidade visual mínima
+// - Comunicar categoria de forma simbólica
+//
+function getPlaceholderByCategory(tags = []) {
+  const base = {
+    width: '100%',
+    height: '120px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '42px',
+    background: '#f1f5f9'
   };
 
-  const categorias = [
-    { id: 'banho', label: 'Banho', icon: <Scissors size={20} /> },
-    { id: 'vet',   label: 'Vet',   icon: <Stethoscope size={20} /> },
-    { id: 'loja',  label: 'Loja',  icon: <ShoppingBag size={20} /> },
-    { id: 'hotel', label: 'Hotel', icon: <Home size={20} /> },
-  ];
+  if (!Array.isArray(tags)) return { ...base, icon: '🏪' };
+  if (tags.includes('vet')) return { ...base, icon: '🏥' };
+  if (tags.includes('banho')) return { ...base, icon: '✂️' };
+  if (tags.includes('hotel')) return { ...base, icon: '🏠' };
 
+  return { ...base, icon: '🏪' };
+}
+
+// ======================================================
+// 🔹 COMPONENTE PRINCIPAL
+// ======================================================
+export default function PetList({ projeto }) {
+
+  // ==============================
+  // 🔹 ESTADOS PRINCIPAIS
+  // ==============================
+  //
+  // locais        → dados crus do banco
+  // loading       → loading global
+  // selectedLocal → abre modal de conversa
+  //
+  const [locais, setLocais] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedLocal, setSelectedLocal] = useState(null);
+
+  // ==============================
+  // 🔹 FETCH DE DADOS
+  // ==============================
+  //
+  // 🎯 Intenção:
+  // Buscar todos os locais publicados do projeto
+  //
   useEffect(() => {
-    async function buscarLocais() {
+    async function fetchLocais() {
+      if (!projeto?.id) return;
+
       setLoading(true);
-      const { data } = await supabase.from('locais').select('*').eq('status', 'PUBLICAR_APP').eq('projeto_id', projeto.id).order('destaque', { ascending: false });
-      setLocais(data || []);
-      setLocaisFiltrados(data || []);
+
+      const { data, error } = await supabase
+        .from('locais')
+        .select('*')
+        .eq('projeto_id', projeto.id)
+        .eq('status', 'PUBLICAR_APP');
+
+      if (error) {
+        console.error('Erro ao buscar locais:', error);
+        setLocais([]);
+      } else {
+        setLocais(data || []);
+      }
+
       setLoading(false);
     }
-    if (projeto?.id) buscarLocais();
+
+    fetchLocais();
   }, [projeto]);
 
-  useEffect(() => {
-    if (!filtroAtivo) setLocaisFiltrados(locais);
-    else setLocaisFiltrados(locais.filter(local => local.tags && local.tags.includes(filtroAtivo)));
-  }, [filtroAtivo, locais]);
+  // ==============================
+  // 🔹 THEME (CSS VARIABLES)
+  // ==============================
+  //
+  // 🎯 Intenção:
+  // Permitir personalização por projeto
+  //
+  const isDark = projeto?.tema_base === 'dark';
 
+  const themeVars = {
+    '--bg-app': isDark ? '#0f172a' : '#f8fafc',
+    '--bg-card': isDark ? '#1e293b' : '#ffffff',
+    '--text-primary': isDark ? '#f1f5f9' : '#1e293b',
+    '--text-secondary': isDark ? '#94a3b8' : '#64748b',
+    '--border-color': isDark ? '#334155' : '#e2e8f0',
+    '--cor-primaria': projeto?.cor_primaria || '#2563eb',
+    '--cor-destaque': projeto?.cor_destaque || '#f59e0b',
+    '--shadow-card': isDark
+      ? '0 10px 15px rgba(0,0,0,0.4)'
+      : '0 4px 6px rgba(0,0,0,0.08)'
+  };
+
+  // ==============================
+  // 🔹 RENDER
+  // ==============================
   return (
-    <div style={{ ...tema, background: 'var(--bg-app)', color: 'var(--text-primary)', minHeight: '100vh', fontFamily: 'sans-serif', transition: 'background 0.3s' }}>
-      
-      {/* HEADER STICKY */}
-      <div style={{ 
-        position: 'sticky', top: 0, zIndex: 50, 
-        background: isDark ? 'rgba(15, 23, 42, 0.9)' : 'rgba(255,255,255,0.95)', // Blur effect fake
-        backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid var(--border-color)',
-        paddingBottom: '10px'
-      }}>
-        
-        <header style={{ padding: '20px 20px 10px 20px', textAlign: 'left' }}>
-          {projeto.logo_url ? (
-             <img src={projeto.logo_url} alt={projeto.nome} style={{height: '40px', objectFit:'contain', display:'block'}} />
-          ) : (
-             <h1 style={{ fontSize: '1.6rem', margin: '0', fontWeight: '800' }}>{projeto.titulo_pagina || 'App Local'}</h1>
-          )}
-          {!projeto.logo_url && <p style={{ color: 'var(--text-secondary)', fontSize: '14px', margin: '4px 0 0 0' }}>Encontre o melhor serviço.</p>}
-        </header>
+    <div
+      style={{
+        ...themeVars,
+        background: 'var(--bg-app)',
+        color: 'var(--text-primary)',
+        minHeight: '100vh',
+        fontFamily: 'system-ui, sans-serif'
+      }}
+    >
 
-        {/* Barra Categorias */}
-        <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', padding: '10px 20px', scrollbarWidth: 'none' }}>
-          {filtroAtivo && (
-            <button onClick={() => setFiltroAtivo(null)} style={{ flexShrink: 0, padding: '0 12px', height: '45px', borderRadius: 'var(--radius-btn)', border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-              <X size={18} />
-            </button>
-          )}
-         {categorias.map((cat) => {
-          const isAtivo = filtroAtivo === cat.id;
+      {/* ==========================
+          🔹 HEADER
+      ========================== */}
+      <header style={{ padding: '20px' }}>
+        <h1 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 800 }}>
+          {projeto?.titulo_pagina || projeto?.nome}
+        </h1>
+        <p style={{ marginTop: 6, color: 'var(--text-secondary)' }}>
+          Encontre o melhor serviço perto de você
+        </p>
+      </header>
+
+      {/* ==========================
+          🔹 LISTA DE CARDS
+      ========================== */}
+      <div
+        style={{
+          padding: '20px',
+          maxWidth: '640px',
+          margin: '0 auto',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px'
+        }}
+      >
+
+        {/* 🔄 Loading */}
+        {loading && (
+          <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
+            Carregando locais…
+          </p>
+        )}
+
+        {/* 🚫 Empty */}
+        {!loading && locais.length === 0 && (
+          <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
+            Nenhum local disponível no momento.
+          </p>
+        )}
+
+        {/* ======================
+            🔹 CARDS
+        ====================== */}
+        {locais.map(local => {
+          const isVip = local.destaque === true;
+          const placeholder = getPlaceholderByCategory(local.tags);
+
           return (
-            <button 
-              key={cat.id} 
-              onClick={() => setFiltroAtivo(isAtivo ? null : cat.id)} 
+            <div
+              key={local.id}
               style={{
-                flexShrink: 0, 
-                padding: '0 16px', 
-                height: '45px', 
-                borderRadius: 'var(--radius-btn)',
-                cursor: 'pointer', 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '8px',
-                background: isAtivo ? 'var(--cor-primaria)' : 'var(--bg-card)',
-                color: isAtivo ? '#fff' : 'var(--text-secondary)',
-                fontWeight: '600', 
-                fontSize: '14px',
-                border: isAtivo ? 'none' : '1px solid var(--border-color)'
+                background: 'var(--bg-card)',
+                borderRadius: '16px',
+                overflow: 'hidden',
+                boxShadow: isVip
+                  ? `0 0 0 2px var(--cor-destaque), var(--shadow-card)`
+                  : 'var(--shadow-card)',
+                position: 'relative'
               }}
             >
-              {cat.icon} {cat.label}
-            </button>
-          )
-        })}
-        </div>
-      </div>
 
-      {/* LISTA */}
-      <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        {loading && <p style={{textAlign:'center', color:'var(--text-secondary)'}}>Carregando...</p>}
-
-        {locaisFiltrados.map((local) => {
-          const isVip = local.destaque; 
-          return (
-            <div key={local.id} style={{
-              background: 'var(--bg-card)', borderRadius: 'var(--radius-card)', overflow: 'hidden',
-              boxShadow: isVip ? `0 0 0 2px var(--cor-destaque), var(--shadow-card)` : 'var(--shadow-card)',
-              position: 'relative'
-            }}>
-              
+              {/* 🏆 SELO VIP */}
               {isVip && (
-                <div style={{ background: 'var(--cor-destaque)', color: '#fff', fontSize: '10px', fontWeight: 'bold', padding: '4px 10px', position: 'absolute', top: 0, right: 0, borderBottomLeftRadius: '12px', zIndex: 10 }}>
-                  <Award size={12} style={{verticalAlign:'middle'}} /> VIP
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 10,
+                    right: 10,
+                    background: 'var(--cor-destaque)',
+                    color: '#fff',
+                    padding: '4px 10px',
+                    borderRadius: '12px',
+                    fontSize: '10px',
+                    fontWeight: 'bold',
+                    zIndex: 2
+                  }}
+                >
+                  <Award size={12} /> VIP
                 </div>
               )}
 
-              <div style={{ padding: '20px' }}>
-                <h3 style={{ margin: '0 0 4px 0', fontSize: '1.25rem', fontWeight: '700', paddingRight: '20px' }}>{local.nome}</h3>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', color: 'var(--text-secondary)', fontSize: '13px', marginBottom: '16px' }}>
-                  <MapPin size={16} style={{flexShrink: 0, marginTop: '2px'}} />
-                  <span>{local.endereco || "Endereço não informado"}</span>
+              {/* 🖼️ LOGO OU PLACEHOLDER */}
+              {local.logo_url ? (
+                <img
+                  src={local.logo_url}
+                  alt={local.nome}
+                  style={{
+                    width: '100%',
+                    height: '120px',
+                    objectFit: 'contain',
+                    background: '#f8fafc'
+                  }}
+                />
+              ) : (
+                <div style={placeholder}>
+                  {placeholder.icon}
+                </div>
+              )}
+
+              {/* 📄 CONTEÚDO */}
+              <div style={{ padding: '16px' }}>
+                <h3 style={{ margin: 0, fontSize: '1.1rem' }}>
+                  {local.nome}
+                </h3>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '6px',
+                    marginTop: 6,
+                    color: 'var(--text-secondary)',
+                    fontSize: '13px'
+                  }}
+                >
+                  <MapPin size={14} />
+                  {local.endereco || 'Endereço não informado'}
                 </div>
 
-                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                  {local.tags && local.tags.map(tag => (
-                    <span key={tag} style={{ background: isDark ? '#334155' : '#f1f5f9', color: 'var(--text-secondary)', fontSize: '11px', fontWeight: '600', padding: '4px 10px', borderRadius: 'var(--radius-btn)' }}>
-                      {tag.replace('_', ' ')}
-                    </span>
-                  ))}
+                {/* 🏷️ TAGS */}
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10 }}>
+                  {Array.isArray(local.tags) &&
+                    local.tags.map(tag => (
+                      <span
+                        key={tag}
+                        style={{
+                          fontSize: '11px',
+                          padding: '4px 10px',
+                          background: '#f1f5f9',
+                          borderRadius: '12px',
+                          color: '#475569',
+                          fontWeight: 600
+                        }}
+                      >
+                        {tag}
+                      </span>
+                    ))}
                 </div>
 
+                {/* 📸 Instagram (VIP) */}
                 {isVip && local.instagram_url && (
-                  <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border-color)', marginTop: '15px' }}>
-                     <InstagramEmbed url={local.instagram_url} width="100%" />
+                  <div style={{ marginTop: 12 }}>
+                    <InstagramEmbed url={local.instagram_url} width="100%" />
                   </div>
                 )}
               </div>
 
-              <button onClick={() => setSelectedLocal(local)} style={{
-                  width: '100%', padding: '16px', border: 'none', cursor: 'pointer',
-                  background: isVip ? 'var(--cor-destaque)' : (isDark ? '#334155' : '#f1f5f9'),
-                  color: isVip ? '#fff' : 'var(--cor-primaria)',
-                  fontSize: '15px', fontWeight: '700',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
-                }}>
-                <MessageCircle size={20} /> Solicitar
+              {/* 💬 CTA */}
+              <button
+                onClick={() => setSelectedLocal(local)}
+                style={{
+                  width: '100%',
+                  padding: '16px',
+                  background: '#25D366',
+                  color: '#fff',
+                  border: 'none',
+                  fontWeight: 700,
+                  fontSize: '15px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
+              >
+                <MessageCircle size={20} />
+                Falar com a loja
               </button>
             </div>
           );
         })}
       </div>
 
-      {selectedLocal && <ChatModal local={selectedLocal} projeto={projeto} onClose={() => setSelectedLocal(null)} />}
+      {/* ==========================
+          🔹 MODAL DE CHAT
+      ========================== */}
+      {selectedLocal && (
+        <ChatModal
+          local={selectedLocal}
+          projeto={projeto}
+          onClose={() => setSelectedLocal(null)}
+        />
+      )}
     </div>
   );
 }
+
 ----------------------------------
 
 --- ARQUIVO: src/components/dashboard/DashboardHeader.jsx ---
+// ======================================================
+// 📄 DashboardHeader.jsx
+// Função: Cabeçalho principal do Dashboard do Projeto
+// ======================================================
 
-// src/components/dashboard/DashboardHeader.jsx
+// 🔹 DEPENDÊNCIAS
+// Componentes visuais e ícones
 import React from 'react';
 import { Store, ExternalLink } from 'lucide-react';
 
+// ======================================================
+// 🔹 DASHBOARD HEADER — IDENTIDADE DO PROJETO
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Exibir identidade básica do projeto (nome + ícone)
+// e fornecer acesso rápido ao App público.
+//
+// 🔒 CONTRATO
+// - Deve ser sempre simples e rápido de renderizar
+// - Não depende de dados pesados
+// - Não deve conter lógica de negócio
+//
+// 🚫 NÃO FAZER AQUI
+// - Não adicionar filtros
+// - Não adicionar métricas
+// - Não adicionar lógica de permissão
+//
+// 🚧 FUTURO
+// - Pode exibir status do projeto (ativo/inativo)
+// - Pode exibir badge de plano (free / pro)
+//
 export default function DashboardHeader({ projeto, theme }) {
   return (
-    <header style={{
-      background: theme.card,
-      borderRadius: '12px',
-      border: `1px solid ${theme.border}`,
-      padding: '20px',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: '20px',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-    }}>
+    // ==============================
+    // 🔹 CONTAINER PRINCIPAL
+    // ==============================
+    <header
+      style={{
+        background: theme.card,
+        borderRadius: '12px',
+        border: `1px solid ${theme.border}`,
+        padding: '20px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '20px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+      }}
+    >
+      {/* ==============================
+          🔹 IDENTIDADE DO PROJETO
+          ============================== */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-        <div style={{
-          width: '40px',
-          height: '40px',
-          background: theme.primary,
-          borderRadius: '8px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white'
-        }}>
+        
+        {/* ÍCONE / LOGO DO PROJETO */}
+        <div
+          style={{
+            width: '40px',
+            height: '40px',
+            background: theme.primary,
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white'
+          }}
+        >
           <Store size={22} />
         </div>
+
+        {/* NOME DO PROJETO */}
         <h1 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 'bold' }}>
           {projeto.nome}
         </h1>
       </div>
 
+      {/* ==============================
+          🔹 AÇÃO PRINCIPAL
+          ============================== */}
+      {/* CTA DE NAVEGAÇÃO — NÃO É CONVERSÃO */}
       <button
         onClick={() => window.location.href = `/${projeto.slug}`}
         style={{
@@ -907,31 +1945,76 @@ export default function DashboardHeader({ projeto, theme }) {
           alignItems: 'center'
         }}
       >
-        <ExternalLink size={16} /> Ver App
+        <ExternalLink size={16} />
+        Ver App
       </button>
     </header>
   );
 }
+
 ----------------------------------
 
 --- ARQUIVO: src/components/dashboard/EmptyState.jsx ---
+// ======================================================
+// 📄 EmptyState.jsx
+// Função: Estados vazios do Dashboard e App
+// ======================================================
 
-// src/components/dashboard/EmptyState.jsx
+// 🔹 DEPENDÊNCIAS
+// Ícones visuais para comunicação sem texto excessivo
 import React from 'react';
 import { Search, Store } from 'lucide-react';
 
+// ======================================================
+// 🔹 EMPTY STATE — FEEDBACK AO USUÁRIO
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Comunicar claramente ao usuário que:
+// - Não há resultados para os filtros aplicados
+// - Ou ainda não existem dados cadastrados no projeto
+//
+// 🔒 CONTRATO
+// - Nunca deve quebrar renderização
+// - Nunca deve bloquear interação
+// - Deve ser sempre leve e amigável
+//
+// 🧠 PRINCÍPIO DE UX
+// - Não culpar o usuário
+// - Sempre sugerir um próximo passo
+//
+// 🚫 NÃO FAZER AQUI
+// - Não inserir lógica de negócio
+// - Não consultar dados
+// - Não alterar estado global
+//
+// 🚧 FUTURO
+// - Pode receber CTA contextual (ex: "Cadastrar loja")
+// - Pode variar mensagens por nicho
+//
 export default function EmptyState({ type = 'filter', theme }) {
+
+  // ==============================
+  // 🔹 EMPTY STATE — FILTRO SEM RESULTADO
+  // ==============================
   if (type === 'filter') {
     return (
-      <div style={{
-        textAlign: 'center',
-        padding: '60px 20px',
-        color: theme.textSec
-      }}>
+      <div
+        style={{
+          textAlign: 'center',
+          padding: '60px 20px',
+          color: theme.textSec
+        }}
+      >
+        {/* ÍCONE DE BUSCA */}
         <Search size={48} style={{ opacity: 0.3, marginBottom: '16px' }} />
+
+        {/* MENSAGEM PRINCIPAL */}
         <p style={{ margin: 0, fontSize: '16px', fontWeight: '500' }}>
           Nenhuma loja encontrada
         </p>
+
+        {/* MENSAGEM DE APOIO */}
         <p style={{ margin: '8px 0 0 0', fontSize: '14px', opacity: 0.7 }}>
           Tente ajustar os filtros acima
         </p>
@@ -939,17 +2022,27 @@ export default function EmptyState({ type = 'filter', theme }) {
     );
   }
 
+  // ==============================
+  // 🔹 EMPTY STATE — PROJETO SEM DADOS
+  // ==============================
   if (type === 'no-data') {
     return (
-      <div style={{
-        textAlign: 'center',
-        padding: '80px 20px',
-        color: theme.textSec
-      }}>
+      <div
+        style={{
+          textAlign: 'center',
+          padding: '80px 20px',
+          color: theme.textSec
+        }}
+      >
+        {/* ÍCONE DE LOJA */}
         <Store size={56} style={{ opacity: 0.2, marginBottom: '20px' }} />
+
+        {/* MENSAGEM PRINCIPAL */}
         <p style={{ margin: 0, fontSize: '18px', fontWeight: '600' }}>
           Nenhuma loja cadastrada ainda
         </p>
+
+        {/* PRÓXIMO PASSO SUGERIDO */}
         <p style={{ margin: '8px 0 0 0', fontSize: '14px', opacity: 0.7 }}>
           Use o Admin Generator para começar
         </p>
@@ -957,16 +2050,53 @@ export default function EmptyState({ type = 'filter', theme }) {
     );
   }
 
+  // ==============================
+  // 🔹 FALLBACK DE SEGURANÇA
+  // ==============================
+  // Caso o tipo não seja reconhecido,
+  // não renderiza nada (falha silenciosa)
   return null;
 }
+
 ----------------------------------
 
 --- ARQUIVO: src/components/dashboard/FilterBar.jsx ---
+// ======================================================
+// 📄 FilterBar.jsx
+// Função: Barra de filtros do Dashboard (Admin)
+// ======================================================
 
-// src/components/dashboard/FilterBar.jsx
+// 🔹 DEPENDÊNCIAS
+// Constantes globais de filtros e categorias
 import React from 'react';
 import { TAGS_OFICIAIS, STATUS_FILTROS } from '../../utils/constants';
 
+// ======================================================
+// 🔹 FILTER BAR — CONTROLE DE VISUALIZAÇÃO
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Permitir que o administrador:
+// - Filtre lojas por status (publicado / oculto / todos)
+// - Filtre lojas por categoria (tags)
+//
+// 🔒 CONTRATO
+// - Não busca dados
+// - Não ordena ranking
+// - Apenas altera estado local
+//
+// 🧠 PRINCÍPIO
+// Filtros aqui são *ferramentas de leitura*, não regras de negócio.
+//
+// 🚫 NÃO FAZER AQUI
+// - Não alterar filtros ativos do projeto
+// - Não salvar nada no banco
+// - Não aplicar ordenação
+//
+// 🚧 FUTURO
+// - Pode ser reutilizado na PetList (modo leitura)
+// - Pode virar scroll horizontal no mobile
+//
 export default function FilterBar({ 
   filtroStatus, 
   setFiltroStatus, 
@@ -975,20 +2105,31 @@ export default function FilterBar({
   theme 
 }) {
   return (
-    <div style={{
-      display: 'flex',
-      gap: '15px',
-      marginBottom: '20px',
-      flexWrap: 'wrap',
-      alignItems: 'center'
-    }}>
-      
-      <div style={{
+    // ==============================
+    // 🔹 CONTAINER GERAL
+    // ==============================
+    <div
+      style={{
         display: 'flex',
-        background: '#e2e8f0',
-        padding: '4px',
-        borderRadius: '8px'
-      }}>
+        gap: '15px',
+        marginBottom: '20px',
+        flexWrap: 'wrap',
+        alignItems: 'center'
+      }}
+    >
+      
+      {/* ==============================
+          🔹 FILTRO DE STATUS (SEGMENTADO)
+          ============================== */}
+      {/* Controle rápido para visibilidade no dashboard */}
+      <div
+        style={{
+          display: 'flex',
+          background: '#e2e8f0',
+          padding: '4px',
+          borderRadius: '8px'
+        }}
+      >
         {STATUS_FILTROS.map(status => (
           <button
             key={status}
@@ -1002,7 +2143,10 @@ export default function FilterBar({
               color: theme.text,
               fontWeight: 'bold',
               fontSize: '11px',
-              boxShadow: filtroStatus === status ? '0 1px 2px rgba(0,0,0,0.1)' : 'none',
+              boxShadow:
+                filtroStatus === status
+                  ? '0 1px 2px rgba(0,0,0,0.1)'
+                  : 'none',
               transition: 'all 0.2s'
             }}
           >
@@ -1011,6 +2155,10 @@ export default function FilterBar({
         ))}
       </div>
 
+      {/* ==============================
+          🔹 FILTRO POR CATEGORIA (TAGS)
+          ============================== */}
+      {/* Chips de categoria para leitura rápida */}
       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
         {TAGS_OFICIAIS.map(tag => {
           const isActive = filtroCategoria === tag.id;
@@ -1039,48 +2187,396 @@ export default function FilterBar({
     </div>
   );
 }
+
+----------------------------------
+
+--- ARQUIVO: src/components/dashboard/ProjectFiltersPanel.jsx ---
+// ======================================================
+// 📄 ProjectFiltersPanel.jsx
+// Função: Painel de controle dos filtros ativos por projeto
+// ======================================================
+
+// 🔹 DEPENDÊNCIAS EXTERNAS
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../../supabaseClient';
+
+// 🔹 CONSTANTES DE PRODUTO
+// - FILTROS_APP: filtros exibidos no dashboard (UI)
+// - DEFAULT_FILTROS_APP: fallback quando projeto não tem filtros
+import { FILTROS_APP, DEFAULT_FILTROS_APP } from '../../utils/constants';
+
+// 🔹 DEFINIÇÃO GLOBAL DOS FILTROS (infra)
+import { FILTERS } from '../../filters/filters.config';
+
+// ======================================================
+// 🔹 LISTA GLOBAL DE FILTROS DISPONÍVEIS
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Ter acesso a todos os filtros possíveis definidos no código,
+// independentemente do projeto.
+//
+// 🔒 CONTRATO
+// - Nunca modificar essa lista aqui
+// - Ela representa a "fonte de verdade" do sistema
+//
+const filtrosDisponiveis = Object.values(FILTERS);
+
+// ======================================================
+// 🔹 PROJECT FILTERS PANEL — ADMIN
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Permitir que o administrador do projeto:
+// - Ative ou desative filtros
+// - Controle quais filtros afetam ranking e listagem
+//
+// 🔒 CONTRATO
+// - O dashboard NÃO cria filtros
+// - O dashboard NÃO altera lógica de filtros
+// - Apenas ativa/desativa por projeto
+//
+// 🚫 NÃO FAZER AQUI
+// - Não implementar ordenação
+// - Não implementar lógica de filtro
+// - Não decidir comportamento de ranking
+//
+// 🚧 FUTURO
+// - Explicar impacto do filtro (ex: “afeta ranking”)
+// - Exibir preview do efeito do filtro
+//
+export default function ProjectFiltersPanel({ projeto, theme, onUpdate }) {
+
+  // ==============================
+  // 🔹 ESTADO LOCAL DO PAINEL
+  // ==============================
+  const [ativos, setAtivos] = useState([]);
+  const [saving, setSaving] = useState(false);
+
+  // ==============================
+  // 🔹 SINCRONIZAÇÃO COM O PROJETO
+  // ==============================
+  //
+  // 🎯 Intenção:
+  // Garantir que o painel reflita o estado real do projeto
+  //
+  useEffect(() => {
+    setAtivos(
+      projeto.filtros_ativos && projeto.filtros_ativos.length > 0
+        ? projeto.filtros_ativos
+        : DEFAULT_FILTROS_APP
+    );
+  }, [projeto]);
+
+  // ==============================
+  // 🔹 TOGGLE DE FILTRO (LOCAL)
+  // ==============================
+  //
+  // 🎯 Intenção:
+  // Ativar ou desativar filtros SEM salvar ainda
+  //
+  const toggleFiltro = (id) => {
+    setAtivos(prev =>
+      prev.includes(id)
+        ? prev.filter(f => f !== id)
+        : [...prev, id]
+    );
+  };
+
+  // ==============================
+  // 🔹 SALVAR CONFIGURAÇÃO NO PROJETO
+  // ==============================
+  //
+  // 🔒 CONTRATO
+  // - Falha não deve quebrar UI
+  // - Estado local só reflete backend após sucesso
+  //
+  const salvar = async () => {
+    setSaving(true);
+
+    const { error } = await supabase
+      .from('projetos')
+      .update({ filtros_ativos: ativos })
+      .eq('id', projeto.id);
+
+    setSaving(false);
+
+    if (error) {
+      alert('Erro ao salvar filtros');
+      return;
+    }
+
+    onUpdate?.(ativos);
+  };
+
+  // ==============================
+  // 🔹 RENDERIZAÇÃO POR GRUPO (UI)
+  // ==============================
+  //
+  // 🎯 Intenção:
+  // Agrupar filtros por tipo (filtro / ordenação)
+  //
+  const renderGroup = (group, title) => (
+    <>
+      <h4 style={{ margin: '15px 0 5px', fontSize: '14px' }}>{title}</h4>
+
+      {FILTROS_APP
+        .filter(f => f.group === group)
+        .map(filtro => (
+          <label
+            key={filtro.id}
+            style={{
+              display: 'flex',
+              gap: '10px',
+              alignItems: 'flex-start',
+              padding: '8px 0',
+              cursor: 'pointer'
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={ativos.includes(filtro.id)}
+              onChange={() => toggleFiltro(filtro.id)}
+            />
+
+            <div>
+              <div style={{ fontWeight: '600', fontSize: '13px' }}>
+                {filtro.label}
+              </div>
+              <div style={{ fontSize: '12px', color: theme.textSec }}>
+                {filtro.description}
+              </div>
+            </div>
+          </label>
+        ))}
+    </>
+  );
+
+  // ==============================
+  // 🔹 RENDER PRINCIPAL
+  // ==============================
+  return (
+    <div
+      style={{
+        background: theme.card,
+        border: `1px solid ${theme.border}`,
+        borderRadius: '12px',
+        padding: '20px',
+        marginBottom: '20px'
+      }}
+    >
+      {/* ==============================
+          🔹 CABEÇALHO DO PAINEL
+          ============================== */}
+      <h3 style={{ marginTop: 0 }}>Filtros visíveis no App</h3>
+      <p style={{ fontSize: '13px', color: theme.textSec }}>
+        Ative apenas os filtros que fazem sentido para este nicho.
+      </p>
+
+      {/* ==============================
+          🔹 GRUPOS DE FILTROS
+          ============================== */}
+      {renderGroup('filtro', 'Filtros')}
+      {renderGroup('ordenacao', 'Ordenação')}
+
+      {/* ==============================
+          🔹 AÇÃO DE SALVAR
+          ============================== */}
+      <button
+        onClick={salvar}
+        disabled={saving}
+        style={{
+          marginTop: '15px',
+          padding: '10px 16px',
+          background: theme.primary,
+          color: 'white',
+          border: 'none',
+          borderRadius: '8px',
+          fontWeight: 'bold',
+          cursor: 'pointer'
+        }}
+      >
+        {saving ? 'Salvando…' : 'Salvar filtros'}
+      </button>
+
+      {/* ======================================================
+          ⚠️ ÁREA EXPERIMENTAL / DUPLICADA
+          ======================================================
+          🚨 OBSERVAÇÃO IMPORTANTE
+          Este bloco abaixo:
+          - Duplica a renderização dos filtros
+          - Mistura duas abordagens diferentes
+          - Deve ser REVISADO no próximo ciclo
+          ====================================================== */}
+
+      {/* TESTE DE VISIBILIDADE */}
+      <div style={{ padding: '20px', background: 'red', color: 'white', margin: '20px 0' }}>
+        TESTE: PANEL VISÍVEL
+      </div>
+
+      {/* ==============================
+          🔹 LISTA COMPLETA DE FILTROS (DEBUG / FUTURO)
+          ============================== */}
+      {filtrosDisponiveis.map((filtro) => {
+        const ativo = projeto.filtros_ativos?.includes(filtro.id);
+
+        return (
+          <div
+            key={filtro.id}
+            style={{
+              border: '1px solid var(--border-color)',
+              borderRadius: '8px',
+              padding: '12px',
+              marginBottom: '12px',
+              background: ativo ? 'var(--bg-card)' : 'transparent'
+            }}
+          >
+            <label style={{ display: 'flex', gap: '10px', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={ativo}
+                onChange={async () => {
+                  const novosFiltros = ativo
+                    ? projeto.filtros_ativos.filter((f) => f !== filtro.id)
+                    : [...(projeto.filtros_ativos || []), filtro.id];
+
+                  await supabase
+                    .from('projetos')
+                    .update({ filtros_ativos: novosFiltros })
+                    .eq('id', projeto.id);
+
+                  projeto.filtros_ativos = novosFiltros;
+                }}
+              />
+
+              <div>
+                <strong>{filtro.nome_humano}</strong>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                  {filtro.descricao}
+                </div>
+              </div>
+            </label>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 ----------------------------------
 
 --- ARQUIVO: src/components/dashboard/StoreCard.jsx ---
-// src/components/dashboard/StoreCard.jsx
+// ======================================================
+// 📄 StoreCard.jsx
+// Função: Card administrativo de um estabelecimento
+// ======================================================
+
+// 🔹 DEPENDÊNCIAS
+// Ícones de ação administrativa
 import React from 'react';
 import { Eye, EyeOff, Edit, Trash2, Star } from 'lucide-react';
 
-export default function StoreCard({ local, theme, onToggleStatus, onEdit, onDelete }) {
+// ======================================================
+// 🔹 STORE CARD — VISÃO ADMINISTRATIVA
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Exibir um estabelecimento no Dashboard permitindo:
+// - Visualizar dados básicos
+// - Controlar visibilidade no App
+// - Editar informações
+// - Excluir o registro
+//
+// 🔒 CONTRATO
+// - Este card NÃO é conversão
+// - Não deve conter CTA de WhatsApp
+// - Não deve conter lógica de ranking
+//
+// 🧠 DIFERENÇA IMPORTANTE
+// Este card NÃO é o mesmo da PetList.
+// Aqui o foco é controle, não atração.
+//
+// 🚫 NÃO FAZER AQUI
+// - Não aplicar filtros
+// - Não aplicar ordenação
+// - Não navegar para o App
+//
+// 🚧 FUTURO
+// - Pode exibir métricas (cliques, leads)
+// - Pode exibir badges extras (ex: “premium”)
+//
+export default function StoreCard({
+  local,
+  theme,
+  onToggleStatus,
+  onEdit,
+  onDelete
+}) {
+
+  // ==============================
+  // 🔹 ESTADO DERIVADO
+  // ==============================
+  //
+  // 🎯 Intenção:
+  // Determinar rapidamente se o local está visível no App
+  //
   const isVisible = local.status === 'PUBLICAR_APP';
 
+  // ==============================
+  // 🔹 RENDER DO CARD
+  // ==============================
   return (
-    <div style={{
-      background: theme.card,
-      borderRadius: '12px',
-      border: `1px solid ${theme.border}`,
-      padding: '16px',
-      transition: 'all 0.2s'
-    }}>
+    <div
+      style={{
+        background: theme.card,
+        borderRadius: '12px',
+        border: `1px solid ${theme.border}`,
+        padding: '16px',
+        transition: 'all 0.2s'
+      }}
+    >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         
+        {/* ==============================
+            🔹 INFORMAÇÕES DO LOCAL
+            ============================== */}
         <div>
-          <div style={{ 
-            fontWeight: 'bold', 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '8px' 
-          }}>
-            {local.nome}
-            {local.destaque && <Star size={14} fill="#f59e0b" color="#f59e0b" />}
-          </div>
           
-          <div style={{ 
-            fontSize: '12px', 
-            color: theme.textSec, 
-            marginTop: '4px' 
-          }}>
+          {/* NOME + DESTAQUE */}
+          <div
+            style={{
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            {local.nome}
+
+            {/* BADGE DE DESTAQUE (VISUAL) */}
+            {local.destaque && (
+              <Star size={14} fill="#f59e0b" color="#f59e0b" />
+            )}
+          </div>
+
+          {/* ENDEREÇO */}
+          <div
+            style={{
+              fontSize: '12px',
+              color: theme.textSec,
+              marginTop: '4px'
+            }}
+          >
             {local.endereco || 'Sem endereço cadastrado'}
           </div>
         </div>
 
+        {/* ==============================
+            🔹 AÇÕES ADMINISTRATIVAS
+            ============================== */}
         <div style={{ display: 'flex', gap: '8px' }}>
           
+          {/* TOGGLE VISIBILIDADE */}
           <button
             onClick={() => onToggleStatus(local)}
             style={{
@@ -1100,6 +2596,7 @@ export default function StoreCard({ local, theme, onToggleStatus, onEdit, onDele
             {isVisible ? <Eye size={18} /> : <EyeOff size={18} />}
           </button>
 
+          {/* EDITAR */}
           <button
             onClick={() => onEdit(local)}
             style={{
@@ -1119,6 +2616,7 @@ export default function StoreCard({ local, theme, onToggleStatus, onEdit, onDele
             <Edit size={18} />
           </button>
 
+          {/* EXCLUIR */}
           <button
             onClick={() => onDelete(local.id)}
             style={{
@@ -1142,20 +2640,74 @@ export default function StoreCard({ local, theme, onToggleStatus, onEdit, onDele
     </div>
   );
 }
+
 ----------------------------------
 
 --- ARQUIVO: src/components/dashboard/StoreCardEdit.jsx ---
-// src/components/dashboard/StoreCardEdit.jsx
+// ======================================================
+// 📄 StoreCardEdit.jsx
+// Função: Edição inline de um estabelecimento (Dashboard)
+// ======================================================
+
+// 🔹 DEPENDÊNCIAS
 import React, { useState } from 'react';
+
+// 🔹 CONSTANTES DE PRODUTO
+// Lista oficial de categorias/tags disponíveis
 import { TAGS_OFICIAIS } from '../../utils/constants';
 
+// ======================================================
+// 🔹 STORE CARD EDIT — MODO EDIÇÃO
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Permitir a edição rápida dos principais atributos do local:
+// - Nome
+// - Destaque (indireto, via tags no futuro)
+// - Categorias (tags)
+//
+// 🔒 CONTRATO
+// - Este componente NÃO salva direto no banco
+// - Apenas coleta dados e delega o save
+// - Não altera visibilidade (status)
+// - Não altera filtros globais
+//
+// 🧠 UX
+// - Edição inline, sem navegação
+// - Ações claras: Salvar ou Cancelar
+//
+// 🚫 NÃO FAZER AQUI
+// - Não chamar Supabase diretamente
+// - Não aplicar validações complexas
+// - Não alterar ranking
+//
+// 🚧 FUTURO
+// - Adicionar edição de telefone / WhatsApp
+// - Adicionar toggle de destaque explícito
+// - Adicionar preview do card público
+//
 export default function StoreCardEdit({ local, theme, onSave, onCancel }) {
+
+  // ==============================
+  // 🔹 ESTADO LOCAL DO FORMULÁRIO
+  // ==============================
+  //
+  // 🎯 Intenção:
+  // Inicializar o formulário com dados atuais do local
+  //
   const [formData, setFormData] = useState({
     nome: local.nome,
     destaque: local.destaque,
     tags: local.tags || []
   });
 
+  // ==============================
+  // 🔹 TOGGLE DE TAG
+  // ==============================
+  //
+  // 🎯 Intenção:
+  // Adicionar ou remover categorias do local
+  //
   const toggleTag = (tagId) => {
     setFormData(prev => ({
       ...prev,
@@ -1165,27 +2717,48 @@ export default function StoreCardEdit({ local, theme, onSave, onCancel }) {
     }));
   };
 
+  // ==============================
+  // 🔹 SUBMISSÃO DO FORMULÁRIO
+  // ==============================
+  //
+  // 🔒 CONTRATO
+  // - Delegar persistência ao componente pai
+  // - Nunca salvar diretamente aqui
+  //
   const handleSubmit = () => {
     onSave(local.id, formData);
   };
 
+  // ==============================
+  // 🔹 RENDER DO CARD DE EDIÇÃO
+  // ==============================
   return (
-    <div style={{
-      background: theme.card,
-      borderRadius: '12px',
-      border: `1px solid ${theme.border}`,
-      padding: '16px',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
-    }}>
+    <div
+      style={{
+        background: theme.card,
+        borderRadius: '12px',
+        border: `1px solid ${theme.border}`,
+        padding: '16px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+      }}
+    >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
         
+        {/* ==============================
+            🔹 TÍTULO DE CONTEXTO
+            ============================== */}
         <div style={{ fontWeight: 'bold', fontSize: '14px' }}>
           Editando: {local.nome}
         </div>
 
+        {/* ==============================
+            🔹 CAMPO — NOME DO LOCAL
+            ============================== */}
         <input
           value={formData.nome}
-          onChange={e => setFormData({ ...formData, nome: e.target.value })}
+          onChange={e =>
+            setFormData({ ...formData, nome: e.target.value })
+          }
           style={{
             width: '100%',
             padding: '10px',
@@ -1196,28 +2769,40 @@ export default function StoreCardEdit({ local, theme, onSave, onCancel }) {
           placeholder="Nome do local"
         />
 
+        {/* ==============================
+            🔹 TAGS / CATEGORIAS
+            ============================== */}
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          {TAGS_OFICIAIS.map(tag => (
-            <button
-              key={tag.id}
-              onClick={() => toggleTag(tag.id)}
-              style={{
-                padding: '6px 10px',
-                borderRadius: '6px',
-                border: `1px solid ${theme.border}`,
-                background: formData.tags.includes(tag.id) ? tag.color : 'white',
-                color: formData.tags.includes(tag.id) ? 'white' : theme.textSec,
-                cursor: 'pointer',
-                fontSize: '11px',
-                fontWeight: '600'
-              }}
-            >
-              {tag.label}
-            </button>
-          ))}
+          {TAGS_OFICIAIS.map(tag => {
+            const ativo = formData.tags.includes(tag.id);
+
+            return (
+              <button
+                key={tag.id}
+                onClick={() => toggleTag(tag.id)}
+                style={{
+                  padding: '6px 10px',
+                  borderRadius: '6px',
+                  border: `1px solid ${theme.border}`,
+                  background: ativo ? tag.color : 'white',
+                  color: ativo ? 'white' : theme.textSec,
+                  cursor: 'pointer',
+                  fontSize: '11px',
+                  fontWeight: '600'
+                }}
+              >
+                {tag.label}
+              </button>
+            );
+          })}
         </div>
 
+        {/* ==============================
+            🔹 AÇÕES
+            ============================== */}
         <div style={{ display: 'flex', gap: '10px' }}>
+          
+          {/* SALVAR */}
           <button
             onClick={handleSubmit}
             style={{
@@ -1234,6 +2819,7 @@ export default function StoreCardEdit({ local, theme, onSave, onCancel }) {
             Salvar
           </button>
           
+          {/* CANCELAR */}
           <button
             onClick={onCancel}
             style={{
@@ -1252,6 +2838,7 @@ export default function StoreCardEdit({ local, theme, onSave, onCancel }) {
     </div>
   );
 }
+
 ----------------------------------
 
 --- ARQUIVO: src/components/ui/Badge.jsx ---
@@ -1264,19 +2851,211 @@ export default function StoreCardEdit({ local, theme, onSave, onCancel }) {
 
 ----------------------------------
 
+--- ARQUIVO: src/filters/filters.config.js ---
+/**
+ * SISTEMA GLOBAL DE FILTROS
+ * =========================
+ *
+ * Este arquivo define TODOS os filtros possíveis da plataforma.
+ *
+ * ➜ Filtros são infraestrutura.
+ * ➜ Nunca são criados pelo dashboard.
+ * ➜ Funcionam em qualquer nicho (multi-tenant).
+ *
+ * O dashboard apenas:
+ * - ativa ou desativa filtros por projeto
+ * - define prioridade entre filtros de ordenação
+ *
+ * Este arquivo deve ser legível como documentação viva.
+ */
+
+/**
+ * Cada filtro segue um contrato fixo.
+ * Se alguém não entender o filtro lendo apenas este arquivo,
+ * o filtro está mal definido.
+ */
+
+export const FILTERS = {
+  /**
+   * ⭐ FILTRO: Bem avaliados
+   * ----------------------
+   * Intenção:
+   * Priorizar locais com boa reputação.
+   *
+   * Impacto:
+   * Reorganiza o ranking, não remove resultados.
+   *
+   * Limite:
+   * Se o local não tiver avaliação, ele é ignorado pelo filtro.
+   */
+  bem_avaliados: {
+    id: 'bem_avaliados',
+
+    nome_humano: 'Bem avaliados',
+
+    descricao:
+      'Prioriza locais com avaliação igual ou superior a 4.0. Não remove resultados.',
+
+    tipo: 'ordenacao',
+
+    campo_afetado: 'nota',
+
+    comportamento: 'ordenar',
+
+    /**
+     * Função de ordenação.
+     * Retorna um número para comparação.
+     * Quanto maior, mais acima no ranking.
+     */
+    ordenar: (local) => {
+      if (typeof local.nota !== 'number') return 0;
+      if (local.nota < 4) return 0;
+      return local.nota;
+    },
+
+    /**
+     * Fallback seguro:
+     * Se algo falhar, o filtro não interfere na lista.
+     */
+    fallback: () => 0
+  },
+
+  /**
+   * 💬 FILTRO: WhatsApp disponível
+   * -----------------------------
+   * Intenção:
+   * Priorizar locais com contato rápido.
+   *
+   * Impacto:
+   * Reorganiza o ranking.
+   *
+   * Limite:
+   * Não remove locais sem WhatsApp.
+   */
+  whatsapp_disponivel: {
+    id: 'whatsapp_disponivel',
+
+    nome_humano: 'WhatsApp disponível',
+
+    descricao:
+      'Prioriza locais que possuem WhatsApp ativo para contato direto.',
+
+    tipo: 'ordenacao',
+
+    campo_afetado: 'is_whatsapp',
+
+    comportamento: 'ordenar',
+
+    ordenar: (local) => {
+      if (local.is_whatsapp === true) return 1;
+      return 0;
+    },
+
+    fallback: () => 0
+  },
+
+  /**
+   * 💎 FILTRO: Destaque / VIP
+   * ------------------------
+   * Intenção:
+   * Dar prioridade a locais destacados pelo projeto.
+   *
+   * Impacto:
+   * Reorganiza o ranking.
+   *
+   * Limite:
+   * Não remove locais comuns.
+   */
+  destaque: {
+    id: 'destaque',
+
+    nome_humano: 'Destaque',
+
+    descricao:
+      'Prioriza locais marcados como destaque (VIP). Não remove resultados.',
+
+    tipo: 'ordenacao',
+
+    campo_afetado: 'destaque',
+
+    comportamento: 'ordenar',
+
+    ordenar: (local) => {
+      if (local.destaque === true) return 1;
+      return 0;
+    },
+
+    fallback: () => 0
+  }
+};
+
+----------------------------------
+
 --- ARQUIVO: src/hooks/useDashboardData.jsx ---
-// src/hooks/useDashboardData.jsx
+// ======================================================
+// 📄 useDashboardData.jsx
+// Hook de dados do Dashboard (CRUD + Estado)
+// ======================================================
+
+// ======================================================
+// 🔹 DEPENDÊNCIAS
+// ======================================================
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 
+// ======================================================
+// 🔹 HOOK: useDashboardData
+// ======================================================
+//
+// 🎯 INTENÇÃO GERAL
+// Centralizar TODA a lógica de dados do Dashboard:
+// - Buscar locais
+// - Atualizar status (publicar / ocultar)
+// - Editar dados do local
+// - Excluir local
+//
+// 🧠 MODELO MENTAL
+// - O Dashboard consome dados
+// - Este hook controla:
+//   • estado
+//   • loading
+//   • erro
+//   • sincronização com o banco
+//
+// 🔒 CONTRATO
+// - Nenhum JSX aqui
+// - Nenhuma regra de filtro
+// - Nenhuma regra de ordenação
+// - Apenas dados e efeitos colaterais
+//
 export function useDashboardData(projetoId) {
+
+  // ==============================
+  // 🔹 ESTADOS PRINCIPAIS
+  // ==============================
+  //
+  // locais  → lista de estabelecimentos do projeto
+  // loading → estado global de carregamento
+  // error   → erro simples (string)
+  //
   const [locais, setLocais] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // ==============================
+  // 🔹 FETCH DE LOCAIS
+  // ==============================
+  //
+  // 🎯 Intenção:
+  // Buscar todos os locais vinculados ao projeto
+  //
+  // 🛡️ Falha segura:
+  // - Não quebra UI
+  // - Retorna lista vazia
+  //
   const fetchLocais = async () => {
     if (!projetoId) return;
-    
+
     setLoading(true);
     setError(null);
 
@@ -1288,7 +3067,7 @@ export function useDashboardData(projetoId) {
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
-      
+
       setLocais(data || []);
     } catch (err) {
       setError(err.message);
@@ -1298,9 +3077,27 @@ export function useDashboardData(projetoId) {
     }
   };
 
+  // ==============================
+  // 🔹 TOGGLE DE STATUS (PUBLICAR / OCULTAR)
+  // ==============================
+  //
+  // 🎯 Intenção:
+  // Alternar visibilidade do local no app
+  //
+  // 🧠 Regra:
+  // PUBLICAR_APP ↔ RASCUNHO
+  //
+  // 🔒 Contrato:
+  // - Atualiza banco
+  // - Atualiza estado local
+  // - Não refaz fetch completo
+  //
   const toggleStatus = async (local) => {
-    const novoStatus = local.status === 'PUBLICAR_APP' ? 'RASCUNHO' : 'PUBLICAR_APP';
-    
+    const novoStatus =
+      local.status === 'PUBLICAR_APP'
+        ? 'RASCUNHO'
+        : 'PUBLICAR_APP';
+
     try {
       const { error } = await supabase
         .from('locais')
@@ -1309,8 +3106,11 @@ export function useDashboardData(projetoId) {
 
       if (error) throw error;
 
-      setLocais(locais.map(l => 
-        l.id === local.id ? { ...l, status: novoStatus } : l
+      // Atualização otimista do estado
+      setLocais(locais.map(l =>
+        l.id === local.id
+          ? { ...l, status: novoStatus }
+          : l
       ));
     } catch (err) {
       console.error('Erro ao atualizar status:', err);
@@ -1318,6 +3118,17 @@ export function useDashboardData(projetoId) {
     }
   };
 
+  // ==============================
+  // 🔹 ATUALIZAR LOCAL (EDIÇÃO)
+  // ==============================
+  //
+  // 🎯 Intenção:
+  // Atualizar dados do local (nome, tags, destaque, etc)
+  //
+  // 🧠 Decisão:
+  // Após update → refetch completo
+  // (garante consistência total)
+  //
   const updateLocal = async (id, updates) => {
     try {
       const { error } = await supabase
@@ -1334,6 +3145,17 @@ export function useDashboardData(projetoId) {
     }
   };
 
+  // ==============================
+  // 🔹 EXCLUIR LOCAL
+  // ==============================
+  //
+  // 🎯 Intenção:
+  // Remover definitivamente o local
+  //
+  // 🧠 Estratégia:
+  // - Deleta no banco
+  // - Remove do estado local
+  //
   const deleteLocal = async (id) => {
     try {
       const { error } = await supabase
@@ -1350,10 +3172,23 @@ export function useDashboardData(projetoId) {
     }
   };
 
+  // ==============================
+  // 🔹 EFEITO DE INICIALIZAÇÃO
+  // ==============================
+  //
+  // 🎯 Intenção:
+  // Recarregar locais sempre que o projeto mudar
+  //
   useEffect(() => {
     fetchLocais();
   }, [projetoId]);
 
+  // ==============================
+  // 🔹 API DO HOOK (RETORNO)
+  // ==============================
+  //
+  // Tudo que o Dashboard pode fazer com dados
+  //
   return {
     locais,
     loading,
@@ -1364,33 +3199,179 @@ export function useDashboardData(projetoId) {
     deleteLocal
   };
 }
+
 ----------------------------------
 
 --- ARQUIVO: src/hooks/useDashboardFilters.jsx ---
-// src/hooks/useDashboardFilters.jsx
-import { useState, useMemo } from 'react';
+// ======================================================
+// 📄 useDashboardFilters.jsx
+// Hook de filtros + ordenação do Dashboard / App
+// ======================================================
 
-export function useDashboardFilters(locais) {
+// ======================================================
+// 🔹 DEPENDÊNCIAS
+// ======================================================
+import { useState, useMemo } from 'react';
+import { FILTERS } from '../filters/filters.config';
+
+// ======================================================
+// 🔹 FUNÇÃO: aplicarOrdenacao
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Aplicar filtros de ORDENAÇÃO sobre uma lista de locais,
+// respeitando a prioridade definida pelo projeto.
+//
+// 🧠 MODELO MENTAL
+// - Ordena, nunca remove
+// - Cada filtro soma um "score"
+// - A ordem dos filtros define o peso
+//
+// 🔒 CONTRATO
+// - Nunca quebra a listagem
+// - Nunca lança erro para fora
+// - Nunca muta o array original
+//
+// 🛡️ FALHA SEGURA
+// - Se algo falhar → retorna lista original
+//
+function aplicarOrdenacao(locais, filtrosAtivos = []) {
+
+  // Se não houver filtros ativos, retorna lista intacta
+  if (!Array.isArray(filtrosAtivos) || filtrosAtivos.length === 0) {
+    return locais;
+  }
+
+  // Criamos cópia para não mutar o array original
+  const locaisOrdenados = [...locais];
+
+  try {
+    locaisOrdenados.sort((a, b) => {
+      let scoreA = 0;
+      let scoreB = 0;
+
+      filtrosAtivos.forEach((filtroId, index) => {
+        const filtro = FILTERS[filtroId];
+
+        // Ignora filtros inexistentes ou que não sejam de ordenação
+        if (!filtro || filtro.comportamento !== 'ordenar') return;
+
+        // Peso simples: filtros no início têm mais impacto
+        const peso = filtrosAtivos.length - index;
+
+        try {
+          scoreA += (filtro.ordenar?.(a) || 0) * peso;
+          scoreB += (filtro.ordenar?.(b) || 0) * peso;
+        } catch {
+          // Falha silenciosa por filtro individual
+        }
+      });
+
+      return scoreB - scoreA;
+    });
+  } catch {
+    // Falha total → não ordena
+    return locais;
+  }
+
+  return locaisOrdenados;
+}
+
+// ======================================================
+// 🔹 HOOK: useDashboardFilters
+// ======================================================
+//
+// 🎯 INTENÇÃO GERAL
+// Centralizar TODA a lógica de:
+// - Filtros básicos de UI (status, categoria)
+// - Ordenação baseada nos filtros ativos do projeto
+//
+// 🧠 MODELO MENTAL
+// - Filtrar primeiro
+// - Ordenar depois
+// - Nunca quebrar listagem
+//
+// 🔒 CONTRATO
+// - Não conhece Supabase
+// - Não conhece Dashboard
+// - Apenas recebe dados e retorna dados
+//
+export function useDashboardFilters(locais, filtrosAtivosProjeto = []) {
+
+  // ==============================
+  // 🔹 ESTADOS DE UI
+  // ==============================
+  //
+  // filtroStatus    → publicado / oculto / todos
+  // filtroCategoria → tag ativa (ou null)
+  //
   const [filtroStatus, setFiltroStatus] = useState('todos');
   const [filtroCategoria, setFiltroCategoria] = useState(null);
 
+  // ==============================
+  // 🔹 PIPELINE DE FILTROS
+  // ==============================
+  //
+  // Ordem intencional:
+  // 1️⃣ Filtragem básica (restrição)
+  // 2️⃣ Ordenação inteligente (ranking)
+  //
   const locaisFiltrados = useMemo(() => {
-    return locais.filter(local => {
+
+    // ------------------------------
+    // 1️⃣ FILTRAGEM BÁSICA (EXISTENTE)
+    // ------------------------------
+    //
+    // 🎯 Intenção:
+    // Restringir resultados com base em UI simples
+    //
+    const filtrados = locais.filter(local => {
+
+      // Status: publicados
       if (filtroStatus === 'publicados' && local.status !== 'PUBLICAR_APP') {
         return false;
       }
+
+      // Status: ocultos
       if (filtroStatus === 'ocultos' && local.status === 'PUBLICAR_APP') {
         return false;
       }
 
+      // Categoria / Tag
       if (filtroCategoria && !local.tags?.includes(filtroCategoria)) {
         return false;
       }
 
       return true;
     });
-  }, [locais, filtroStatus, filtroCategoria]);
 
+    // ------------------------------
+    // 2️⃣ ORDENAÇÃO POR PROJETO
+    // ------------------------------
+    //
+    // 🎯 Intenção:
+    // Reordenar resultados com base nos filtros
+    // ativados no dashboard do projeto
+    //
+    const filtrosAtivosValidos = Array.isArray(filtrosAtivosProjeto)
+      ? filtrosAtivosProjeto
+      : [];
+
+    return aplicarOrdenacao(filtrados, filtrosAtivosValidos);
+
+  }, [
+    locais,
+    filtroStatus,
+    filtroCategoria,
+    filtrosAtivosProjeto
+  ]);
+
+  // ==============================
+  // 🔹 API DO HOOK (RETORNO)
+  // ==============================
+  //
+  // Tudo que a UI pode usar
+  //
   return {
     filtroStatus,
     setFiltroStatus,
@@ -1399,100 +3380,173 @@ export function useDashboardFilters(locais) {
     locaisFiltrados
   };
 }
+
 ----------------------------------
 
 --- ARQUIVO: src/index.css ---
+/* ======================================================
+   📄 global.css / main.css
+   Estilos Globais da Aplicação
+   ======================================================
+
+   🎯 PROPÓSITO
+   - Definir base visual e tipográfica do app
+   - Garantir legibilidade, consistência e performance
+   - Preparar o app para comportamento "App-like"
+
+   🧠 MODELO MENTAL
+   - Este arquivo:
+     ✅ define defaults
+     ✅ controla UX global
+     ❌ não estiliza componentes específicos
+
+   🔒 CONTRATO
+   - Nenhuma regra de layout de tela aqui
+   - Nenhuma regra específica de Dashboard, Card ou Modal
+   - Apenas fundamentos
+*/
+
+/* ======================================================
+   🔹 VARIÁVEIS & BASE TIPOGRÁFICA
+   ====================================================== */
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
+  /* Esquema de cores padrão (dark-first) */
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
 
+  /* Qualidade de renderização */
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ======================================================
+   🔹 LINKS
+   ====================================================== */
 a {
   font-weight: 500;
   color: #646cff;
   text-decoration: inherit;
 }
+
 a:hover {
   color: #535bf2;
 }
 
+/* ======================================================
+   🔹 BODY (LAYOUT BASE)
+   ====================================================== */
 body {
   margin: 0;
+
+  /* Centralização padrão (modo app / landing) */
   display: flex;
   place-items: center;
+
   min-width: 320px;
   min-height: 100vh;
 }
 
+/* ======================================================
+   🔹 TÍTULOS
+   ====================================================== */
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
 }
 
+/* ======================================================
+   🔹 BOTÕES (BASE GLOBAL)
+   ====================================================== */
 button {
   border-radius: 8px;
   border: 1px solid transparent;
+
   padding: 0.6em 1.2em;
+
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
+
   background-color: #1a1a1a;
   cursor: pointer;
+
   transition: border-color 0.25s;
 }
+
 button:hover {
   border-color: #646cff;
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+/* ======================================================
+   🔹 MODO LIGHT (PREFERÊNCIA DO SISTEMA)
+   ====================================================== */
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
     background-color: #ffffff;
   }
+
   a:hover {
     color: #747bff;
   }
+
   button {
     background-color: #f9f9f9;
   }
 }
 
-/* Esconde a barra de rolagem mas mantém a função de scroll */
+/* ======================================================
+   🔹 SCROLLBAR (DESKTOP)
+   ====================================================== 
+   🎯 UX
+   - Scroll discreto
+   - Aparência clean
+   - Não interfere no layout
+*/
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 10px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
 
-/* Para navegadores mobile, esconde totalmente para parecer App */
+/* ======================================================
+   🔹 SCROLLBAR (MOBILE / APP-LIKE)
+   ====================================================== 
+   🎯 UX
+   - Esconde completamente
+   - Mantém scroll funcional
+   - Sensação de aplicativo nativo
+*/
 @media (max-width: 768px) {
   ::-webkit-scrollbar {
     display: none;
   }
 }
+
 ----------------------------------
 
 --- ARQUIVO: src/main.jsx ---
@@ -1526,8 +3580,46 @@ export const supabase = createClient(supabaseUrl, supabaseKey);
 ----------------------------------
 
 --- ARQUIVO: src/utils/constants.js ---
-// src/utils/constants.js
+// ======================================================
+// 📄 constants.js
+// Constantes globais do App / Dashboard
+// ======================================================
+//
+// 🎯 PROPÓSITO DESTE ARQUIVO
+// Centralizar TODAS as constantes de domínio:
+// - Tags oficiais
+// - Status
+// - Tema
+// - Definição de filtros do app
+//
+// 🧠 MODELO MENTAL
+// - Nada aqui contém lógica
+// - Nada aqui acessa banco
+// - Tudo aqui é reutilizável entre projetos
+//
+// 🔒 CONTRATO
+// - Arquivo seguro para edição por humanos
+// - Mudanças aqui não quebram a aplicação
+// - Pode ser lido como documentação viva
+//
 
+// ======================================================
+// 🔹 TAGS OFICIAIS (CATEGORIAS)
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Definir as categorias possíveis de um local
+//
+// 🧠 USO
+// - Dashboard (edição do local)
+// - Filtros do app
+// - Cards visuais
+//
+// 🔒 CONTRATO
+// - id   → usado em código / banco
+// - label → exibido ao usuário
+// - color → identidade visual da tag
+//
 export const TAGS_OFICIAIS = [
   { id: 'banho', label: 'Banho', color: '#3b82f6' },
   { id: 'vet',   label: 'Vet',   color: '#10b981' },
@@ -1535,13 +3627,45 @@ export const TAGS_OFICIAIS = [
   { id: 'hotel', label: 'Hotel', color: '#8b5cf6' }
 ];
 
+// ======================================================
+// 🔹 STATUS DE FILTRO (UI)
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Controlar visualização no Dashboard
+//
+// 🧠 USO
+// - Filtro rápido: todos / publicados / ocultos
+//
 export const STATUS_FILTROS = ['todos', 'publicados', 'ocultos'];
 
+// ======================================================
+// 🔹 STATUS DE DADOS (BANCO)
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Padronizar valores usados no banco
+//
+// 🧠 USO
+// - Comparações
+// - Toggle de visibilidade
+//
 export const STATUS_TYPES = {
   PUBLICADO: 'PUBLICAR_APP',
   RASCUNHO: 'RASCUNHO'
 };
 
+// ======================================================
+// 🔹 TEMA PADRÃO DO SISTEMA
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Definir cores base do app
+//
+// 🧠 MODELO
+// - Pode ser sobrescrito por projeto
+// - Nunca depende de CSS externo
+//
 export const THEME_COLORS = {
   primary: '#2563eb',
   bg: '#f8fafc',
@@ -1553,6 +3677,17 @@ export const THEME_COLORS = {
   success: '#22c55e'
 };
 
+// ======================================================
+// 🔹 FUNÇÃO: getTheme
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Gerar tema final baseado no projeto
+//
+// 🧠 REGRA
+// - Projeto pode sobrescrever apenas cor primária
+// - Todo o resto permanece consistente
+//
 export const getTheme = (projeto) => ({
   primary: projeto?.cor_primaria || THEME_COLORS.primary,
   bg: THEME_COLORS.bg,
@@ -1563,6 +3698,74 @@ export const getTheme = (projeto) => ({
   danger: THEME_COLORS.danger,
   success: THEME_COLORS.success
 });
+
+// ======================================================
+// 🔹 FILTROS DISPONÍVEIS NO APP
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Definir QUAIS filtros existem no sistema
+//
+// 🧠 MODELO MENTAL
+// - Código define o que é possível
+// - Dashboard decide o que está ativo
+//
+// 🔒 CONTRATO
+// - id           → chave técnica
+// - label        → nome exibido
+// - description  → explicação humana
+// - group        → filtro ou ordenação
+//
+export const FILTROS_APP = [
+  {
+    id: 'categoria',
+    label: 'Categoria',
+    description: 'Banho, Vet, Loja, Hotel',
+    group: 'filtro'
+  },
+  {
+    id: 'bem_avaliados',
+    label: 'Bem avaliados ⭐',
+    description: 'Nota ≥ 4.5 e pelo menos 40 avaliações',
+    group: 'filtro'
+  },
+  {
+    id: 'com_instagram',
+    label: 'Com Instagram 📸',
+    description: 'Exibe apenas lojas com Instagram',
+    group: 'filtro'
+  },
+  {
+    id: 'ordenar_melhor_nota',
+    label: 'Ordenar por melhor nota',
+    description: 'Usuário pode priorizar qualidade',
+    group: 'ordenacao'
+  },
+  {
+    id: 'ordenar_mais_avaliados',
+    label: 'Ordenar por mais avaliados',
+    description: 'Usuário pode priorizar popularidade',
+    group: 'ordenacao'
+  }
+];
+
+// ======================================================
+// 🔹 FILTROS PADRÃO ATIVOS (MVP)
+// ======================================================
+//
+// 🎯 INTENÇÃO
+// Garantir experiência mínima sem configuração
+//
+// 🧠 REGRA
+// - Aplicado quando projeto ainda não definiu filtros
+// - Pode ser alterado no dashboard
+//
+export const DEFAULT_FILTROS_APP = [
+  'categoria',
+  'bem_avaliados',
+  'com_instagram'
+];
+
 ----------------------------------
 
 --- ARQUIVO: src/utils/theme.js ---
