@@ -1,29 +1,34 @@
 // ======================================================
 // 📄 PetList.jsx
-// Tela pública do App (leitura)
+// Página pública do App (usuário final)
+// ======================================================
+//
+// 🎯 RESPONSABILIDADE
+// - Buscar locais publicados
+// - Exibir filtros fixos no topo (categorias + ordenação)
+// - Renderizar cards com imagem
+// - Abrir ChatModal
 // ======================================================
 
-// ======================================================
-// 🔹 DEPENDÊNCIAS
-// ======================================================
 import React, { useEffect, useMemo, useState } from 'react';
 import { supabase } from './supabaseClient';
 import {
   MessageCircle,
-  MapPin,
+  Award,
+  Store,
   Scissors,
   Stethoscope,
   ShoppingBag,
-  Home,
-  X
+  Home
 } from 'lucide-react';
+
 import ChatModal from './ChatModal';
 
 // ======================================================
 // 🔹 CONFIGURAÇÕES FIXAS
 // ======================================================
 
-// Categorias permitidas (contrato visual + dados)
+// Categorias (scroll horizontal, fixo no topo)
 const CATEGORIAS = [
   { id: 'banho', label: 'Banho', icon: <Scissors size={18} /> },
   { id: 'vet', label: 'Vet', icon: <Stethoscope size={18} /> },
@@ -31,36 +36,32 @@ const CATEGORIAS = [
   { id: 'hotel', label: 'Hotel', icon: <Home size={18} /> }
 ];
 
+// Ordenações disponíveis
+const ORDENACOES = [
+  { id: 'melhor_nota', label: '⭐ Melhor nota' },
+  { id: 'mais_avaliados', label: '📈 Mais avaliações' },
+  { id: 'destaque', label: '🏆 Destaques' }
+];
+
 // ======================================================
-// 🔹 COMPONENTE
+// 🔹 COMPONENTE PRINCIPAL
 // ======================================================
 export default function PetList({ projeto }) {
-
   // ==============================
   // 🔹 ESTADOS
   // ==============================
-  //
-  // locais           → dados crus do banco
-  // filtroCategoria  → categoria selecionada
-  // loading          → carregamento
-  // selectedLocal    → modal de chat
-  //
   const [locais, setLocais] = useState([]);
-  const [filtroCategoria, setFiltroCategoria] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const [categoriaAtiva, setCategoriaAtiva] = useState(null);
+  const [ordenacaoAtiva, setOrdenacaoAtiva] = useState('melhor_nota'); // padrão
   const [selectedLocal, setSelectedLocal] = useState(null);
 
   // ==============================
-  // 🔹 FETCH DE DADOS
+  // 🔹 BUSCA DE DADOS
   // ==============================
-  //
-  // 🎯 Intenção:
-  // Buscar apenas locais PUBLICADOS para o app
-  //
   useEffect(() => {
     async function fetchLocais() {
-      if (!projeto?.id) return;
-
       setLoading(true);
 
       const { data, error } = await supabase
@@ -69,247 +70,247 @@ export default function PetList({ projeto }) {
         .eq('projeto_id', projeto.id)
         .eq('status', 'PUBLICAR_APP');
 
-      if (!error) {
+      if (error) {
+        console.error('Erro ao buscar locais:', error);
+        setLocais([]);
+      } else {
         setLocais(data || []);
       }
 
       setLoading(false);
     }
 
-    fetchLocais();
+    if (projeto?.id) fetchLocais();
   }, [projeto]);
 
   // ==============================
-  // 🔹 FILTRAGEM (MEMOIZADA)
+  // 🔹 FILTRAGEM + ORDENAÇÃO
   // ==============================
-  //
-  // 🧠 Modelo mental:
-  // - Nunca mutar "locais"
-  // - Sempre derivar a lista
-  //
-  const locaisFiltrados = useMemo(() => {
-    if (!filtroCategoria) return locais;
+  const locaisProcessados = useMemo(() => {
+    let resultado = [...locais];
 
-    return locais.filter(local =>
-      Array.isArray(local.tags) &&
-      local.tags.includes(filtroCategoria)
-    );
-  }, [locais, filtroCategoria]);
+    // 🏷 Categoria
+    if (categoriaAtiva) {
+      resultado = resultado.filter(
+        l =>
+          Array.isArray(l.tags) &&
+          l.tags.includes(categoriaAtiva)
+      );
+    }
+
+    // 🔃 Ordenação
+    if (ordenacaoAtiva === 'melhor_nota') {
+      resultado.sort((a, b) => (b.nota || 0) - (a.nota || 0));
+    }
+
+    if (ordenacaoAtiva === 'mais_avaliados') {
+      resultado.sort((a, b) => (b.avaliacoes || 0) - (a.avaliacoes || 0));
+    }
+
+    if (ordenacaoAtiva === 'destaque') {
+      resultado.sort((a, b) => {
+        if (b.destaque === a.destaque) return 0;
+        return b.destaque ? 1 : -1;
+      });
+    }
+
+    return resultado;
+  }, [locais, categoriaAtiva, ordenacaoAtiva]);
 
   // ==============================
-  // 🔹 TEMA DO PROJETO
+  // 🔹 TEMA
   // ==============================
-  const corPrimaria = projeto?.cor_primaria || '#2563eb';
+  const isDark = projeto?.tema_base === 'dark';
 
-  // ==============================
+  const tema = {
+    '--bg-app': isDark ? '#0f172a' : '#f8fafc',
+    '--bg-card': isDark ? '#1e293b' : '#ffffff',
+    '--text-primary': isDark ? '#f1f5f9' : '#1e293b',
+    '--text-secondary': isDark ? '#94a3b8' : '#64748b',
+    '--border-color': isDark ? '#334155' : '#e2e8f0',
+    '--cor-primaria': projeto?.cor_primaria || '#2563eb',
+    '--cor-destaque': projeto?.cor_destaque || '#f59e0b'
+  };
+
+  // ======================================================
   // 🔹 RENDER
-  // ==============================
+  // ======================================================
   return (
     <div
       style={{
+        ...tema,
+        background: 'var(--bg-app)',
         minHeight: '100vh',
-        background: '#f8fafc',
-        fontFamily: 'system-ui'
+        color: 'var(--text-primary)',
+        fontFamily: 'sans-serif'
       }}
     >
-
-      {/* ==========================
-          🔹 HEADER FIXO + FILTROS
-         ========================== */}
+      {/* ============================================= */}
+      {/* 🔝 FILTROS FIXOS */}
+      {/* ============================================= */}
       <div
         style={{
           position: 'sticky',
           top: 0,
-          zIndex: 20,
-          background: '#ffffff',
-          borderBottom: '1px solid #e2e8f0'
+          zIndex: 50,
+          background: 'var(--bg-app)',
+          borderBottom: '1px solid var(--border-color)'
         }}
       >
-
-        {/* TÍTULO */}
-        <div style={{ padding: '16px 20px' }}>
-          <h1 style={{ margin: 0, fontSize: '1.4rem' }}>
-            {projeto?.titulo_pagina || projeto?.nome || 'Locais'}
-          </h1>
-          <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
-            Encontre os melhores serviços
-          </p>
-        </div>
-
-        {/* FILTRO DE CATEGORIA (SCROLL HORIZONTAL) */}
-        <div
-          style={{
-            display: 'flex',
-            gap: '10px',
-            padding: '10px 20px',
-            overflowX: 'auto'
-          }}
-        >
-
-          {/* LIMPAR FILTRO */}
-          {filtroCategoria && (
-            <button
-              onClick={() => setFiltroCategoria(null)}
-              style={{
-                flexShrink: 0,
-                height: '40px',
-                padding: '0 12px',
-                borderRadius: '20px',
-                border: '1px solid #e2e8f0',
-                background: '#f1f5f9',
-                cursor: 'pointer'
-              }}
-            >
-              <X size={16} />
-            </button>
-          )}
-
-          {/* TODAS */}
+        {/* CATEGORIAS */}
+        <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', padding: '12px' }}>
           <button
-            onClick={() => setFiltroCategoria(null)}
+            onClick={() => setCategoriaAtiva(null)}
             style={{
-              flexShrink: 0,
-              height: '40px',
-              padding: '0 16px',
-              borderRadius: '20px',
-              border: 'none',
-              background: filtroCategoria === null ? corPrimaria : '#f1f5f9',
-              color: filtroCategoria === null ? '#fff' : '#475569',
-              fontWeight: 600,
-              cursor: 'pointer'
+              padding: '10px 14px',
+              borderRadius: '999px',
+              border: '1px solid var(--border-color)',
+              background: categoriaAtiva === null ? 'var(--cor-primaria)' : 'var(--bg-card)',
+              color: categoriaAtiva === null ? '#fff' : 'var(--text-secondary)',
+              fontWeight: 600
             }}
           >
-            Todos
+            <Store size={16} /> Todos
           </button>
 
-          {/* CATEGORIAS */}
           {CATEGORIAS.map(cat => {
-            const ativo = filtroCategoria === cat.id;
-
+            const ativo = categoriaAtiva === cat.id;
             return (
               <button
                 key={cat.id}
-                onClick={() => setFiltroCategoria(cat.id)}
+                onClick={() => setCategoriaAtiva(ativo ? null : cat.id)}
                 style={{
-                  flexShrink: 0,
-                  height: '40px',
-                  padding: '0 16px',
-                  borderRadius: '20px',
-                  border: 'none',
+                  padding: '10px 14px',
+                  borderRadius: '999px',
+                  border: '1px solid var(--border-color)',
+                  background: ativo ? 'var(--cor-primaria)' : 'var(--bg-card)',
+                  color: ativo ? '#fff' : 'var(--text-secondary)',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
-                  background: ativo ? corPrimaria : '#f1f5f9',
-                  color: ativo ? '#fff' : '#475569',
-                  fontWeight: 600,
-                  cursor: 'pointer'
+                  fontWeight: 600
                 }}
               >
-                {cat.icon}
-                {cat.label}
+                {cat.icon} {cat.label}
               </button>
             );
           })}
         </div>
+
+        {/* ORDENAÇÃO */}
+        <div style={{ display: 'flex', gap: '10px', padding: '10px 12px' }}>
+          {ORDENACOES.map(o => (
+            <button
+              key={o.id}
+              onClick={() => setOrdenacaoAtiva(o.id)}
+              style={{
+                padding: '8px 12px',
+                borderRadius: '8px',
+                border: '1px solid var(--border-color)',
+                background: ordenacaoAtiva === o.id ? 'var(--cor-destaque)' : 'var(--bg-card)',
+                color: ordenacaoAtiva === o.id ? '#fff' : 'var(--text-secondary)',
+                fontWeight: 600,
+                fontSize: '13px'
+              }}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* ==========================
-          🔹 LISTA DE LOCAIS
-         ========================== */}
+      {/* ============================================= */}
+      {/* 📋 CARDS */}
+      {/* ============================================= */}
       <div
         style={{
-          padding: '20px',
-          maxWidth: '640px',
+          maxWidth: '600px',
           margin: '0 auto',
+          padding: '20px',
           display: 'flex',
           flexDirection: 'column',
           gap: '16px'
         }}
       >
-        {loading && (
-          <p style={{ textAlign: 'center', color: '#64748b' }}>
-            Carregando...
-          </p>
-        )}
+        {loading && <p style={{ textAlign: 'center' }}>Carregando…</p>}
 
-        {!loading && locaisFiltrados.length === 0 && (
-          <p style={{ textAlign: 'center', color: '#64748b' }}>
-            Nenhum local encontrado.
-          </p>
-        )}
+        {!loading &&
+          locaisProcessados.map(local => {
+            const isVip = local.destaque || local.nota >= 4.5;
 
-        {locaisFiltrados.map(local => (
-          <div
-            key={local.id}
-            style={{
-              background: '#ffffff',
-              borderRadius: '16px',
-              border: '1px solid #e2e8f0',
-              padding: '16px'
-            }}
-          >
-            <h3 style={{ margin: '0 0 6px 0' }}>{local.nome}</h3>
+            return (
+              <div
+                key={local.id}
+                style={{
+                  background: 'var(--bg-card)',
+                  borderRadius: '16px',
+                  overflow: 'hidden',
+                  boxShadow: isVip
+                    ? `0 0 0 2px var(--cor-destaque)`
+                    : '0 4px 8px rgba(0,0,0,0.05)'
+                }}
+              >
+                {/* IMAGEM */}
+                {local.image_url ? (
+                  <img
+                    src={local.image_url}
+                    alt={local.nome}
+                    style={{
+                      width: '100%',
+                      height: '160px',
+                      objectFit: 'cover'
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      height: '160px',
+                      background: '#e2e8f0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '42px'
+                    }}
+                  >
+                    🐶
+                  </div>
+                )}
 
-            <div
-              style={{
-                display: 'flex',
-                gap: '6px',
-                alignItems: 'flex-start',
-                fontSize: '13px',
-                color: '#64748b'
-              }}
-            >
-              <MapPin size={16} />
-              <span>{local.endereco || 'Endereço não informado'}</span>
-            </div>
+                {/* CONTEÚDO */}
+                <div style={{ padding: '16px' }}>
+                  <div style={{ fontWeight: 700, display: 'flex', gap: '6px' }}>
+                    {local.nome}
+                    {isVip && <Award size={14} color="var(--cor-destaque)" />}
+                  </div>
 
-            {/* TAGS */}
-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '10px' }}>
-              {local.tags?.map(tag => (
-                <span
-                  key={tag}
+                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                    ⭐ {local.nota || '-'} · {local.avaliacoes || 0} avaliações
+                  </div>
+                </div>
+
+                {/* CTA */}
+                <button
+                  onClick={() => setSelectedLocal(local)}
                   style={{
-                    fontSize: '11px',
-                    padding: '4px 10px',
-                    background: '#f1f5f9',
-                    borderRadius: '20px',
-                    fontWeight: 600
+                    width: '100%',
+                    padding: '14px',
+                    border: 'none',
+                    background: '#25D366',
+                    color: '#fff',
+                    fontWeight: 700,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    gap: '8px'
                   }}
                 >
-                  {tag}
-                </span>
-              ))}
-            </div>
-
-            {/* CTA */}
-            <button
-              onClick={() => setSelectedLocal(local)}
-              style={{
-                marginTop: '14px',
-                width: '100%',
-                height: '44px',
-                border: 'none',
-                borderRadius: '12px',
-                background: '#25D366',
-                color: '#fff',
-                fontWeight: 700,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                cursor: 'pointer'
-              }}
-            >
-              <MessageCircle size={18} />
-              Falar com a loja
-            </button>
-          </div>
-        ))}
+                  <MessageCircle size={18} /> Falar com a loja
+                </button>
+              </div>
+            );
+          })}
       </div>
 
-      {/* ==========================
-          🔹 MODAL DE CHAT
-         ========================== */}
+      {/* CHAT */}
       {selectedLocal && (
         <ChatModal
           local={selectedLocal}
