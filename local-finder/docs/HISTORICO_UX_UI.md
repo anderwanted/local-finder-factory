@@ -268,3 +268,28 @@ Quando houver mudanças futuras, identificar claramente:
 - 💼 **Mudança de Negócio** → Atualiza MANUAL_FRANQUIA.md + explica impacto
 
 Esta separação garante que o histórico permaneça claro e rastreável.
+
+✔️ Filtros fixos no topo da PetList
+
+Mobile-first
+
+Scroll horizontal
+
+Não usar modal / pop-up
+
+✔️ Ordenação padrão definida
+
+Default: Melhor nota
+
+Usuário pode mudar
+
+UI mostra claramente a ordenação ativa
+
+✔️ Card padrão escolhido
+
+PetCardClassic como base atual
+
+Bento fica registrado como evolução futura (não agora)
+
+👉 Motivo:
+Sem isso, qualquer pessoa (ou IA) pode “voltar atrás” achando que foi decisão temporária.

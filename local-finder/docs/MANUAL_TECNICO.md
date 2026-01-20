@@ -706,3 +706,20 @@ Essa separação garante estabilidade, facilidade de evolução e testes editori
 **Tempo médio:** ~500ms (incluindo latência de rede)
 
 ---
+
+✔️ Separação clara:
+
+PetList → UI + interação
+
+Ordenação → controlada, não destrutiva
+
+Filtros → priorizam, não excluem tudo
+
+✔️ Regra técnica:
+
+Cards nunca quebram sem imagem
+
+Sempre existe fallback visual
+
+👉 Motivo:
+Evita refatorações erradas no futuro.

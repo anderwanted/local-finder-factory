@@ -129,3 +129,13 @@ Se este arquivo for colado:
 - E que decisões já foram tomadas
 
 Nada começa do zero.
+
+Estado atual do sistema:
+
+PetList funcional
+
+Filtros fixos
+
+Ordenação visível
+
+Dashboard separado por responsabilidade

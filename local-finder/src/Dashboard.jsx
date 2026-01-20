@@ -2,34 +2,7 @@
 // 📄 Dashboard.jsx
 // Painel Administrativo do Projeto
 // ======================================================
-//
-// 🎯 PROPÓSITO
-// - Centralizar o controle do projeto
-// - Alternar entre:
-//   • Configuração do App
-//   • Gestão de Lojas (CRUD)
-//
-// 🧠 MODELO MENTAL
-// - Dashboard é um ORQUESTRADOR
-// - Ele NÃO:
-//   ❌ busca dados direto
-//   ❌ filtra manualmente
-//   ❌ renderiza lógica complexa
-//
-// - Ele APENAS:
-//   ✅ conecta hooks
-//   ✅ distribui props
-//   ✅ decide o modo visual
-//
-// 🔒 CONTRATO
-// - Nenhuma query direta aqui
-// - Nenhuma regra de negócio pesada
-// - Hooks fazem o trabalho sujo
-//
 
-// ======================================================
-// 🔹 DEPENDÊNCIAS
-// ======================================================
 import React, { useState } from 'react';
 
 // Hooks
@@ -47,31 +20,18 @@ import StoreCardEdit from './components/dashboard/StoreCardEdit';
 import EmptyState from './components/dashboard/EmptyState';
 import ProjectFiltersPanel from './components/dashboard/ProjectFiltersPanel';
 
-// ======================================================
-// 🔹 COMPONENTE: Dashboard
-// ======================================================
-//
-// 🔑 PROPS
-// - projeto → objeto completo do projeto (slug, cores, filtros, etc)
-//
 export default function Dashboard({ projeto }) {
 
   // ==============================
   // 🔹 ESTADOS DE CONTROLE
   // ==============================
-  //
-  // modoDashboard:
-  // - 'config' → configurações do app
-  // - 'lista'  → gerenciamento das lojas
-  //
   const [modoDashboard, setModoDashboard] = useState('config');
   const [editingId, setEditingId] = useState(null);
 
-  // Tema visual baseado no projeto
   const theme = getTheme(projeto);
 
   // ==============================
-  // 🔹 HOOK: DADOS (CRUD)
+  // 🔹 HOOKS
   // ==============================
   const {
     locais,
@@ -82,9 +42,6 @@ export default function Dashboard({ projeto }) {
     deleteLocal
   } = useDashboardData(projeto?.id);
 
-  // ==============================
-  // 🔹 HOOK: FILTROS + ORDENAÇÃO
-  // ==============================
   const {
     filtroStatus,
     setFiltroStatus,
@@ -97,11 +54,9 @@ export default function Dashboard({ projeto }) {
   );
 
   // ==============================
-  // 🔹 HANDLERS (AÇÕES DO USUÁRIO)
+  // 🔹 HANDLERS
   // ==============================
-  const handleEdit = (local) => {
-    setEditingId(local.id);
-  };
+  const handleEdit = (local) => setEditingId(local.id);
 
   const handleSave = async (id, updates) => {
     await updateLocal(id, updates);
@@ -117,9 +72,6 @@ export default function Dashboard({ projeto }) {
     await toggleStatus(local);
   };
 
-  // ==============================
-  // 🔹 FALLBACK DE SEGURANÇA
-  // ==============================
   if (!projeto) {
     return (
       <div style={{ padding: 50, textAlign: 'center' }}>
@@ -129,7 +81,7 @@ export default function Dashboard({ projeto }) {
   }
 
   // ==============================
-  // 🔹 RENDERIZAÇÃO
+  // 🔹 RENDER
   // ==============================
   return (
     <div
@@ -142,52 +94,19 @@ export default function Dashboard({ projeto }) {
       }}
     >
 
-      {/* =====================================
-          🔴 BLOCOS DE TESTE (DEBUG)
-          (podem ser removidos depois)
-      ====================================== */}
-      <div style={{ background: 'purple', color: 'white', padding: '40px' }}>
-        TESTE: DASHBOARD JSX
-      </div>
-
-      {/* =====================================
-          🔹 HEADER DO DASHBOARD
-      ====================================== */}
+      {/* HEADER */}
       <DashboardHeader projeto={projeto} theme={theme} />
 
-      <div style={{ background: 'blue', color: 'white', padding: '20px' }}>
-        TESTE: DASHBOARD ESTÁ RENDERIZANDO
-      </div>
-
-      {/* =====================================
-          🔹 PAINEL GLOBAL DE FILTROS DO APP
-          (sempre visível no topo)
-      ====================================== */}
-      <ProjectFiltersPanel
-        projeto={projeto}
-        theme={theme}
-        onUpdate={() => {}}
-      />
-
-      {/* =====================================
-          🔹 TOGGLE DE MODO
-          (Configuração ↔ Lista)
-      ====================================== */}
-      <div style={{ display: 'flex', gap: '8px', padding: '0 20px 20px' }}>
+      {/* TOGGLE DE MODO */}
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
         <button
           onClick={() => setModoDashboard('config')}
           style={{
             padding: '10px 16px',
-            borderRadius: 'var(--radius-btn)',
-            border: '1px solid var(--border-color)',
-            background:
-              modoDashboard === 'config'
-                ? 'var(--cor-primaria)'
-                : 'var(--bg-card)',
-            color:
-              modoDashboard === 'config'
-                ? '#fff'
-                : 'var(--text-secondary)',
+            borderRadius: '8px',
+            border: `1px solid ${theme.border}`,
+            background: modoDashboard === 'config' ? theme.primary : theme.card,
+            color: modoDashboard === 'config' ? '#fff' : theme.textSec,
             fontWeight: 600,
             cursor: 'pointer'
           }}
@@ -199,16 +118,10 @@ export default function Dashboard({ projeto }) {
           onClick={() => setModoDashboard('lista')}
           style={{
             padding: '10px 16px',
-            borderRadius: 'var(--radius-btn)',
-            border: '1px solid var(--border-color)',
-            background:
-              modoDashboard === 'lista'
-                ? 'var(--cor-primaria)'
-                : 'var(--bg-card)',
-            color:
-              modoDashboard === 'lista'
-                ? '#fff'
-                : 'var(--text-secondary)',
+            borderRadius: '8px',
+            border: `1px solid ${theme.border}`,
+            background: modoDashboard === 'lista' ? theme.primary : theme.card,
+            color: modoDashboard === 'lista' ? '#fff' : theme.textSec,
             fontWeight: 600,
             cursor: 'pointer'
           }}
@@ -217,27 +130,25 @@ export default function Dashboard({ projeto }) {
         </button>
       </div>
 
-      {/* =====================================
-          🔹 MODO: CONFIGURAÇÃO DO APP
-      ====================================== */}
+      {/* ==========================
+          MODO CONFIG
+      ========================== */}
       {modoDashboard === 'config' && (
         <ProjectFiltersPanel
           projeto={projeto}
           theme={theme}
           onUpdate={(filtros) => {
-            // atualização local do projeto
             projeto.filtros_ativos = filtros;
           }}
         />
       )}
 
-      {/* =====================================
-          🔹 MODO: LISTA DE LOJAS
-      ====================================== */}
+      {/* ==========================
+          MODO LISTA
+      ========================== */}
       {modoDashboard === 'lista' && (
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
 
-          {/* BARRA DE FILTROS */}
           <FilterBar
             filtroStatus={filtroStatus}
             setFiltroStatus={setFiltroStatus}
@@ -246,9 +157,7 @@ export default function Dashboard({ projeto }) {
             theme={theme}
           />
 
-          {/* LISTAGEM */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-
             {loading && (
               <p style={{ textAlign: 'center', padding: '40px' }}>
                 Carregando dados...
@@ -265,35 +174,30 @@ export default function Dashboard({ projeto }) {
               <EmptyState type="no-data" theme={theme} />
             )}
 
-            {!loading &&
-              !error &&
-              locais.length > 0 &&
-              locaisFiltrados.length === 0 && (
-                <EmptyState type="filter" theme={theme} />
-              )}
+            {!loading && !error && locais.length > 0 && locaisFiltrados.length === 0 && (
+              <EmptyState type="filter" theme={theme} />
+            )}
 
-            {!loading &&
-              !error &&
-              locaisFiltrados.map((local) =>
-                editingId === local.id ? (
-                  <StoreCardEdit
-                    key={local.id}
-                    local={local}
-                    theme={theme}
-                    onSave={handleSave}
-                    onCancel={() => setEditingId(null)}
-                  />
-                ) : (
-                  <StoreCard
-                    key={local.id}
-                    local={local}
-                    theme={theme}
-                    onToggleStatus={handleToggleStatus}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                  />
-                )
-              )}
+            {!loading && !error && locaisFiltrados.map((local) =>
+              editingId === local.id ? (
+                <StoreCardEdit
+                  key={local.id}
+                  local={local}
+                  theme={theme}
+                  onSave={handleSave}
+                  onCancel={() => setEditingId(null)}
+                />
+              ) : (
+                <StoreCard
+                  key={local.id}
+                  local={local}
+                  theme={theme}
+                  onToggleStatus={handleToggleStatus}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              )
+            )}
           </div>
         </div>
       )}

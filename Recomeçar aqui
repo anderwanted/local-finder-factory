@@ -1,0 +1,171 @@
+
+# 🧠 SUPER PROMPT — RESGATE COMPLETO DO PROJETO (LOCAL FINDER / PET APP)
+
+## 📌 CONTEXTO GERAL
+Você está assumindo um projeto React + Supabase chamado **Local Finder**, com foco inicial em um **App de Pet Shops** (PetList) e um **Dashboard Administrativo**.
+
+O projeto já passou por várias iterações, ajustes e correções.  
+Este documento define **o estado atual REAL**, **decisões tomadas**, **o que NÃO deve ser quebrado** e **como evoluir daqui para frente**.
+
+⚠️ **Regra de ouro**:  
+> NÃO reimaginar o sistema. NÃO refatorar sem pedido explícito.  
+> Trabalhar SEMPRE a partir do que já existe.
+
+---
+
+## 🎯 OBJETIVO DO PRODUTO
+Criar uma plataforma onde:
+- Usuários finais veem **listas de pet shops**
+- Podem **ordenar e filtrar** facilmente
+- Cards são claros, bonitos e confiáveis
+- Lojas VIP / bem avaliadas têm mais destaque
+- O Dashboard controla **configurações do app e lojas**, não a experiência do usuário final
+
+---
+
+## 🧩 ARQUITETURA MENTAL (OBRIGATÓRIA)
+
+### 🧠 Separação de responsabilidades
+- **PetList**
+  - UI
+  - Filtros visuais
+  - Ordenação
+  - Experiência do usuário final
+- **Dashboard**
+  - Orquestrador
+  - NÃO faz queries diretas
+  - NÃO implementa regra de negócio pesada
+- **Hooks**
+  - `useDashboardData` → CRUD + dados
+  - `useDashboardFilters` → filtro + ordenação (não destrutiva)
+
+---
+
+## 🐾 PETLIST — ESTADO ATUAL (NÃO QUEBRAR)
+
+### ✅ Decisões consolidadas
+- Filtros **fixos no topo**
+- Mobile-first
+- Scroll horizontal
+- ❌ **NÃO usar modal ou popup para filtros**
+- Ordenação **visível e clara**
+- Ordenação padrão (default): **Melhor nota**
+- Usuário pode mudar ordenação manualmente
+
+### 🎛️ Ordenações permitidas
+- ⭐ Melhor nota
+- 📈 Mais avaliados
+- 🏆 Destaques (VIP / bem avaliados)
+
+### 🏷️ Categorias (NÃO OMITIR)
+Categorias existem e devem estar sempre visíveis quando ativas:
+- Banho
+- Vet
+- Loja
+- Hotel
+
+### 🃏 Cards
+- Card padrão atual: **PetCardClassic**
+- Bento: **registrado como evolução futura**, NÃO implementar agora
+- Cards:
+  - Nunca quebram sem imagem
+  - Sempre possuem fallback visual
+  - Imagem é complementar, não obrigatória
+
+---
+
+## 🖼️ IMAGENS (IMPORTANTE)
+- Banco **já pode ter imagens associadas**
+- PetList deve:
+  - Ler corretamente o campo de imagem existente
+  - Exibir imagem se existir
+  - Caso contrário, usar placeholder
+- Nunca assumir que todos os registros têm imagem
+
+---
+
+## ⭐ VIP / BEM AVALIADOS
+- Destaque visual:
+  - VIP OU
+  - Nota ≥ 4.5 + número mínimo de avaliações
+- Destaque influencia:
+  - Ordem
+  - Selo visual
+  - Prioridade no card
+
+---
+
+## 🧭 DASHBOARD — ESTADO ATUAL (CORRETO)
+
+### ✅ Dashboard é um ORQUESTRADOR
+- Não busca dados direto
+- Não contém lógica pesada
+- Apenas:
+  - Conecta hooks
+  - Alterna modos
+  - Renderiza componentes
+
+### Modos
+- `config` → Configuração do App
+- `lista` → Gestão de lojas (CRUD)
+
+### Painéis
+- `ProjectFiltersPanel`
+  - Controla filtros ativos do app
+  - Persiste no projeto
+  - NÃO interfere diretamente na PetList (via UI)
+
+---
+
+## 🔐 REGRAS DE DESENVOLVIMENTO (IMPORTANTÍSSIMAS)
+
+1. ❌ NÃO remover categorias sem pedido explícito
+2. ❌ NÃO substituir filtros fixos por modais
+3. ❌ NÃO refatorar PetList inteira sem necessidade
+4. ❌ NÃO criar lógica duplicada entre Dashboard e PetList
+5. ✅ Sempre entregar código COMPLETO quando solicitado
+6. ✅ Nunca omitir trechos “por brevidade”
+7. ✅ Comentários claros, estilo técnico-documental
+8. ✅ Mudanças sempre incrementais
+
+---
+
+## 📜 DOCUMENTAÇÃO JÁ EXISTENTE
+Existem os seguintes documentos no projeto:
+- HISTORICO_UX_UI.md
+- MANUAL_TECNICO.md
+- PROMPT_RESGATE.md
+- PLANEJAMENTO_PRODUTO.md
+- CONTROLADORES.md
+- MANUAL_FRANQUIA.md
+
+⚠️ Atualizações recentes relevantes:
+- UX/UI e decisões de filtros e ordenação já foram consolidadas
+- Card Classic escolhido
+- PetList e Dashboard estão funcionalmente separados
+
+---
+
+## 🧠 ESTADO EMOCIONAL DO PROJETO (IMPORTANTE PARA A IA)
+O usuário:
+- É técnico
+- É detalhista
+- Já perdeu tempo com regressões
+- Valoriza **consistência, memória e respeito às decisões**
+- Prefere **passo a passo consciente**, não “reinvenções criativas”
+
+---
+
+## 🎯 PRÓXIMOS PASSOS ESPERADOS (SE PEDIDO)
+Somente executar se o usuário solicitar explicitamente:
+- Evolução visual do Card Classic
+- Animações suaves de ordenação
+- Refinar filtros (sem mudar estrutura)
+- Performance e micro-interações
+- Preparação para novos nichos além de pet
+
+---
+
+## 🛑 FRASE DE SEGURANÇA
+Se houver dúvida sobre o que fazer:
+> **Pergunte antes de mudar.**
