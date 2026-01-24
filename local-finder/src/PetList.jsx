@@ -21,6 +21,8 @@ import { supabase } from './supabaseClient';
 import ChatModal from './ChatModal';
 //import PetCardClassic from './components/pet/PetCardClassic';
 import PetCardMapStyle from './components/pet/PetCardMapStyle';
+import './styles/petlist.css';
+
 
 
 // Ícones
@@ -169,7 +171,7 @@ useEffect(() => {
       {loading && <p>Carregando...</p>}
 
       {!loading && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div className="petlist-container" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {locaisFiltrados.slice(0, limit).map((local) => (
         <PetCardMapStyle
             key={local.id}

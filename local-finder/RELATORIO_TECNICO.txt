@@ -1,5 +1,5 @@
 RELATÓRIO TÉCNICO DO PROJETO
-Data: 24/01/2026, 15:01:16
+Data: 24/01/2026, 17:23:34
 
 --- PACKAGE.JSON ---
 {
@@ -15,6 +15,7 @@ Data: 24/01/2026, 15:01:16
   "dependencies": {
     "@supabase/supabase-js": "^2.90.1",
     "@vitejs/plugin-react": "^5.1.2",
+    "framer-motion": "^12.29.0",
     "lucide-react": "^0.562.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -524,6 +525,9 @@ import { FolderPlus } from 'lucide-react';
 import PetList from './PetList';
 import AdminGenerator from './AdminGenerator';
 import Dashboard from './Dashboard';
+import './styles/components.css';
+import './styles/theme.css';
+
 
 // ======================================================
 // 🔹 COMPONENTE: UniversalLoader
@@ -1201,248 +1205,624 @@ export default function ChatModal({ local, projeto, onClose }) {
 ----------------------------------
 
 --- ARQUIVO: src/Dashboard.jsx ---
-// ======================================================
-// 📄 Dashboard.jsx
-// Painel Administrativo do Projeto
-// ======================================================
+import React, { useEffect, useMemo, useState } from "react";
+import { supabase } from './supabaseClient';
 
-import React, { useState } from 'react';
+/* ======================================================
+   DASHBOARD — PET FINDER
+   3 seções (1 e 2 config; 3 CRUD real em 'locais')
+====================================================== */
 
-// Hooks
-import { useDashboardData } from './hooks/useDashboardData';
-import { useDashboardFilters } from './hooks/useDashboardFilters';
+export default function Dashboard() {
+  /* ======================================================
+     SEÇÃO 1 — ORDENAÇÃO PADRÃO DA PETLIST
+  ====================================================== */
+  const [ordenacaoPadrao, setOrdenacaoPadrao] = useState("padrao");
 
-// Utils
-import { getTheme } from './utils/constants';
+  /* ======================================================
+     SEÇÃO 2 — FILTROS DISPONÍVEIS NA PETLIST
+  ====================================================== */
+  const [filtros, setFiltros] = useState({
+    categoria: true,
+    bemAvaliados: true,
+    instagram: true,
+    whatsapp: true,
+    destaque: true
+  });
 
-// Componentes
-import DashboardHeader from './components/dashboard/DashboardHeader';
-import FilterBar from './components/dashboard/FilterBar';
-import StoreCard from './components/dashboard/StoreCard';
-import StoreCardEdit from './components/dashboard/StoreCardEdit';
-import EmptyState from './components/dashboard/EmptyState';
-import ProjectFiltersPanel from './components/dashboard/ProjectFiltersPanel';
-
-export default function Dashboard({ projeto }) {
-
-  // ==============================
-  // 🔹 ESTADOS DE CONTROLE
-  // ==============================
-  const [modoDashboard, setModoDashboard] = useState('config');
-  const [editingId, setEditingId] = useState(null);
-
-  const theme = getTheme(projeto);
-
-  // ==============================
-  // 🔹 HOOKS
-  // ==============================
-  const {
-    locais,
-    loading,
-    error,
-    toggleStatus,
-    updateLocal,
-    deleteLocal
-  } = useDashboardData(projeto?.id);
-
-  const {
-    filtroStatus,
-    setFiltroStatus,
-    filtroCategoria,
-    setFiltroCategoria,
-    locaisFiltrados
-  } = useDashboardFilters(
-    locais,
-    projeto?.filtros_ativos || []
-  );
-
-  // ==============================
-  // 🔹 HANDLERS
-  // ==============================
-  const handleEdit = (local) => setEditingId(local.id);
-
-  const handleSave = async (id, updates) => {
-    await updateLocal(id, updates);
-    setEditingId(null);
+  const toggleFiltro = (key) => {
+    setFiltros((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Tem certeza que deseja excluir esta loja?')) return;
-    await deleteLocal(id);
+  const salvarConfiguracoes = async () => {
+    // MVP: por enquanto só log (depois persistimos em "projetos.filtros_ativos" etc)
+    console.log("Ordenação padrão:", ordenacaoPadrao);
+    console.log("Filtros ativos:", filtros);
+    alert("Configurações salvas (por enquanto local / mock).");
   };
 
-  const handleToggleStatus = async (local) => {
-    await toggleStatus(local);
+  /* ======================================================
+     SEÇÃO 3 — GERENCIAR 'locais' (CRUD REAL)
+  ====================================================== */
+
+  // ⚠️ Ajuste estas strings quando você souber o ENUM real de `status`
+  const STATUS_VISIBLE = "ativo";  // <- ajuste se o enum for "publicado", "visivel", etc
+  const STATUS_HIDDEN  = "oculto"; // <- ajuste se o enum for "inativo", "hidden", etc
+  
+
+  const [locais, setLocais] = useState([]);
+  const [loadingLocais, setLoadingLocais] = useState(true);
+  const [errorLocais, setErrorLocais] = useState("");
+
+  const [query, setQuery] = useState(""); // busca simples no admin
+  const [onlyHidden, setOnlyHidden] = useState(false); // opcional: ver só ocultos
+  const [onlyFeatured, setOnlyFeatured] = useState(false); // opcional: ver só destaques
+
+  const [form, setForm] = useState({
+    id: null,
+    nome: "",
+    telefone: "",
+    endereco: "",
+    site: "",
+    niche: "",
+    status: STATUS_VISIBLE,
+    origem: "",
+    is_whatsapp: false,
+    instagram_url: "",
+    destaque: false,
+    image_url: "",
+    google_maps_url: "",
+    horario_fechamento: "",
+    aberto_agora: false,
+    estacionamento: false,
+    nota: null,
+    avaliacoes: null
+  });
+
+  const resetForm = () => {
+    setForm({
+      id: null,
+      nome: "",
+      telefone: "",
+      endereco: "",
+      site: "",
+      niche: "",
+      status: STATUS_VISIBLE,
+      origem: "",
+      is_whatsapp: false,
+      instagram_url: "",
+      destaque: false,
+      image_url: "",
+      google_maps_url: "",
+      horario_fechamento: "",
+      aberto_agora: false,
+      estacionamento: false,
+      nota: null,
+      avaliacoes: null
+    });
   };
 
-  if (!projeto) {
-    return (
-      <div style={{ padding: 50, textAlign: 'center' }}>
-        Carregando projeto...
-      </div>
-    );
+  // Helpers de status (robusto p/ enum desconhecido)
+  const isVisibleStatus = (s) => {
+    const v = (s || "").toString().toLowerCase().trim();
+    if (!v) return true; // se estiver null/vazio, consideramos visível por padrão
+    return ["ativo", "active", "publicado", "visivel", "online"].includes(v);
+  };
+
+  const isHiddenStatus = (s) => {
+    const v = (s || "").toString().toLowerCase().trim();
+    return ["oculto", "hidden", "inativo", "offline"].includes(v);
+  };
+
+  // Busca TOTAL (com paginação) — garante "puxar todos"
+  const fetchAllLocais = async () => {
+    setLoadingLocais(true);
+    setErrorLocais("");
+
+    try {
+      const pageSize = 1000; // Supabase costuma limitar; usamos range para paginar
+      let from = 0;
+      let all = [];
+
+      while (true) {
+        const { data, error } = await supabase
+          .from("locais")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .range(from, from + pageSize - 1);
+
+        if (error) throw error;
+
+        all = all.concat(data || []);
+        if (!data || data.length < pageSize) break;
+        from += pageSize;
+      }
+
+      setLocais(all);
+    } catch (err) {
+      console.error(err);
+      setErrorLocais(
+        err?.message ||
+          "Não foi possível carregar locais. Verifique RLS/policies e a tabela 'locais'."
+      );
+    } finally {
+      setLoadingLocais(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllLocais();
+  }, []);
+
+  // Lista filtrada (somente no dashboard)
+  const locaisFiltrados = useMemo(() => {
+    let list = [...locais];
+
+    if (query.trim()) {
+      const q = query.toLowerCase();
+      list = list.filter((l) =>
+        [l.nome, l.endereco, l.niche, l.site, l.telefone]
+          .filter(Boolean)
+          .some((x) => x.toString().toLowerCase().includes(q))
+      );
+    }
+
+    if (onlyHidden) {
+      list = list.filter((l) => isHiddenStatus(l.status));
+    }
+
+    if (onlyFeatured) {
+      list = list.filter((l) => Boolean(l.destaque));
+    }
+
+    return list;
+  }, [locais, query, onlyHidden, onlyFeatured]);
+
+const onEdit = (row) => {
+  console.log("EDITANDO:", row);
+
+  setForm({
+    id: row.id,
+    nome: row.nome || "",
+    telefone: row.telefone || "",
+    endereco: row.endereco || "",
+    site: row.site || "",
+    niche: row.niche || "",
+    status: row.status || "",
+    origem: row.origem || "",
+    is_whatsapp: Boolean(row.is_whatsapp),
+    instagram_url: row.instagram_url || "",
+    destaque: Boolean(row.destaque),
+    image_url: row.image_url || "",
+    google_maps_url: row.google_maps_url || "",
+    horario_fechamento: row.horario_fechamento || "",
+    aberto_agora: Boolean(row.aberto_agora),
+    estacionamento: Boolean(row.estacionamento),
+    nota: row.nota ?? "",
+    avaliacoes: row.avaliacoes ?? ""
+  });
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+
+
+  const onDelete = async (id) => {
+    if (!confirm("Excluir DEFINITIVAMENTE este local?")) return;
+    setErrorLocais("");
+
+    const { error } = await supabase.from("locais").delete().eq("id", id);
+    if (error) {
+      setErrorLocais(error.message);
+      return;
+    }
+
+    await fetchAllLocais();
+  };
+
+const onToggleVisibility = async (row) => {
+  const novoStatus =
+    row.status === "PUBLICAR_APP" ? "RASCUNHO" : "PUBLICAR_APP";
+
+  const { error } = await supabase
+    .from("locais")
+    .update({ status: novoStatus })
+    .eq("id", row.id);
+
+  if (error) {
+    console.error(error);
+    alert("Erro ao atualizar status");
+    return;
   }
 
-  // ==============================
-  // 🔹 RENDER
-  // ==============================
+  await fetchAllLocais();
+};
+
+
+
+
+  const onSave = async () => {
+    setErrorLocais("");
+
+    if (!form.nome.trim()) {
+      alert("Informe o nome do local.");
+      return;
+    }
+
+    const payload = {
+      nome: form.nome.trim(),
+      telefone: form.telefone || null,
+      endereco: form.endereco || null,
+      site: form.site || null,
+      niche: form.niche || null,
+      status: form.status || null,
+      origem: form.origem || null,
+      is_whatsapp: Boolean(form.is_whatsapp),
+      instagram_url: form.instagram_url || null,
+      destaque: Boolean(form.destaque),
+      image_url: form.image_url || null,
+      google_maps_url: form.google_maps_url || null,
+      horario_fechamento: form.horario_fechamento || null,
+      aberto_agora: Boolean(form.aberto_agora),
+      estacionamento: Boolean(form.estacionamento),
+      nota: form.nota === "" ? null : form.nota,
+      avaliacoes: form.avaliacoes === "" ? null : form.avaliacoes
+    };
+
+    if (form.id) {
+      const { error } = await supabase.from("locais").update(payload).eq("id", form.id);
+      if (error) {
+        setErrorLocais(error.message);
+        return;
+      }
+    } else {
+      const { error } = await supabase.from("locais").insert(payload);
+      if (error) {
+        setErrorLocais(error.message);
+        return;
+      }
+    }
+
+    resetForm();
+    await fetchAllLocais();
+  };
+
+  /* ======================================================
+     RENDER
+  ====================================================== */
+  console.log("FORM ATUAL:", form);
   return (
-    <div
-      style={{
-        background: theme.bg,
-        minHeight: '100vh',
-        color: theme.text,
-        padding: '20px',
-        fontFamily: 'sans-serif'
-      }}
-    >
+    <div style={{ padding: "24px", maxWidth: "1100px" }}>
+      <header style={{ marginBottom: "28px" }}>
+        <h1 style={{ marginBottom: 6 }}>Dashboard</h1>
+        <p style={{ color: "#64748b", fontSize: 14, margin: 0 }}>
+          Painel de administração do Pet Finder
+        </p>
+      </header>
 
-      {/* HEADER */}
-      <DashboardHeader projeto={projeto} theme={theme} />
+      {/* ======================================================
+          SEÇÃO 1 — ORDENAÇÃO
+      ====================================================== */}
+      <section style={box}>
+        <h2 style={h2}>Ordenação padrão da PetList</h2>
+        <p style={desc}>Define como os locais aparecem ao abrir o app.</p>
 
-      {/* =====================================
-    🔹 SECTION SWITCHER (Tabs de Produto)
-====================================== */}
-<div
-  style={{
-    display: 'flex',
-    gap: '4px',
-    background: 'var(--bg-card)',
-    borderRadius: '14px',
-    padding: '6px',
-    maxWidth: '420px',
-    margin: '0 auto 24px',
-    border: '1px solid var(--border-color)',
-    boxShadow: 'var(--shadow-card)'
-  }}
->
-  {/* TAB: CONFIG */}
-  <button
-    onClick={() => setModoDashboard('config')}
-    style={{
-      flex: 1,
-      padding: '12px 16px',
-      borderRadius: '10px',
-      border: 'none',
-      cursor: 'pointer',
-      fontWeight: 600,
-      fontSize: '14px',
-      background:
-        modoDashboard === 'config'
-          ? 'var(--cor-primaria)'
-          : 'transparent',
-      color:
-        modoDashboard === 'config'
-          ? '#fff'
-          : 'var(--text-secondary)',
-      transition: 'all 0.2s ease'
-    }}
-  >
-    ⚙️ Configuração do App
-  </button>
+        {[
+          ["padrao", "Padrão (sem priorização)"],
+          ["melhorNota", "Melhor nota primeiro ⭐"],
+          ["maisAvaliados", "Mais avaliados primeiro 📈"],
+          ["destaques", "Destaques (VIP) primeiro 🏆"]
+        ].map(([key, label]) => (
+          <label key={key} style={line}>
+            <input
+              type="radio"
+              name="ordenacao"
+              checked={ordenacaoPadrao === key}
+              onChange={() => setOrdenacaoPadrao(key)}
+            />{" "}
+            {label}
+          </label>
+        ))}
+      </section>
 
-  {/* TAB: LISTA */}
-  <button
-    onClick={() => setModoDashboard('lista')}
-    style={{
-      flex: 1,
-      padding: '12px 16px',
-      borderRadius: '10px',
-      border: 'none',
-      cursor: 'pointer',
-      fontWeight: 600,
-      fontSize: '14px',
-      background:
-        modoDashboard === 'lista'
-          ? 'var(--cor-primaria)'
-          : 'transparent',
-      color:
-        modoDashboard === 'lista'
-          ? '#fff'
-          : 'var(--text-secondary)',
-      transition: 'all 0.2s ease'
-    }}
-  >
-    🏪 Gerenciar Lojas
-  </button>
-</div>
+      {/* ======================================================
+          SEÇÃO 2 — FILTROS
+      ====================================================== */}
+      <section style={box}>
+        <h2 style={h2}>Filtros disponíveis na PetList</h2>
+        <p style={desc}>Define quais filtros o usuário pode ativar no app.</p>
 
-     
+        {[
+          ["categoria", "Categoria (Banho, Vet, Loja, Hotel)"],
+          ["bemAvaliados", "Apenas bem avaliados ⭐"],
+          ["instagram", "Com Instagram 📸"],
+          ["whatsapp", "WhatsApp disponível 💬"],
+          ["destaque", "Destaque (VIP) 🏷️"]
+        ].map(([key, label]) => (
+          <label key={key} style={line}>
+            <input
+              type="checkbox"
+              checked={filtros[key]}
+              onChange={() => toggleFiltro(key)}
+            />{" "}
+            {label}
+          </label>
+        ))}
 
-      {/* ==========================
-          MODO CONFIG
-      ========================== */}
-      {modoDashboard === 'config' && (
-        <ProjectFiltersPanel
-          projeto={projeto}
-          theme={theme}
-          onUpdate={(filtros) => {
-            projeto.filtros_ativos = filtros;
-          }}
-        />
-      )}
+        <button style={primaryBtn} onClick={salvarConfiguracoes}>
+          Salvar configurações
+        </button>
+      </section>
 
-      {/* ==========================
-          MODO LISTA
-      ========================== */}
-      {modoDashboard === 'lista' && (
-        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+      {/* ======================================================
+          SEÇÃO 3 — GERENCIAR LOCAIS (SUPABASE REAL)
+      ====================================================== */}
+      <section style={box}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+          <div>
+            <h2 style={h2}>Gerenciar Locais</h2>
+            <p style={desc}>
+              Lista toda a base (Supabase), com mostrar/ocultar, adicionar, editar e excluir definitivo.
+            </p>
+          </div>
 
-          <FilterBar
-            filtroStatus={filtroStatus}
-            setFiltroStatus={setFiltroStatus}
-            filtroCategoria={filtroCategoria}
-            setFiltroCategoria={setFiltroCategoria}
-            theme={theme}
-          />
+          <button style={secondaryBtn} onClick={fetchAllLocais}>
+            Recarregar base
+          </button>
+        </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {loading && (
-              <p style={{ textAlign: 'center', padding: '40px' }}>
-                Carregando dados...
-              </p>
-            )}
+        {errorLocais && (
+          <div style={{ padding: 12, border: "1px solid #fecaca", background: "#fff1f2", borderRadius: 10, marginBottom: 12 }}>
+            <strong>Erro:</strong> {errorLocais}
+            <div style={{ fontSize: 12, color: "#7f1d1d", marginTop: 6 }}>
+              Dica: se estiver vindo vazio, verifique RLS/policies de SELECT na tabela <code>locais</code>.
+            </div>
+          </div>
+        )}
 
-            {error && (
-              <div style={{ padding: '20px', color: 'red' }}>
-                Erro ao carregar dados: {error}
-              </div>
-            )}
+        {/* FORM (Adicionar/Editar) */}
 
-            {!loading && !error && locais.length === 0 && (
-              <EmptyState type="no-data" theme={theme} />
-            )}
 
-            {!loading && !error && locais.length > 0 && locaisFiltrados.length === 0 && (
-              <EmptyState type="filter" theme={theme} />
-            )}
+        <div style={{ padding: 12, border: "1px solid #e2e8f0", borderRadius: 12, marginBottom: 16 }}>
+                  <h3 style={{ marginTop: 0 }}>
+        {form.id ? "✏️ Editando local" : "➕ Adicionar novo local"}
+      </h3>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <input
+              style={input}
+              placeholder="Nome *"
+              value={form.nome}
+              onChange={(e) => setForm({ ...form, nome: e.target.value })}
+            />
+            <input
+              style={input}
+              placeholder="Telefone"
+              value={form.telefone}
+              onChange={(e) => setForm({ ...form, telefone: e.target.value })}
+            />
+            <input
+              style={input}
+              placeholder="Endereço"
+              value={form.endereco}
+              onChange={(e) => setForm({ ...form, endereco: e.target.value })}
+            />
+            <input
+              style={input}
+              placeholder="Site"
+              value={form.site}
+              onChange={(e) => setForm({ ...form, site: e.target.value })}
+            />
+            <input
+              style={input}
+              placeholder="Nicho/Categoria (niche)"
+              value={form.niche}
+              onChange={(e) => setForm({ ...form, niche: e.target.value })}
+            />
+          </div>
 
-            {!loading && !error && locaisFiltrados.map((local) =>
-              editingId === local.id ? (
-                <StoreCardEdit
-                  key={local.id}
-                  local={local}
-                  theme={theme}
-                  onSave={handleSave}
-                  onCancel={() => setEditingId(null)}
-                />
-              ) : (
-                <StoreCard
-                  key={local.id}
-                  local={local}
-                  theme={theme}
-                  onToggleStatus={handleToggleStatus}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                />
-              )
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 10 }}>
+            <label style={smallLabel}>
+              <input
+                type="checkbox"
+                checked={form.is_whatsapp}
+                onChange={(e) => setForm({ ...form, is_whatsapp: e.target.checked })}
+              />{" "}
+              WhatsApp
+            </label>
+
+            <label style={smallLabel}>
+              <input
+                type="checkbox"
+                checked={form.destaque}
+                onChange={(e) => setForm({ ...form, destaque: e.target.checked })}
+              />{" "}
+              Destaque (VIP)
+            </label>
+
+            <label style={smallLabel}>
+              <input
+                type="checkbox"
+                checked={form.estacionamento}
+                onChange={(e) => setForm({ ...form, estacionamento: e.target.checked })}
+              />{" "}
+              Estacionamento
+            </label>
+
+            <label style={smallLabel}>
+              <input
+                type="checkbox"
+                checked={form.aberto_agora}
+                onChange={(e) => setForm({ ...form, aberto_agora: e.target.checked })}
+              />{" "}
+              Aberto agora
+            </label>
+
+            <input
+              style={{ ...input, width: 180 }}
+              placeholder="Status (enum)"
+              value={form.status || ""}
+              onChange={(e) => setForm({ ...form, status: e.target.value })}
+              title="Se der erro ao salvar, o enum de status não aceita esse valor."
+            />
+          </div>
+
+          <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
+            <button style={primaryBtn} onClick={onSave}>
+              {form.id ? "Atualizar local" : "Adicionar local"}
+            </button>
+            {form.id && (
+              <button style={secondaryBtn} onClick={resetForm}>
+                Cancelar edição
+              </button>
             )}
           </div>
         </div>
-      )}
+
+        {/* Ferramentas da lista */}
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", marginBottom: 10 }}>
+          <input
+            style={{ ...input, minWidth: 260 }}
+            placeholder="Buscar por nome, endereço, niche, site, telefone…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          <label style={smallLabel}>
+            <input type="checkbox" checked={onlyHidden} onChange={(e) => setOnlyHidden(e.target.checked)} />{" "}
+            Mostrar só ocultos
+          </label>
+          <label style={smallLabel}>
+            <input type="checkbox" checked={onlyFeatured} onChange={(e) => setOnlyFeatured(e.target.checked)} />{" "}
+            Mostrar só destaques
+          </label>
+          <span style={{ fontSize: 12, color: "#64748b" }}>
+            Total carregado: <strong>{locais.length}</strong> | Exibindo: <strong>{locaisFiltrados.length}</strong>
+          </span>
+        </div>
+
+        {/* LISTA */}
+        {loadingLocais ? (
+          <p>Carregando locais do Supabase…</p>
+        ) : (
+          <div style={{ overflowX: "auto" }}>
+            <table width="100%" cellPadding="8" style={{ borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ textAlign: "left", borderBottom: "1px solid #e2e8f0" }}>
+                  <th>Nome</th>
+                  <th>Niche</th>
+                  <th>Status</th>
+                  <th>WhatsApp</th>
+                  <th>Destaque</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {locaisFiltrados.map((l) => (
+                  <tr key={l.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                    <td style={{ minWidth: 220 }}>
+                      <div style={{ fontWeight: 700 }}>{l.nome}</div>
+                      <div style={{ fontSize: 12, color: "#64748b" }}>{l.endereco || "-"}</div>
+                    </td>
+                    <td>{l.niche || "-"}</td>
+                    <td>
+                      {isHiddenStatus(l.status) ? (
+                        <span style={{ color: "#b45309", fontWeight: 700 }}>Oculto</span>
+                      ) : (
+                        <span style={{ color: "#16a34a", fontWeight: 700 }}>Visível</span>
+                      )}
+                      <div style={{ fontSize: 12, color: "#64748b" }}>{l.status || "(sem status)"}</div>
+                    </td>
+                    <td>{l.is_whatsapp ? "Sim" : "Não"}</td>
+                    <td>{l.destaque ? "⭐" : "-"}</td>
+                    <td style={{ whiteSpace: "nowrap" }}>
+                      <button style={miniBtn} onClick={() => onEdit(l)}>Editar</button>{" "}
+                      <button style={miniBtn} onClick={() => onToggleVisibility(l)}>
+                        {isHiddenStatus(l.status) ? "Mostrar" : "Ocultar"}
+                      </button>{" "}
+                      <button style={{ ...miniBtn, borderColor: "#fecaca", color: "#b91c1c" }} onClick={() => onDelete(l.id)}>
+                        Excluir
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+
+                {locaisFiltrados.length === 0 && (
+                  <tr>
+                    <td colSpan={6} style={{ padding: 14, color: "#64748b" }}>
+                      Nenhum registro encontrado.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
     </div>
   );
 }
+
+/* ======================================================
+   ESTILOS BASE (neutros, prontos p/ polish depois)
+====================================================== */
+
+const box = {
+  padding: "20px",
+  border: "1px solid #e2e8f0",
+  borderRadius: "12px",
+  marginBottom: "24px",
+  background: "#fff"
+};
+
+const h2 = { margin: "0 0 6px 0" };
+
+const desc = {
+  fontSize: "13px",
+  color: "#64748b",
+  marginBottom: "12px"
+};
+
+const line = {
+  display: "block",
+  marginBottom: "8px"
+};
+
+const input = {
+  padding: "10px",
+  borderRadius: "10px",
+  border: "1px solid #e2e8f0",
+  outline: "none",
+  minWidth: 220
+};
+
+const primaryBtn = {
+  padding: "10px 14px",
+  background: "#2563eb",
+  color: "#fff",
+  border: "none",
+  borderRadius: "10px",
+  cursor: "pointer",
+  fontWeight: 700
+};
+
+const secondaryBtn = {
+  padding: "10px 14px",
+  background: "#f1f5f9",
+  border: "1px solid #e2e8f0",
+  borderRadius: "10px",
+  cursor: "pointer",
+  fontWeight: 700
+};
+
+const miniBtn = {
+  padding: "8px 10px",
+  background: "#fff",
+  border: "1px solid #e2e8f0",
+  borderRadius: "10px",
+  cursor: "pointer",
+  fontWeight: 700
+};
+
+const smallLabel = { fontSize: "13px", color: "#334155" };
 
 ----------------------------------
 
@@ -1468,7 +1848,11 @@ import { supabase } from './supabaseClient';
 
 // Componentes
 import ChatModal from './ChatModal';
-import PetCardClassic from './components/pet/PetCardClassic';
+//import PetCardClassic from './components/pet/PetCardClassic';
+import PetCardMapStyle from './components/pet/PetCardMapStyle';
+import './styles/petlist.css';
+
+
 
 // Ícones
 import { Store, X } from 'lucide-react';
@@ -1491,6 +1875,9 @@ const getFiltrosAtivos = (projeto) => {
 export default function PetList({ projeto }) {
   const [locais, setLocais] = useState([]);
   const [locaisFiltrados, setLocaisFiltrados] = useState([]);
+
+  const [limit, setLimit] = useState(6);
+
   const [loading, setLoading] = useState(true);
 
   const [selectedLocal, setSelectedLocal] = useState(null);
@@ -1501,24 +1888,33 @@ export default function PetList({ projeto }) {
   const filtrosAtivos = getFiltrosAtivos(projeto);
   const hasFiltro = (id) => filtrosAtivos.includes(id);
 
-  // ======================================================
-  // 🔹 BUSCA DE LOCAIS
-  // ======================================================
-  useEffect(() => {
-    async function buscarLocais() {
-      setLoading(true);
+// ======================================================
+// 🔹 BUSCA DE LOCAIS (APENAS PUBLICADOS NO APP)
+// ======================================================
+useEffect(() => {
+  async function buscarLocais() {
+    setLoading(true);
 
-      const { data, error } = await supabase
-        .from('locais')
-        .select('*')
-        .eq('projeto_id', projeto.id);
+    const { data, error } = await supabase
+      .from("locais")
+      .select("*")
+      .eq("status", "PUBLICAR_APP")
+      .order("created_at", { ascending: false });
 
+    if (error) {
+      console.error("Erro ao buscar locais:", error);
+      setLocais([]);
+    } else {
       setLocais(data || []);
-      setLoading(false);
     }
 
-    if (projeto?.id) buscarLocais();
-  }, [projeto]);
+    setLoading(false);
+  }
+
+  buscarLocais();
+}, []);
+
+
 
   // ======================================================
   // 🔹 FILTROS + ORDENAÇÃO
@@ -1604,14 +2000,32 @@ export default function PetList({ projeto }) {
       {loading && <p>Carregando...</p>}
 
       {!loading && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {locaisFiltrados.map((local) => (
-            <PetCardClassic
-              key={local.id}
-              local={local}
-              onSelect={(local) => setSelectedLocal(local)}
-            />
+        <div className="petlist-container" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {locaisFiltrados.slice(0, limit).map((local) => (
+        <PetCardMapStyle
+            key={local.id}
+            local={local}
+            onOpenChat={(local) => setSelectedLocal(local)}
+          />
           ))}
+          {limit < locaisFiltrados.length && (
+      <button
+        onClick={() => setLimit((prev) => prev + 6)}
+        style={{
+          margin: '20px auto',
+          display: 'block',
+          padding: '12px 20px',
+          borderRadius: '12px',
+          border: '1px solid #e2e8f0',
+          background: '#fff',
+          fontWeight: 600,
+          cursor: 'pointer'
+        }}
+      >
+        Carregar mais
+      </button>
+    )}
+
         </div>
       )}
 
@@ -3031,6 +3445,307 @@ export default function PetCardClassic({ local, onOpenChat }) {
 
 ----------------------------------
 
+--- ARQUIVO: src/components/pet/PetCardMapStyle.jsx ---
+// src/components/pet/PetCardMapStyle.jsx
+import React, { useState } from "react";
+import {
+  Star,
+  MessageCircle,
+  Scissors,
+  Stethoscope,
+  Car,
+  ChevronDown,
+  ChevronUp,
+  MapPin,
+  Award
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import "../../styles/pet-card.css";
+
+
+
+
+export default function PetCardMapStyle({ local, onOpenChat }) {
+  const nota = Number(local.nota || 0);
+  const avaliacoes = Number(local.avaliacoes || 0);
+  const [expanded, setExpanded] = useState(false);
+  const isVip = Boolean(local.destaque);
+  
+
+
+ const imagem =
+  typeof local.image_url === 'string' && local.image_url.trim() !== ''
+    ? local.image_url
+    : 'https://images.unsplash.com/photo-1518717758536-85ae29035b6d?auto=format&fit=crop&w=800&q=80';
+
+
+  return (
+    <div
+      style={{
+        background: "#fff",
+        borderRadius: "16px",
+        overflow: "hidden",
+        boxShadow: "0 6px 18px rgba(0,0,0,0.08)"
+      }}
+    >
+      {/* IMAGEM */}
+      <div style={{ position: "relative" }}>
+      <img
+        src={imagem}
+        alt={local.nome}
+        loading="lazy"
+        onError={(e) => {
+          e.currentTarget.onerror = null;
+          e.currentTarget.src =
+            'https://images.unsplash.com/photo-1518717758536-85ae29035b6d?auto=format&fit=crop&w=800&q=80';
+        }}
+        style={{
+          width: '100%',
+          height: '160px',
+          objectFit: 'cover'
+        }}
+      />
+
+{/* BADGE VIP — GOLD PREMIUM */}
+{isVip && (
+  <div
+    style={{
+      position: "absolute",
+      top: 12,
+      right: 12,
+      padding: "6px 14px",
+      borderRadius: "999px",
+      fontSize: "11px",
+      fontWeight: 800,
+      letterSpacing: "0.4px",
+      color: "#3b2f0b",
+      background:
+        "linear-gradient(135deg, #f6e27a 0%, #facc15 35%, #eab308 65%, #a16207 100%)",
+      border: "1px solid rgba(255,255,255,0.6)",
+      boxShadow:
+        "0 0 0 1px rgba(250,204,21,0.35), 0 8px 22px rgba(250,204,21,0.45)",
+      textShadow: "0 1px 0 rgba(255,255,255,0.6)",
+      display: "flex",
+      alignItems: "center",
+      gap: "6px",
+      backdropFilter: "blur(4px)"
+    }}
+  >
+    <Award size={14} />
+    VIP
+  </div>
+)}
+
+
+
+
+        {local.aberto_agora && (
+          <span
+            style={{
+              position: "absolute",
+              top: 12,
+              left: 12,
+              background: "#22c55e",
+              color: "#fff",
+              fontSize: "11px",
+              fontWeight: 700,
+              padding: "4px 10px",
+              borderRadius: "999px"
+            }}
+          >
+            ABERTO AGORA
+          </span>
+        )}
+      </div>
+
+      {/* CONTEÚDO */}
+      <div  className="pet-card" style={{ padding: "14px" }}>
+        <h3 className="pet-title">{local.nome}</h3>
+
+        {/* NOTA */}
+        {nota > 0 && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              marginTop: "4px",
+              fontSize: "13px",
+              color: "#475569"
+            }}
+          >
+            <Star size={14} fill="#facc15" color="#facc15" />
+            <strong>{nota.toFixed(1)}</strong>
+            <span>({avaliacoes} avaliações)</span>
+          </div>
+        )}
+
+        {/* INFO */}
+<div className="pet-info-grid">
+  {local.horario_fechamento && (
+    <div className="pet-info-item">
+      <span className="pet-info-icon">⏰</span>
+      <span>Até {local.horario_fechamento}</span>
+    </div>
+  )}
+
+  {local.tags?.includes("banho") && (
+    <div className="pet-info-item">
+      <Scissors size={14} />
+      <span>Banho e Tosa</span>
+    </div>
+  )}
+
+  {local.tags?.includes("vet") && (
+    <div className="pet-info-item">
+      <Stethoscope size={14} />
+      <span>Veterinário</span>
+    </div>
+  )}
+
+  {local.estacionamento && (
+    <div className="pet-info-item">
+      <Car size={14} />
+      <span>Estacionamento</span>
+    </div>
+  )}
+</div>
+
+
+{/* =========================
+    CARREGAR MAIS — MOTION REAL
+========================= */}
+<button
+  type="button"
+  onClick={() => setExpanded((v) => !v)}
+  style={{
+    marginTop: "12px",
+    width: "100%",
+    background: expanded ? "#f8fafc" : "transparent",
+    border: "1px solid #e2e8f0",
+    borderRadius: "12px",
+    padding: "10px",
+    fontSize: "13px",
+    cursor: "pointer",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: "8px",
+    fontWeight: 600,
+    color: "#334155"
+  }}
+>
+  <div
+  style={{
+    marginTop: "8px",
+    fontSize: "12px",
+    color: "#64748b",
+    textAlign: "center"
+  }}
+>
+  Toque para ver endereço e mais informações
+</div>
+ {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+</button>
+
+<AnimatePresence initial={false}>
+  {expanded && (
+    <motion.div
+      initial={{ opacity: 0, y: -6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -6 }}
+      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      style={{ marginTop: "10px" }}
+    >
+      <div
+        style={{
+          padding: "12px",
+          background: "#f8fafc",
+          borderRadius: "12px",
+          fontSize: "13px",
+          color: "#475569",
+          display: "flex",
+          flexDirection: "column",
+          gap: "8px",
+          border: "1px solid #e2e8f0"
+        }}
+      >
+        {/* Status */}
+        {local.aberto_agora !== null && (
+          <div>{local.aberto_agora ? "🟢 Aberto agora" : "🔴 Fechado"}</div>
+        )}
+
+        {/* Horário */}
+        {local.horario_fechamento && (
+          <div>⏰ Até {local.horario_fechamento}</div>
+        )}
+
+        {/* Endereço */}
+        {local.endereco && (
+          <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+            <MapPin size={16} style={{ marginTop: 2 }} />
+            <span>{local.endereco}</span>
+          </div>
+        )}
+
+        {/* Estacionamento */}
+        {local.estacionamento && <div>🅿️ Estacionamento disponível</div>}
+
+        {/* Tags */}
+        {Array.isArray(local.tags) && local.tags.length > 0 && (
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 4 }}>
+            {local.tags.map((tag) => (
+              <span
+                key={tag}
+                style={{
+                  background: "#ffffff",
+                  border: "1px solid #e2e8f0",
+                  fontSize: "11px",
+                  padding: "4px 10px",
+                  borderRadius: "999px",
+                  fontWeight: 600
+                }}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
+
+        {/* CTA */}
+        <button className="btn-whatsapp"
+          onClick={() => onOpenChat(local)}
+          style={{
+            marginTop: "14px",
+            width: "100%",
+            background: "#25D366",
+            color: "#fff",
+            fontWeight: 700,
+            border: "none",
+            borderRadius: "10px",
+            padding: "12px",
+            cursor: "pointer",
+            display: "flex",
+            justifyContent: "center",
+            gap: "8px"
+          }}
+        >
+          
+
+          <MessageCircle size={18} /> Falar no WhatsApp
+        </button>
+      </div>
+    </div>
+  );
+}
+
+----------------------------------
+
 --- ARQUIVO: src/components/ui/Badge.jsx ---
 
 
@@ -3641,7 +4356,15 @@ body {
 
   min-width: 320px;
   min-height: 100vh;
+
+
+  font-family: var(--font-main);
+  background-color: var(--color-bg);
+  color: var(--color-text);
 }
+
+
+
 
 /* ======================================================
    🔹 TÍTULOS
@@ -3744,6 +4467,8 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
+import './styles/theme.css';
+
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -3751,6 +4476,147 @@ createRoot(document.getElementById('root')).render(
   </StrictMode>,
 )
 
+
+
+----------------------------------
+
+--- ARQUIVO: src/styles/components.css ---
+.card {
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  padding: 16px;
+  border: 1px solid var(--color-border);
+}
+
+----------------------------------
+
+--- ARQUIVO: src/styles/pet-card.css ---
+.pet-card {
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  padding: 16px;
+  border: 1px solid var(--color-border);
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pet-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.pet-meta {
+  font-size: 13px;
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.btn-whatsapp {
+  background: var(--color-whatsapp);
+  color: #fff;
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-whatsapp:hover {
+  background: var(--color-whatsapp-hover);
+}
+
+
+.badge-vip {
+  align-self: flex-start;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 999px;
+}
+
+
+.pet-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.pet-info-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.2;
+}
+
+.pet-info-icon {
+  font-size: 14px;
+}
+
+----------------------------------
+
+--- ARQUIVO: src/styles/petlist.css ---
+.petlist-container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+----------------------------------
+
+--- ARQUIVO: src/styles/theme.css ---
+:root {
+  /* 🎨 CORES */
+  --color-bg: #F8FAF9;
+  --color-card: #FFFFFF;
+  --color-border: #E6E8EB;
+
+  --color-text: #1F2933;
+  --color-muted: #6B7280;
+
+  --color-primary: #2563eb;
+  --color-accent: #C8A94A;      /* VIP */
+  --color-accent-soft: #F6F1DF;
+
+  --color-whatsapp: #2FBF71;
+  --color-whatsapp-hover: #28A863;
+
+  /* 🧱 LAYOUT */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+
+  --shadow-soft: 0 6px 20px rgba(0,0,0,0.06);
+
+  /* ✍️ TIPOGRAFIA */
+  --font-main: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+
+body {
+  outline: 5px solid red;
+}
 
 ----------------------------------
 

@@ -1,0 +1,31 @@
+:root {
+  /* 🎨 CORES */
+  --color-bg: #F8FAF9;
+  --color-card: #FFFFFF;
+  --color-border: #E6E8EB;
+
+  --color-text: #1F2933;
+  --color-muted: #6B7280;
+
+  --color-primary: #2563eb;
+  --color-accent: #C8A94A;      /* VIP */
+  --color-accent-soft: #F6F1DF;
+
+  --color-whatsapp: #2FBF71;
+  --color-whatsapp-hover: #28A863;
+
+  /* 🧱 LAYOUT */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+
+  --shadow-soft: 0 6px 20px rgba(0,0,0,0.06);
+
+  /* ✍️ TIPOGRAFIA */
+  --font-main: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+
+body {
+  outline: 5px solid red;
+}

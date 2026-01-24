@@ -12,6 +12,8 @@ import {
   Award
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import "../../styles/pet-card.css";
+
 
 
 
@@ -56,35 +58,15 @@ export default function PetCardMapStyle({ local, onOpenChat }) {
         }}
       />
 
-{/* BADGE VIP — GOLD PREMIUM */}
+
+{/* BADGE VIP */}
 {isVip && (
-  <div
-    style={{
-      position: "absolute",
-      top: 12,
-      right: 12,
-      padding: "6px 14px",
-      borderRadius: "999px",
-      fontSize: "11px",
-      fontWeight: 800,
-      letterSpacing: "0.4px",
-      color: "#3b2f0b",
-      background:
-        "linear-gradient(135deg, #f6e27a 0%, #facc15 35%, #eab308 65%, #a16207 100%)",
-      border: "1px solid rgba(255,255,255,0.6)",
-      boxShadow:
-        "0 0 0 1px rgba(250,204,21,0.35), 0 8px 22px rgba(250,204,21,0.45)",
-      textShadow: "0 1px 0 rgba(255,255,255,0.6)",
-      display: "flex",
-      alignItems: "center",
-      gap: "6px",
-      backdropFilter: "blur(4px)"
-    }}
-  >
+  <div className="badge-vip">
     <Award size={14} />
-    VIP
+    <span>VIP</span>
   </div>
 )}
+
 
 
 
@@ -109,10 +91,8 @@ export default function PetCardMapStyle({ local, onOpenChat }) {
       </div>
 
       {/* CONTEÚDO */}
-      <div style={{ padding: "14px" }}>
-        <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 700 }}>
-          {local.nome}
-        </h3>
+      <div  className="pet-card" style={{ padding: "14px" }}>
+        <h3 className="pet-title">{local.nome}</h3>
 
         {/* NOTA */}
         {nota > 0 && (
@@ -133,35 +113,36 @@ export default function PetCardMapStyle({ local, onOpenChat }) {
         )}
 
         {/* INFO */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "6px",
-            marginTop: "10px",
-            fontSize: "13px",
-            color: "#475569"
-          }}
-        >
-          {local.horario_fechamento && (
-            <div>⏰ Até {local.horario_fechamento}</div>
-          )}
-          {local.tags?.includes("banho") && (
-            <div style={{ display: "flex", gap: 6 }}>
-              <Scissors size={14} /> Banho e Tosa
-            </div>
-          )}
-          {local.tags?.includes("vet") && (
-            <div style={{ display: "flex", gap: 6 }}>
-              <Stethoscope size={14} /> Veterinário
-            </div>
-          )}
-          {local.estacionamento && (
-            <div style={{ display: "flex", gap: 6 }}>
-              <Car size={14} /> Estacionamento
-            </div>
-          )}
-        </div>
+<div className="pet-info-grid">
+  {local.horario_fechamento && (
+    <div className="pet-info-item">
+      <span className="pet-info-icon">⏰</span>
+      <span>Até {local.horario_fechamento}</span>
+    </div>
+  )}
+
+  {local.tags?.includes("banho") && (
+    <div className="pet-info-item">
+      <Scissors size={14} />
+      <span>Banho e Tosa</span>
+    </div>
+  )}
+
+  {local.tags?.includes("vet") && (
+    <div className="pet-info-item">
+      <Stethoscope size={14} />
+      <span>Veterinário</span>
+    </div>
+  )}
+
+  {local.estacionamento && (
+    <div className="pet-info-item">
+      <Car size={14} />
+      <span>Estacionamento</span>
+    </div>
+  )}
+</div>
+
 
 {/* =========================
     CARREGAR MAIS — MOTION REAL
@@ -269,7 +250,7 @@ export default function PetCardMapStyle({ local, onOpenChat }) {
 
 
         {/* CTA */}
-        <button
+        <button className="btn-whatsapp"
           onClick={() => onOpenChat(local)}
           style={{
             marginTop: "14px",

@@ -40,6 +40,9 @@ import { FolderPlus } from 'lucide-react';
 import PetList from './PetList';
 import AdminGenerator from './AdminGenerator';
 import Dashboard from './Dashboard';
+import './styles/components.css';
+import './styles/theme.css';
+
 
 // ======================================================
 // 🔹 COMPONENTE: UniversalLoader
