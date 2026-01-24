@@ -1,168 +1,113 @@
 /* ======================================================
-   📄 global.css / main.css
-   Estilos Globais da Aplicação
-   ======================================================
-
-   🎯 PROPÓSITO
-   - Definir base visual e tipográfica do app
-   - Garantir legibilidade, consistência e performance
-   - Preparar o app para comportamento "App-like"
-
-   🧠 MODELO MENTAL
-   - Este arquivo:
-     ✅ define defaults
-     ✅ controla UX global
-     ❌ não estiliza componentes específicos
-
-   🔒 CONTRATO
-   - Nenhuma regra de layout de tela aqui
-   - Nenhuma regra específica de Dashboard, Card ou Modal
-   - Apenas fundamentos
-*/
+   📄 index.css / global.css
+   Base global da aplicação
+   ====================================================== */
 
 /* ======================================================
-   🔹 VARIÁVEIS & BASE TIPOGRÁFICA
+   🔹 RESET BÁSICO
+   ====================================================== */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
+/* ======================================================
+   🔹 VARIÁVEIS & TIPOGRAFIA BASE
    ====================================================== */
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  /* Tipografia */
+  --font-main: system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
-  /* Esquema de cores padrão (dark-first) */
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* Cores base */
+  --color-bg: #f8fafc;
+  --color-text: #0f172a;
+  --color-muted: #64748b;
+  --color-border: #e2e8f0;
 
-  /* Qualidade de renderização */
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Brand (ajustável depois) */
+  --color-primary: #2563eb;
+  --color-primary-soft: #dbeafe;
+
+  /* App shell */
+  --app-max-width: 420px;
+}
+
+body {
+  font-family: var(--font-main);
+  color: var(--color-text);
+  background: var(--color-bg);
+
+  /* Centralização HORIZONTAL tipo app */
+  display: flex;
+  justify-content: center;
+
+  /* ⚠️ NUNCA centralizar verticalmente no body */
+}
+
+/* ======================================================
+   🔹 ROOT DO REACT
+   ====================================================== */
+#root {
+  width: 100%;
+  max-width: var(--app-max-width);
+  min-height: 100vh;
+
+  /* Importante para páginas longas */
+  display: block;
 }
 
 /* ======================================================
    🔹 LINKS
    ====================================================== */
 a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+  color: var(--color-primary);
+  text-decoration: none;
 }
 
 a:hover {
-  color: #535bf2;
+  text-decoration: underline;
 }
 
 /* ======================================================
-   🔹 BODY (LAYOUT BASE)
-   ====================================================== */
-body {
-  margin: 0;
-
-  /* Centralização padrão (modo app / landing) */
-  display: flex;
-  place-items: center;
-
-  min-width: 320px;
-  min-height: 100vh;
-
-
-  font-family: var(--font-main);
-  background-color: var(--color-bg);
-  color: var(--color-text);
-}
-
-
-
-
-/* ======================================================
-   🔹 TÍTULOS
-   ====================================================== */
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-/* ======================================================
-   🔹 BOTÕES (BASE GLOBAL)
+   🔹 BOTÕES (BASE NEUTRA)
    ====================================================== */
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-
-  padding: 0.6em 1.2em;
-
-  font-size: 1em;
-  font-weight: 500;
   font-family: inherit;
-
-  background-color: #1a1a1a;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: #fff;
+  color: inherit;
   cursor: pointer;
 
-  transition: border-color 0.25s;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 button:hover {
-  border-color: #646cff;
-}
-
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-/* ======================================================
-   🔹 MODO LIGHT (PREFERÊNCIA DO SISTEMA)
-   ====================================================== */
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-
-  a:hover {
-    color: #747bff;
-  }
-
-  button {
-    background-color: #f9f9f9;
-  }
+  background: #f1f5f9;
 }
 
 /* ======================================================
    🔹 SCROLLBAR (DESKTOP)
-   ====================================================== 
-   🎯 UX
-   - Scroll discreto
-   - Aparência clean
-   - Não interfere no layout
-*/
+   ====================================================== */
 ::-webkit-scrollbar {
   width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  border-radius: 6px;
 }
 
 /* ======================================================
    🔹 SCROLLBAR (MOBILE / APP-LIKE)
-   ====================================================== 
-   🎯 UX
-   - Esconde completamente
-   - Mantém scroll funcional
-   - Sensação de aplicativo nativo
-*/
+   ====================================================== */
 @media (max-width: 768px) {
   ::-webkit-scrollbar {
     display: none;
