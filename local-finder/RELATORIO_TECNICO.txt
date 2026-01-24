@@ -1,5 +1,5 @@
 RELATÓRIO TÉCNICO DO PROJETO
-Data: 18/01/2026, 22:41:21
+Data: 24/01/2026, 15:01:16
 
 --- PACKAGE.JSON ---
 {
@@ -1205,34 +1205,7 @@ export default function ChatModal({ local, projeto, onClose }) {
 // 📄 Dashboard.jsx
 // Painel Administrativo do Projeto
 // ======================================================
-//
-// 🎯 PROPÓSITO
-// - Centralizar o controle do projeto
-// - Alternar entre:
-//   • Configuração do App
-//   • Gestão de Lojas (CRUD)
-//
-// 🧠 MODELO MENTAL
-// - Dashboard é um ORQUESTRADOR
-// - Ele NÃO:
-//   ❌ busca dados direto
-//   ❌ filtra manualmente
-//   ❌ renderiza lógica complexa
-//
-// - Ele APENAS:
-//   ✅ conecta hooks
-//   ✅ distribui props
-//   ✅ decide o modo visual
-//
-// 🔒 CONTRATO
-// - Nenhuma query direta aqui
-// - Nenhuma regra de negócio pesada
-// - Hooks fazem o trabalho sujo
-//
 
-// ======================================================
-// 🔹 DEPENDÊNCIAS
-// ======================================================
 import React, { useState } from 'react';
 
 // Hooks
@@ -1250,31 +1223,18 @@ import StoreCardEdit from './components/dashboard/StoreCardEdit';
 import EmptyState from './components/dashboard/EmptyState';
 import ProjectFiltersPanel from './components/dashboard/ProjectFiltersPanel';
 
-// ======================================================
-// 🔹 COMPONENTE: Dashboard
-// ======================================================
-//
-// 🔑 PROPS
-// - projeto → objeto completo do projeto (slug, cores, filtros, etc)
-//
 export default function Dashboard({ projeto }) {
 
   // ==============================
   // 🔹 ESTADOS DE CONTROLE
   // ==============================
-  //
-  // modoDashboard:
-  // - 'config' → configurações do app
-  // - 'lista'  → gerenciamento das lojas
-  //
   const [modoDashboard, setModoDashboard] = useState('config');
   const [editingId, setEditingId] = useState(null);
 
-  // Tema visual baseado no projeto
   const theme = getTheme(projeto);
 
   // ==============================
-  // 🔹 HOOK: DADOS (CRUD)
+  // 🔹 HOOKS
   // ==============================
   const {
     locais,
@@ -1285,9 +1245,6 @@ export default function Dashboard({ projeto }) {
     deleteLocal
   } = useDashboardData(projeto?.id);
 
-  // ==============================
-  // 🔹 HOOK: FILTROS + ORDENAÇÃO
-  // ==============================
   const {
     filtroStatus,
     setFiltroStatus,
@@ -1300,11 +1257,9 @@ export default function Dashboard({ projeto }) {
   );
 
   // ==============================
-  // 🔹 HANDLERS (AÇÕES DO USUÁRIO)
+  // 🔹 HANDLERS
   // ==============================
-  const handleEdit = (local) => {
-    setEditingId(local.id);
-  };
+  const handleEdit = (local) => setEditingId(local.id);
 
   const handleSave = async (id, updates) => {
     await updateLocal(id, updates);
@@ -1320,9 +1275,6 @@ export default function Dashboard({ projeto }) {
     await toggleStatus(local);
   };
 
-  // ==============================
-  // 🔹 FALLBACK DE SEGURANÇA
-  // ==============================
   if (!projeto) {
     return (
       <div style={{ padding: 50, textAlign: 'center' }}>
@@ -1332,7 +1284,7 @@ export default function Dashboard({ projeto }) {
   }
 
   // ==============================
-  // 🔹 RENDERIZAÇÃO
+  // 🔹 RENDER
   // ==============================
   return (
     <div
@@ -1345,102 +1297,97 @@ export default function Dashboard({ projeto }) {
       }}
     >
 
-      {/* =====================================
-          🔴 BLOCOS DE TESTE (DEBUG)
-          (podem ser removidos depois)
-      ====================================== */}
-      <div style={{ background: 'purple', color: 'white', padding: '40px' }}>
-        TESTE: DASHBOARD JSX
-      </div>
-
-      {/* =====================================
-          🔹 HEADER DO DASHBOARD
-      ====================================== */}
+      {/* HEADER */}
       <DashboardHeader projeto={projeto} theme={theme} />
 
-      <div style={{ background: 'blue', color: 'white', padding: '20px' }}>
-        TESTE: DASHBOARD ESTÁ RENDERIZANDO
-      </div>
-
       {/* =====================================
-          🔹 PAINEL GLOBAL DE FILTROS DO APP
-          (sempre visível no topo)
-      ====================================== */}
-      <ProjectFiltersPanel
-        projeto={projeto}
-        theme={theme}
-        onUpdate={() => {}}
-      />
+    🔹 SECTION SWITCHER (Tabs de Produto)
+====================================== */}
+<div
+  style={{
+    display: 'flex',
+    gap: '4px',
+    background: 'var(--bg-card)',
+    borderRadius: '14px',
+    padding: '6px',
+    maxWidth: '420px',
+    margin: '0 auto 24px',
+    border: '1px solid var(--border-color)',
+    boxShadow: 'var(--shadow-card)'
+  }}
+>
+  {/* TAB: CONFIG */}
+  <button
+    onClick={() => setModoDashboard('config')}
+    style={{
+      flex: 1,
+      padding: '12px 16px',
+      borderRadius: '10px',
+      border: 'none',
+      cursor: 'pointer',
+      fontWeight: 600,
+      fontSize: '14px',
+      background:
+        modoDashboard === 'config'
+          ? 'var(--cor-primaria)'
+          : 'transparent',
+      color:
+        modoDashboard === 'config'
+          ? '#fff'
+          : 'var(--text-secondary)',
+      transition: 'all 0.2s ease'
+    }}
+  >
+    ⚙️ Configuração do App
+  </button>
 
-      {/* =====================================
-          🔹 TOGGLE DE MODO
-          (Configuração ↔ Lista)
-      ====================================== */}
-      <div style={{ display: 'flex', gap: '8px', padding: '0 20px 20px' }}>
-        <button
-          onClick={() => setModoDashboard('config')}
-          style={{
-            padding: '10px 16px',
-            borderRadius: 'var(--radius-btn)',
-            border: '1px solid var(--border-color)',
-            background:
-              modoDashboard === 'config'
-                ? 'var(--cor-primaria)'
-                : 'var(--bg-card)',
-            color:
-              modoDashboard === 'config'
-                ? '#fff'
-                : 'var(--text-secondary)',
-            fontWeight: 600,
-            cursor: 'pointer'
-          }}
-        >
-          ⚙️ Configurar App
-        </button>
+  {/* TAB: LISTA */}
+  <button
+    onClick={() => setModoDashboard('lista')}
+    style={{
+      flex: 1,
+      padding: '12px 16px',
+      borderRadius: '10px',
+      border: 'none',
+      cursor: 'pointer',
+      fontWeight: 600,
+      fontSize: '14px',
+      background:
+        modoDashboard === 'lista'
+          ? 'var(--cor-primaria)'
+          : 'transparent',
+      color:
+        modoDashboard === 'lista'
+          ? '#fff'
+          : 'var(--text-secondary)',
+      transition: 'all 0.2s ease'
+    }}
+  >
+    🏪 Gerenciar Lojas
+  </button>
+</div>
 
-        <button
-          onClick={() => setModoDashboard('lista')}
-          style={{
-            padding: '10px 16px',
-            borderRadius: 'var(--radius-btn)',
-            border: '1px solid var(--border-color)',
-            background:
-              modoDashboard === 'lista'
-                ? 'var(--cor-primaria)'
-                : 'var(--bg-card)',
-            color:
-              modoDashboard === 'lista'
-                ? '#fff'
-                : 'var(--text-secondary)',
-            fontWeight: 600,
-            cursor: 'pointer'
-          }}
-        >
-          🏪 Ver Pet Shops
-        </button>
-      </div>
+     
 
-      {/* =====================================
-          🔹 MODO: CONFIGURAÇÃO DO APP
-      ====================================== */}
+      {/* ==========================
+          MODO CONFIG
+      ========================== */}
       {modoDashboard === 'config' && (
         <ProjectFiltersPanel
           projeto={projeto}
           theme={theme}
           onUpdate={(filtros) => {
-            // atualização local do projeto
             projeto.filtros_ativos = filtros;
           }}
         />
       )}
 
-      {/* =====================================
-          🔹 MODO: LISTA DE LOJAS
-      ====================================== */}
+      {/* ==========================
+          MODO LISTA
+      ========================== */}
       {modoDashboard === 'lista' && (
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
 
-          {/* BARRA DE FILTROS */}
           <FilterBar
             filtroStatus={filtroStatus}
             setFiltroStatus={setFiltroStatus}
@@ -1449,9 +1396,7 @@ export default function Dashboard({ projeto }) {
             theme={theme}
           />
 
-          {/* LISTAGEM */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-
             {loading && (
               <p style={{ textAlign: 'center', padding: '40px' }}>
                 Carregando dados...
@@ -1468,35 +1413,30 @@ export default function Dashboard({ projeto }) {
               <EmptyState type="no-data" theme={theme} />
             )}
 
-            {!loading &&
-              !error &&
-              locais.length > 0 &&
-              locaisFiltrados.length === 0 && (
-                <EmptyState type="filter" theme={theme} />
-              )}
+            {!loading && !error && locais.length > 0 && locaisFiltrados.length === 0 && (
+              <EmptyState type="filter" theme={theme} />
+            )}
 
-            {!loading &&
-              !error &&
-              locaisFiltrados.map((local) =>
-                editingId === local.id ? (
-                  <StoreCardEdit
-                    key={local.id}
-                    local={local}
-                    theme={theme}
-                    onSave={handleSave}
-                    onCancel={() => setEditingId(null)}
-                  />
-                ) : (
-                  <StoreCard
-                    key={local.id}
-                    local={local}
-                    theme={theme}
-                    onToggleStatus={handleToggleStatus}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                  />
-                )
-              )}
+            {!loading && !error && locaisFiltrados.map((local) =>
+              editingId === local.id ? (
+                <StoreCardEdit
+                  key={local.id}
+                  local={local}
+                  theme={theme}
+                  onSave={handleSave}
+                  onCancel={() => setEditingId(null)}
+                />
+              ) : (
+                <StoreCard
+                  key={local.id}
+                  local={local}
+                  theme={theme}
+                  onToggleStatus={handleToggleStatus}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              )
+            )}
           </div>
         </div>
       )}
@@ -1509,333 +1449,173 @@ export default function Dashboard({ projeto }) {
 --- ARQUIVO: src/PetList.jsx ---
 // ======================================================
 // 📄 PetList.jsx
-// Página pública do App (Lista de estabelecimentos)
+// Tela principal do App (usuário final)
 // ======================================================
 //
-// 🎯 PAPEL DESTA TELA
-// - É a PRINCIPAL tela do usuário final
-// - Funciona como um "marketplace local"
-// - Cada CARD é uma mini landing page
-// - Conversão principal: WhatsApp
-//
-// 🧠 MODELO MENTAL
-// - Recebe o projeto já resolvido pelo Router
-// - Busca os locais do projeto
-// - Aplica filtros ATIVOS do projeto
-// - Renderiza cards + CTA
+// 🎯 PROPÓSITO
+// - Listar pet shops do projeto
+// - Permitir filtros e ordenação
+// - Exibir cards interativos
 //
 // 🔒 CONTRATO
-// - Nunca quebrar render
-// - Falhas silenciosas
-// - Sempre mostrar algo (ou Empty State)
-// - Mobile-first
+// - Não escreve no banco
+// - Apenas leitura + interação
 //
 
 import React, { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
 
-// Ícones
-import {
-  MessageCircle,
-  MapPin,
-  Store,
-  Award
-} from 'lucide-react';
 
-// Modal de conversa (lead → WhatsApp)
+// Componentes
 import ChatModal from './ChatModal';
+import PetCardClassic from './components/pet/PetCardClassic';
 
-// Embed Instagram (VIP)
-import { InstagramEmbed } from 'react-social-media-embed';
-
-// ======================================================
-// 🔹 PLACEHOLDER VISUAL (quando não existe logo)
-// ======================================================
-//
-// 🎯 Intenção:
-// - Evitar cards “quebrados”
-// - Garantir identidade visual mínima
-// - Comunicar categoria de forma simbólica
-//
-function getPlaceholderByCategory(tags = []) {
-  const base = {
-    width: '100%',
-    height: '120px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '42px',
-    background: '#f1f5f9'
-  };
-
-  if (!Array.isArray(tags)) return { ...base, icon: '🏪' };
-  if (tags.includes('vet')) return { ...base, icon: '🏥' };
-  if (tags.includes('banho')) return { ...base, icon: '✂️' };
-  if (tags.includes('hotel')) return { ...base, icon: '🏠' };
-
-  return { ...base, icon: '🏪' };
-}
+// Ícones
+import { Store, X } from 'lucide-react';
 
 // ======================================================
-// 🔹 COMPONENTE PRINCIPAL
+// 🔹 HELPERS
+// ======================================================
+const DEFAULT_FILTROS_APP = ['categoria', 'bem_avaliados', 'com_instagram'];
+
+const getFiltrosAtivos = (projeto) => {
+  if (Array.isArray(projeto?.filtros_ativos) && projeto.filtros_ativos.length > 0) {
+    return projeto.filtros_ativos;
+  }
+  return DEFAULT_FILTROS_APP;
+};
+
+// ======================================================
+// 🔹 COMPONENTE
 // ======================================================
 export default function PetList({ projeto }) {
-
-  // ==============================
-  // 🔹 ESTADOS PRINCIPAIS
-  // ==============================
-  //
-  // locais        → dados crus do banco
-  // loading       → loading global
-  // selectedLocal → abre modal de conversa
-  //
   const [locais, setLocais] = useState([]);
+  const [locaisFiltrados, setLocaisFiltrados] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const [selectedLocal, setSelectedLocal] = useState(null);
 
-  // ==============================
-  // 🔹 FETCH DE DADOS
-  // ==============================
-  //
-  // 🎯 Intenção:
-  // Buscar todos os locais publicados do projeto
-  //
-  useEffect(() => {
-    async function fetchLocais() {
-      if (!projeto?.id) return;
+  const [filtroCategoria, setFiltroCategoria] = useState(null);
+  const [ordenacao, setOrdenacao] = useState('melhor_nota');
 
+  const filtrosAtivos = getFiltrosAtivos(projeto);
+  const hasFiltro = (id) => filtrosAtivos.includes(id);
+
+  // ======================================================
+  // 🔹 BUSCA DE LOCAIS
+  // ======================================================
+  useEffect(() => {
+    async function buscarLocais() {
       setLoading(true);
 
       const { data, error } = await supabase
         .from('locais')
         .select('*')
-        .eq('projeto_id', projeto.id)
-        .eq('status', 'PUBLICAR_APP');
+        .eq('projeto_id', projeto.id);
 
-      if (error) {
-        console.error('Erro ao buscar locais:', error);
-        setLocais([]);
-      } else {
-        setLocais(data || []);
-      }
-
+      setLocais(data || []);
       setLoading(false);
     }
 
-    fetchLocais();
+    if (projeto?.id) buscarLocais();
   }, [projeto]);
 
-  // ==============================
-  // 🔹 THEME (CSS VARIABLES)
-  // ==============================
-  //
-  // 🎯 Intenção:
-  // Permitir personalização por projeto
-  //
-  const isDark = projeto?.tema_base === 'dark';
+  // ======================================================
+  // 🔹 FILTROS + ORDENAÇÃO
+  // ======================================================
+  useEffect(() => {
+    let resultado = [...locais];
 
-  const themeVars = {
-    '--bg-app': isDark ? '#0f172a' : '#f8fafc',
-    '--bg-card': isDark ? '#1e293b' : '#ffffff',
-    '--text-primary': isDark ? '#f1f5f9' : '#1e293b',
-    '--text-secondary': isDark ? '#94a3b8' : '#64748b',
-    '--border-color': isDark ? '#334155' : '#e2e8f0',
-    '--cor-primaria': projeto?.cor_primaria || '#2563eb',
-    '--cor-destaque': projeto?.cor_destaque || '#f59e0b',
-    '--shadow-card': isDark
-      ? '0 10px 15px rgba(0,0,0,0.4)'
-      : '0 4px 6px rgba(0,0,0,0.08)'
-  };
+    // Categoria
+    if (hasFiltro('categoria') && filtroCategoria) {
+      resultado = resultado.filter(
+        l =>
+          Array.isArray(l.tags) &&
+          l.tags.includes(filtroCategoria)
+      );
+    }
 
-  // ==============================
+    // Ordenação padrão
+    if (ordenacao === 'melhor_nota') {
+      resultado.sort((a, b) => Number(b.nota || 0) - Number(a.nota || 0));
+    }
+
+    if (ordenacao === 'mais_avaliados') {
+      resultado.sort((a, b) => Number(b.avaliacoes || 0) - Number(a.avaliacoes || 0));
+    }
+
+    if (ordenacao === 'destaques') {
+      resultado.sort((a, b) => Number(b.destaque) - Number(a.destaque));
+    }
+
+    setLocaisFiltrados(resultado);
+  }, [locais, filtroCategoria, ordenacao, filtrosAtivos]);
+
+  // ======================================================
   // 🔹 RENDER
-  // ==============================
+  // ======================================================
   return (
     <div
       style={{
-        ...themeVars,
         background: 'var(--bg-app)',
-        color: 'var(--text-primary)',
         minHeight: '100vh',
-        fontFamily: 'system-ui, sans-serif'
+        padding: '16px'
       }}
     >
-
-      {/* ==========================
-          🔹 HEADER
-      ========================== */}
-      <header style={{ padding: '20px' }}>
-        <h1 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 800 }}>
-          {projeto?.titulo_pagina || projeto?.nome}
-        </h1>
-        <p style={{ marginTop: 6, color: 'var(--text-secondary)' }}>
-          Encontre o melhor serviço perto de você
-        </p>
+      {/* HEADER SIMPLES */}
+      <header style={{ marginBottom: '16px' }}>
+        <h1 style={{ margin: 0 }}>{projeto.nome}</h1>
       </header>
 
-      {/* ==========================
-          🔹 LISTA DE CARDS
-      ========================== */}
-      <div
-        style={{
-          padding: '20px',
-          maxWidth: '640px',
-          margin: '0 auto',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '16px'
-        }}
-      >
+      {/* FILTROS FIXOS NO TOPO */}
+      {hasFiltro('categoria') && (
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+          {filtroCategoria && (
+            <button onClick={() => setFiltroCategoria(null)}>
+              <X size={16} />
+            </button>
+          )}
 
-        {/* 🔄 Loading */}
-        {loading && (
-          <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-            Carregando locais…
-          </p>
-        )}
+          <button onClick={() => setFiltroCategoria(null)}>
+            <Store size={14} /> Todos
+          </button>
 
-        {/* 🚫 Empty */}
-        {!loading && locais.length === 0 && (
-          <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-            Nenhum local disponível no momento.
-          </p>
-        )}
+          <button onClick={() => setFiltroCategoria('banho')}>Banho</button>
+          <button onClick={() => setFiltroCategoria('vet')}>Vet</button>
+          <button onClick={() => setFiltroCategoria('loja')}>Loja</button>
+          <button onClick={() => setFiltroCategoria('hotel')}>Hotel</button>
+        </div>
+      )}
 
-        {/* ======================
-            🔹 CARDS
-        ====================== */}
-        {locais.map(local => {
-          const isVip = local.destaque === true;
-          const placeholder = getPlaceholderByCategory(local.tags);
-
-          return (
-            <div
-              key={local.id}
-              style={{
-                background: 'var(--bg-card)',
-                borderRadius: '16px',
-                overflow: 'hidden',
-                boxShadow: isVip
-                  ? `0 0 0 2px var(--cor-destaque), var(--shadow-card)`
-                  : 'var(--shadow-card)',
-                position: 'relative'
-              }}
-            >
-
-              {/* 🏆 SELO VIP */}
-              {isVip && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 10,
-                    right: 10,
-                    background: 'var(--cor-destaque)',
-                    color: '#fff',
-                    padding: '4px 10px',
-                    borderRadius: '12px',
-                    fontSize: '10px',
-                    fontWeight: 'bold',
-                    zIndex: 2
-                  }}
-                >
-                  <Award size={12} /> VIP
-                </div>
-              )}
-
-              {/* 🖼️ LOGO OU PLACEHOLDER */}
-              {local.logo_url ? (
-                <img
-                  src={local.logo_url}
-                  alt={local.nome}
-                  style={{
-                    width: '100%',
-                    height: '120px',
-                    objectFit: 'contain',
-                    background: '#f8fafc'
-                  }}
-                />
-              ) : (
-                <div style={placeholder}>
-                  {placeholder.icon}
-                </div>
-              )}
-
-              {/* 📄 CONTEÚDO */}
-              <div style={{ padding: '16px' }}>
-                <h3 style={{ margin: 0, fontSize: '1.1rem' }}>
-                  {local.nome}
-                </h3>
-
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: '6px',
-                    marginTop: 6,
-                    color: 'var(--text-secondary)',
-                    fontSize: '13px'
-                  }}
-                >
-                  <MapPin size={14} />
-                  {local.endereco || 'Endereço não informado'}
-                </div>
-
-                {/* 🏷️ TAGS */}
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10 }}>
-                  {Array.isArray(local.tags) &&
-                    local.tags.map(tag => (
-                      <span
-                        key={tag}
-                        style={{
-                          fontSize: '11px',
-                          padding: '4px 10px',
-                          background: '#f1f5f9',
-                          borderRadius: '12px',
-                          color: '#475569',
-                          fontWeight: 600
-                        }}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                </div>
-
-                {/* 📸 Instagram (VIP) */}
-                {isVip && local.instagram_url && (
-                  <div style={{ marginTop: 12 }}>
-                    <InstagramEmbed url={local.instagram_url} width="100%" />
-                  </div>
-                )}
-              </div>
-
-              {/* 💬 CTA */}
-              <button
-                onClick={() => setSelectedLocal(local)}
-                style={{
-                  width: '100%',
-                  padding: '16px',
-                  background: '#25D366',
-                  color: '#fff',
-                  border: 'none',
-                  fontWeight: 700,
-                  fontSize: '15px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px'
-                }}
-              >
-                <MessageCircle size={20} />
-                Falar com a loja
-              </button>
-            </div>
-          );
-        })}
+      {/* ORDENAÇÃO */}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+        <button onClick={() => setOrdenacao('melhor_nota')}>
+          ⭐ Melhor nota
+        </button>
+        <button onClick={() => setOrdenacao('mais_avaliados')}>
+          📈 Mais avaliados
+        </button>
+        <button onClick={() => setOrdenacao('destaques')}>
+          🏆 Destaques
+        </button>
       </div>
 
-      {/* ==========================
-          🔹 MODAL DE CHAT
-      ========================== */}
+      {/* LISTA */}
+      {loading && <p>Carregando...</p>}
+
+      {!loading && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {locaisFiltrados.map((local) => (
+            <PetCardClassic
+              key={local.id}
+              local={local}
+              onSelect={(local) => setSelectedLocal(local)}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* CHAT */}
       {selectedLocal && (
         <ChatModal
           local={selectedLocal}
@@ -2409,10 +2189,7 @@ export default function ProjectFiltersPanel({ projeto, theme, onUpdate }) {
           - Deve ser REVISADO no próximo ciclo
           ====================================================== */}
 
-      {/* TESTE DE VISIBILIDADE */}
-      <div style={{ padding: '20px', background: 'red', color: 'white', margin: '20px 0' }}>
-        TESTE: PANEL VISÍVEL
-      </div>
+
 
       {/* ==============================
           🔹 LISTA COMPLETA DE FILTROS (DEBUG / FUTURO)
@@ -2574,68 +2351,75 @@ export default function StoreCard({
         {/* ==============================
             🔹 AÇÕES ADMINISTRATIVAS
             ============================== */}
-        <div style={{ display: 'flex', gap: '8px' }}>
-          
-          {/* TOGGLE VISIBILIDADE */}
-          <button
-            onClick={() => onToggleStatus(local)}
-            style={{
-              width: '38px',
-              height: '38px',
-              borderRadius: '8px',
-              border: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              background: isVisible ? '#f1f5f9' : '#fee2e2',
-              color: isVisible ? theme.textSec : theme.danger
-            }}
-            title={isVisible ? 'Ocultar' : 'Publicar'}
-          >
-            {isVisible ? <Eye size={18} /> : <EyeOff size={18} />}
-          </button>
+<div
+  style={{
+    display: 'flex',
+    gap: '8px',
+    justifyContent: 'flex-end',
+    marginTop: '12px',
+    borderTop: '1px solid var(--border-color)',
+    paddingTop: '12px'
+  }}
+>
+  {/* VISIBILIDADE */}
+  <button
+    onClick={() => onToggleStatus(local)}
+    style={{
+      padding: '8px 14px',
+      borderRadius: '999px',
+      fontSize: '12px',
+      fontWeight: 600,
+      border: 'none',
+      cursor: 'pointer',
+      background:
+        local.status === 'PUBLICAR_APP'
+          ? 'var(--cor-primaria)'
+          : '#e2e8f0',
+      color:
+        local.status === 'PUBLICAR_APP'
+          ? '#fff'
+          : '#475569'
+    }}
+  >
+    {local.status === 'PUBLICAR_APP'
+      ? '👁 Visível no App'
+      : '🚫 Oculto'}
+  </button>
 
-          {/* EDITAR */}
-          <button
-            onClick={() => onEdit(local)}
-            style={{
-              width: '38px',
-              height: '38px',
-              borderRadius: '8px',
-              border: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              background: '#dbeafe',
-              color: '#2563eb'
-            }}
-            title="Editar"
-          >
-            <Edit size={18} />
-          </button>
+  {/* EDITAR */}
+  <button
+    onClick={() => onEdit(local)}
+    style={{
+      padding: '8px 12px',
+      borderRadius: '8px',
+      border: '1px solid var(--border-color)',
+      background: 'var(--bg-card)',
+      color: 'var(--text-secondary)',
+      cursor: 'pointer',
+      fontSize: '13px'
+    }}
+  >
+    ✏️ Editar
+  </button>
 
-          {/* EXCLUIR */}
-          <button
-            onClick={() => onDelete(local.id)}
-            style={{
-              width: '38px',
-              height: '38px',
-              borderRadius: '8px',
-              border: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              background: '#fef2f2',
-              color: theme.danger
-            }}
-            title="Excluir"
-          >
-            <Trash2 size={18} />
-          </button>
-        </div>
+  {/* EXCLUIR */}
+  <button
+    onClick={() => onDelete(local.id)}
+    style={{
+      padding: '8px 12px',
+      borderRadius: '8px',
+      border: '1px solid #fecaca',
+      background: '#fee2e2',
+      color: '#b91c1c',
+      cursor: 'pointer',
+      fontSize: '13px',
+      fontWeight: 600
+    }}
+  >
+    🗑 Excluir
+  </button>
+</div>
+
       </div>
     </div>
   );
@@ -2835,6 +2619,412 @@ export default function StoreCardEdit({ local, theme, onSave, onCancel }) {
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+----------------------------------
+
+--- ARQUIVO: src/components/pet/FilterSheet.jsx ---
+// ======================================================
+// 📄 FilterSheet.jsx
+// Painel de Filtros & Ordenação (Mobile-first)
+// ======================================================
+
+import React from 'react';
+import {
+  X,
+  Star,
+  TrendingUp,
+  Award,
+  Scissors,
+  Stethoscope,
+  ShoppingBag,
+  Home
+} from 'lucide-react';
+
+// Categorias oficiais
+const CATEGORIAS = [
+  { id: 'banho', label: 'Banho', icon: <Scissors size={18} /> },
+  { id: 'vet', label: 'Vet', icon: <Stethoscope size={18} /> },
+  { id: 'loja', label: 'Loja', icon: <ShoppingBag size={18} /> },
+  { id: 'hotel', label: 'Hotel', icon: <Home size={18} /> }
+];
+
+// Ordenações possíveis
+const ORDENACOES = [
+  { id: 'melhor_nota', label: 'Melhor nota', icon: <Star size={18} /> },
+  { id: 'mais_avaliados', label: 'Mais avaliados', icon: <TrendingUp size={18} /> },
+  { id: 'destaques', label: 'Destaques (VIP)', icon: <Award size={18} /> }
+];
+
+export default function FilterSheet({
+  onClose,
+  categoriaAtiva,
+  setCategoriaAtiva,
+  ordenacaoAtiva,
+  setOrdenacaoAtiva
+}) {
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0,0,0,0.4)',
+        zIndex: 1000,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'flex-end'
+      }}
+    >
+      <div
+        style={{
+          background: '#fff',
+          width: '100%',
+          maxWidth: '500px',
+          borderTopLeftRadius: '20px',
+          borderTopRightRadius: '20px',
+          padding: '20px',
+          maxHeight: '85vh',
+          overflowY: 'auto'
+        }}
+      >
+
+        {/* HEADER */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3 style={{ margin: 0 }}>Filtros & Ordenação</h3>
+          <button onClick={onClose} style={{ background: 'none', border: 'none' }}>
+            <X size={24} />
+          </button>
+        </div>
+
+        {/* ==============================
+            🔹 ORDENAÇÃO
+        ============================== */}
+        <div style={{ marginTop: '25px' }}>
+          <h4>Ordenar por</h4>
+
+          {ORDENACOES.map(opt => (
+            <label
+              key={opt.id}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '12px',
+                borderRadius: '12px',
+                border: '1px solid #e2e8f0',
+                marginBottom: '10px',
+                cursor: 'pointer',
+                background:
+                  ordenacaoAtiva === opt.id ? '#2563eb' : '#fff',
+                color:
+                  ordenacaoAtiva === opt.id ? '#fff' : '#1e293b',
+                fontWeight: 600
+              }}
+            >
+              <input
+                type="radio"
+                name="ordenacao"
+                checked={ordenacaoAtiva === opt.id}
+                onChange={() => setOrdenacaoAtiva(opt.id)}
+              />
+              {opt.icon} {opt.label}
+            </label>
+          ))}
+        </div>
+
+        {/* ==============================
+            🔹 CATEGORIAS
+        ============================== */}
+        <div style={{ marginTop: '25px' }}>
+          <h4>Categoria</h4>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+            {CATEGORIAS.map(cat => {
+              const ativo = categoriaAtiva === cat.id;
+
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setCategoriaAtiva(ativo ? null : cat.id)}
+                  style={{
+                    padding: '10px 14px',
+                    borderRadius: '20px',
+                    border: '1px solid #e2e8f0',
+                    background: ativo ? '#2563eb' : '#fff',
+                    color: ativo ? '#fff' : '#64748b',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  {cat.icon} {cat.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+----------------------------------
+
+--- ARQUIVO: src/components/pet/PetCardClassic.jsx ---
+// ======================================================
+// 🐾 PetCardClassic.jsx
+// Card principal do PetList (versão Classic)
+// ======================================================
+//
+// RESPONSABILIDADE
+// - Renderizar TODAS as informações visuais do Pet Shop
+// - Garantir imagem SEMPRE
+// - Controlar expansão (sanfona)
+// - NÃO acessar Supabase diretamente
+//
+// CONTRATO COM SUPABASE
+// - Campo de imagem: image_url
+// ======================================================
+
+import React, { useState } from "react";
+import {
+  MapPin,
+  MessageCircle,
+  Star,
+  Award,
+  ChevronDown,
+  ChevronUp
+} from "lucide-react";
+
+export default function PetCardClassic({ local, onOpenChat }) {
+  const [expanded, setExpanded] = useState(false);
+
+  // =========================
+  // DADOS NORMALIZADOS
+  // =========================
+  const isVip = Boolean(local.destaque);
+  const nota = Number(local.nota || 0);
+  const avaliacoes = Number(local.avaliacoes || 0);
+
+  // =========================
+  // 🖼️ IMAGEM FINAL (CONTRATO)
+  // =========================
+  const imagemFinal =
+    typeof local.image_url === "string" && local.image_url.trim() !== ""
+      ? local.image_url
+      : "https://images.unsplash.com/photo-abc123?auto=format&fit=crop&w=800&q=80";
+
+  // =========================
+  // PLACEHOLDER (se imagem quebrar)
+  // =========================
+  const getPlaceholderIcon = () => {
+    const niche = (local.niche || "").toLowerCase();
+    if (niche.includes("vet")) return "🏥";
+    if (niche.includes("banho") || niche.includes("tosa")) return "✂️";
+    if (niche.includes("hotel")) return "🏨";
+    return "🐶";
+  };
+
+  // ======================================================
+  // RENDER
+  // ======================================================
+  return (
+    <div
+      style={{
+        background: "var(--bg-card)",
+        borderRadius: "var(--radius-card)",
+        overflow: "hidden",
+        boxShadow: "var(--shadow-card)",
+        position: "relative"
+      }}
+    >
+      {/* =========================
+          SELO VIP
+      ========================== */}
+      {isVip && (
+        <div
+          style={{
+            position: "absolute",
+            top: 8,
+            right: 8,
+            background: "var(--cor-destaque)",
+            color: "#fff",
+            fontSize: "10px",
+            fontWeight: "700",
+            padding: "4px 10px",
+            borderRadius: "999px",
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+            zIndex: 2
+          }}
+        >
+          <Award size={12} /> VIP
+        </div>
+      )}
+
+      {/* =========================
+          IMAGEM
+      ========================== */}
+<img
+  src={imagemFinal}
+  alt={local.nome}
+  loading="lazy"
+  onError={(e) => {
+    e.currentTarget.onerror = null;
+    e.currentTarget.src =
+      "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?auto=format&fit=crop&w=800&q=80";
+  }}
+  style={{
+    width: "100%",
+    height: "160px",
+    objectFit: "cover",
+    display: "block"
+  }}
+/>
+
+      {/* =========================
+          CONTEÚDO
+      ========================== */}
+      <div style={{ padding: "16px" }}>
+        {/* NOME */}
+        <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 700 }}>
+          {local.nome}
+        </h3>
+
+        {/* NOTA */}
+        {nota > 0 && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              marginTop: "4px",
+              fontSize: "13px",
+              color: "var(--text-secondary)"
+            }}
+          >
+            <Star size={14} color="#facc15" fill="#facc15" />
+            <strong>{nota.toFixed(1)}</strong>
+            <span>({avaliacoes} avaliações)</span>
+          </div>
+        )}
+
+        {/* ENDEREÇO */}
+        <div
+          style={{
+            display: "flex",
+            gap: "6px",
+            marginTop: "8px",
+            fontSize: "13px",
+            color: "var(--text-secondary)"
+          }}
+        >
+          <MapPin size={14} />
+          <span>{local.endereco || "Endereço não informado"}</span>
+        </div>
+
+        {/* TAGS */}
+        {Array.isArray(local.tags) && local.tags.length > 0 && (
+          <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "10px" }}>
+            {local.tags.map((tag) => (
+              <span
+                key={tag}
+                style={{
+                  background: "#f1f5f9",
+                  fontSize: "11px",
+                  padding: "4px 10px",
+                  borderRadius: "999px",
+                  fontWeight: 600
+                }}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* =========================
+            TOGGLE EXTRA
+        ========================== */}
+        <button
+          onClick={() => setExpanded((v) => !v)}
+          style={{
+            marginTop: "12px",
+            width: "100%",
+            background: "transparent",
+            border: "1px solid var(--border-color)",
+            borderRadius: "10px",
+            padding: "8px",
+            fontSize: "13px",
+            cursor: "pointer",
+            display: "flex",
+            justifyContent: "center",
+            gap: "6px"
+          }}
+        >
+          Conteúdo extra {expanded ? <ChevronUp /> : <ChevronDown />}
+        </button>
+
+        {/* =========================
+            SANFONA
+        ========================== */}
+        <div
+          style={{
+            maxHeight: expanded ? "300px" : "0",
+            opacity: expanded ? 1 : 0,
+            overflow: "hidden",
+            transition: "all 0.35s ease",
+            marginTop: expanded ? "10px" : "0"
+          }}
+        >
+          <div
+            style={{
+              padding: "12px",
+              background: "#f8fafc",
+              borderRadius: "10px",
+              fontSize: "13px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "6px"
+            }}
+          >
+            {local.aberto_agora !== null && (
+              <div>{local.aberto_agora ? "🟢 Aberto agora" : "🔴 Fechado"}</div>
+            )}
+            {local.horario_fechamento && (
+              <div>⏰ Até {local.horario_fechamento}</div>
+            )}
+            {local.estacionamento && <div>🅿️ Estacionamento disponível</div>}
+          </div>
+        </div>
+      </div>
+
+      {/* =========================
+          CTA
+      ========================== */}
+      <button
+        onClick={() => onOpenChat?.(local)}
+        style={{
+          width: "100%",
+          padding: "14px",
+          border: "none",
+          background: "#25D366",
+          color: "#fff",
+          fontWeight: 700,
+          cursor: "pointer",
+          display: "flex",
+          justifyContent: "center",
+          gap: "8px"
+        }}
+      >
+        <MessageCircle size={20} /> Falar com a loja
+      </button>
     </div>
   );
 }

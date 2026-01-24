@@ -216,10 +216,7 @@ export default function ProjectFiltersPanel({ projeto, theme, onUpdate }) {
           - Deve ser REVISADO no próximo ciclo
           ====================================================== */}
 
-      {/* TESTE DE VISIBILIDADE */}
-      <div style={{ padding: '20px', background: 'red', color: 'white', margin: '20px 0' }}>
-        TESTE: PANEL VISÍVEL
-      </div>
+
 
       {/* ==============================
           🔹 LISTA COMPLETA DE FILTROS (DEBUG / FUTURO)

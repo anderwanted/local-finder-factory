@@ -723,3 +723,16 @@ Sempre existe fallback visual
 
 👉 Motivo:
 Evita refatorações erradas no futuro.
+
+### Diretriz de Separação de Responsabilidades
+
+- PetList: experiência pública e vitrine do app.
+- Dashboard: ferramenta administrativa e de orquestração.
+
+Regras:
+- O Dashboard não implementa lógica complexa de dados.
+- Hooks concentram regras de negócio, filtros e ordenação.
+- Componentes visuais apenas exibem estado e ações.
+- Filtros priorizam ordenação antes de exclusão.
+
+Essa separação garante manutenção simples e evolução segura.

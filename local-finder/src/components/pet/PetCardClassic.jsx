@@ -1,91 +1,88 @@
-import React from 'react';
+// ======================================================
+// 🐾 PetCardClassic.jsx
+// Card principal do PetList (versão Classic)
+// ======================================================
+//
+// RESPONSABILIDADE
+// - Renderizar TODAS as informações visuais do Pet Shop
+// - Garantir imagem SEMPRE
+// - Controlar expansão (sanfona)
+// - NÃO acessar Supabase diretamente
+//
+// CONTRATO COM SUPABASE
+// - Campo de imagem: image_url
+// ======================================================
+
+import React, { useState } from "react";
 import {
   MapPin,
   MessageCircle,
   Star,
-  Award
-} from 'lucide-react';
+  Award,
+  ChevronDown,
+  ChevronUp
+} from "lucide-react";
 
-import { InstagramEmbed } from 'react-social-media-embed';
+export default function PetCardClassic({ local, onOpenChat }) {
+  const [expanded, setExpanded] = useState(false);
 
-/**
- * ======================================================
- * 🐾 PetCardClassic
- * ======================================================
- *
- * 🎯 INTENÇÃO
- * Card visual padrão do feed de Pet Shops.
- *
- * 🔒 CONTRATO
- * - NÃO filtra
- * - NÃO ordena
- * - NÃO abre modal
- * - NÃO acessa Supabase
- *
- * Recebe tudo via props.
- *
- * 🧠 MODELO MENTAL
- * "Me diga O QUE mostrar, eu só desenho."
- *
- * ======================================================
- */
+  // =========================
+  // DADOS NORMALIZADOS
+  // =========================
+  const isVip = Boolean(local.destaque);
+  const nota = Number(local.nota || 0);
+  const avaliacoes = Number(local.avaliacoes || 0);
 
-export default function PetCardClassic({
-  local,
-  theme,
-  onContact
-}) {
-  if (!local) return null;
+  // =========================
+  // 🖼️ IMAGEM FINAL (CONTRATO)
+  // =========================
+  const imagemFinal =
+    typeof local.image_url === "string" && local.image_url.trim() !== ""
+      ? local.image_url
+      : "https://images.unsplash.com/photo-abc123?auto=format&fit=crop&w=800&q=80";
 
-  // ==============================
-  // 🔹 FLAGS DERIVADAS (VISUAIS)
-  // ==============================
-  const isVip = !!local.destaque;
-  const hasInstagram = !!local.instagram_url;
-  const notaAlta = Number(local.nota || 0) >= 4.5;
-
-  // ==============================
-  // 🔹 PLACEHOLDER VISUAL
-  // ==============================
-  const placeholderIcon = () => {
-    if (local.tags?.includes('vet')) return '🏥';
-    if (local.tags?.includes('banho')) return '✂️';
-    if (local.tags?.includes('hotel')) return '🏨';
-    if (local.tags?.includes('loja')) return '🛍️';
-    return '🐾';
+  // =========================
+  // PLACEHOLDER (se imagem quebrar)
+  // =========================
+  const getPlaceholderIcon = () => {
+    const niche = (local.niche || "").toLowerCase();
+    if (niche.includes("vet")) return "🏥";
+    if (niche.includes("banho") || niche.includes("tosa")) return "✂️";
+    if (niche.includes("hotel")) return "🏨";
+    return "🐶";
   };
 
+  // ======================================================
+  // RENDER
+  // ======================================================
   return (
     <div
       style={{
-        background: theme.card,
-        borderRadius: theme.radiusCard || '20px',
-        overflow: 'hidden',
-        boxShadow: isVip
-          ? `0 0 0 2px ${theme.primary}, ${theme.shadow}`
-          : theme.shadow,
-        border: `1px solid ${theme.border}`,
-        transition: 'transform 0.25s ease, box-shadow 0.25s ease'
+        background: "var(--bg-card)",
+        borderRadius: "var(--radius-card)",
+        overflow: "hidden",
+        boxShadow: "var(--shadow-card)",
+        position: "relative"
       }}
     >
-      {/* ==============================
-          🔹 SELO VIP
-      ============================== */}
+      {/* =========================
+          SELO VIP
+      ========================== */}
       {isVip && (
         <div
           style={{
-            position: 'absolute',
-            top: 10,
-            right: 10,
-            background: theme.primary,
-            color: '#fff',
-            fontSize: '11px',
-            fontWeight: '700',
-            padding: '4px 10px',
-            borderRadius: '999px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
+            position: "absolute",
+            top: 8,
+            right: 8,
+            background: "var(--cor-destaque)",
+            color: "#fff",
+            fontSize: "10px",
+            fontWeight: "700",
+            padding: "4px 10px",
+            borderRadius: "999px",
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
             zIndex: 2
           }}
         >
@@ -93,106 +90,79 @@ export default function PetCardClassic({
         </div>
       )}
 
-      {/* ==============================
-          🔹 IMAGEM / IDENTIDADE
-      ============================== */}
-      {local.logo_url ? (
-        <img
-          src={local.logo_url}
-          alt={local.nome}
-          loading="lazy"
-          style={{
-            width: '100%',
-            height: '130px',
-            objectFit: 'contain',
-            background: '#f8fafc'
-          }}
-        />
-      ) : (
-        <div
-          style={{
-            height: '130px',
-            background: '#f1f5f9',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '48px'
-          }}
-        >
-          {placeholderIcon()}
-        </div>
-      )}
+      {/* =========================
+          IMAGEM
+      ========================== */}
+<img
+  src={imagemFinal}
+  alt={local.nome}
+  loading="lazy"
+  onError={(e) => {
+    e.currentTarget.onerror = null;
+    e.currentTarget.src =
+      "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?auto=format&fit=crop&w=800&q=80";
+  }}
+  style={{
+    width: "100%",
+    height: "160px",
+    objectFit: "cover",
+    display: "block"
+  }}
+/>
 
-      {/* ==============================
-          🔹 CONTEÚDO
-      ============================== */}
-      <div style={{ padding: '18px' }}>
-        <h3
-          style={{
-            margin: 0,
-            fontSize: '1.15rem',
-            fontWeight: '800',
-            color: theme.text
-          }}
-        >
+      {/* =========================
+          CONTEÚDO
+      ========================== */}
+      <div style={{ padding: "16px" }}>
+        {/* NOME */}
+        <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 700 }}>
           {local.nome}
         </h3>
 
         {/* NOTA */}
-        {(local.nota || local.avaliacoes) && (
+        {nota > 0 && (
           <div
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              marginTop: '6px',
-              fontSize: '13px',
-              color: notaAlta ? theme.primary : theme.textSec,
-              fontWeight: '600'
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              marginTop: "4px",
+              fontSize: "13px",
+              color: "var(--text-secondary)"
             }}
           >
-            <Star size={14} />
-            {local.nota || '—'}
-            {local.avaliacoes
-              ? ` (${local.avaliacoes})`
-              : ''}
+            <Star size={14} color="#facc15" fill="#facc15" />
+            <strong>{nota.toFixed(1)}</strong>
+            <span>({avaliacoes} avaliações)</span>
           </div>
         )}
 
         {/* ENDEREÇO */}
         <div
           style={{
-            display: 'flex',
-            gap: '6px',
-            marginTop: '10px',
-            fontSize: '13px',
-            color: theme.textSec
+            display: "flex",
+            gap: "6px",
+            marginTop: "8px",
+            fontSize: "13px",
+            color: "var(--text-secondary)"
           }}
         >
           <MapPin size={14} />
-          <span>{local.endereco || 'Endereço não informado'}</span>
+          <span>{local.endereco || "Endereço não informado"}</span>
         </div>
 
         {/* TAGS */}
-        {Array.isArray(local.tags) && (
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '6px',
-              marginTop: '12px'
-            }}
-          >
-            {local.tags.map(tag => (
+        {Array.isArray(local.tags) && local.tags.length > 0 && (
+          <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "10px" }}>
+            {local.tags.map((tag) => (
               <span
                 key={tag}
                 style={{
-                  fontSize: '11px',
-                  fontWeight: '600',
-                  padding: '4px 10px',
-                  borderRadius: '999px',
-                  background: '#f1f5f9',
-                  color: theme.textSec
+                  background: "#f1f5f9",
+                  fontSize: "11px",
+                  padding: "4px 10px",
+                  borderRadius: "999px",
+                  fontWeight: 600
                 }}
               >
                 {tag}
@@ -201,46 +171,81 @@ export default function PetCardClassic({
           </div>
         )}
 
-        {/* INSTAGRAM (somente VIP) */}
-        {isVip && hasInstagram && (
+        {/* =========================
+            TOGGLE EXTRA
+        ========================== */}
+        <button
+          onClick={() => setExpanded((v) => !v)}
+          style={{
+            marginTop: "12px",
+            width: "100%",
+            background: "transparent",
+            border: "1px solid var(--border-color)",
+            borderRadius: "10px",
+            padding: "8px",
+            fontSize: "13px",
+            cursor: "pointer",
+            display: "flex",
+            justifyContent: "center",
+            gap: "6px"
+          }}
+        >
+          Conteúdo extra {expanded ? <ChevronUp /> : <ChevronDown />}
+        </button>
+
+        {/* =========================
+            SANFONA
+        ========================== */}
+        <div
+          style={{
+            maxHeight: expanded ? "300px" : "0",
+            opacity: expanded ? 1 : 0,
+            overflow: "hidden",
+            transition: "all 0.35s ease",
+            marginTop: expanded ? "10px" : "0"
+          }}
+        >
           <div
             style={{
-              marginTop: '16px',
-              borderRadius: '12px',
-              overflow: 'hidden',
-              border: `1px solid ${theme.border}`
+              padding: "12px",
+              background: "#f8fafc",
+              borderRadius: "10px",
+              fontSize: "13px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "6px"
             }}
           >
-            <InstagramEmbed
-              url={local.instagram_url}
-              width="100%"
-            />
+            {local.aberto_agora !== null && (
+              <div>{local.aberto_agora ? "🟢 Aberto agora" : "🔴 Fechado"}</div>
+            )}
+            {local.horario_fechamento && (
+              <div>⏰ Até {local.horario_fechamento}</div>
+            )}
+            {local.estacionamento && <div>🅿️ Estacionamento disponível</div>}
           </div>
-        )}
+        </div>
       </div>
 
-      {/* ==============================
-          🔹 CTA
-      ============================== */}
+      {/* =========================
+          CTA
+      ========================== */}
       <button
-        onClick={() => onContact?.(local)}
+        onClick={() => onOpenChat?.(local)}
         style={{
-          width: '100%',
-          border: 'none',
-          padding: '16px',
-          background: '#25D366',
-          color: '#fff',
-          fontSize: '15px',
-          fontWeight: '700',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '8px',
-          cursor: 'pointer'
+          width: "100%",
+          padding: "14px",
+          border: "none",
+          background: "#25D366",
+          color: "#fff",
+          fontWeight: 700,
+          cursor: "pointer",
+          display: "flex",
+          justifyContent: "center",
+          gap: "8px"
         }}
       >
-        <MessageCircle size={18} />
-        Falar com a loja
+        <MessageCircle size={20} /> Falar com a loja
       </button>
     </div>
   );

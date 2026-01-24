@@ -293,3 +293,24 @@ Bento fica registrado como evolução futura (não agora)
 
 👉 Motivo:
 Sem isso, qualquer pessoa (ou IA) pode “voltar atrás” achando que foi decisão temporária.
+
+## Sprint — Consolidação da PetList e Curadoria
+
+Nesta etapa do produto, a PetList foi consolidada como a principal vitrine do aplicativo.
+
+Decisões de UX tomadas:
+- A lista de estabelecimentos é sempre exibida (listas vazias são evitadas).
+- Filtros e ordenações ficam fixos no topo da tela (mobile-first).
+- Não são utilizados modais para filtros ou ordenação.
+- A ordenação padrão vem definida pelo projeto, mas o usuário pode alterá-la.
+- O critério de ordenação ativo é sempre visível para o usuário.
+
+A lógica de curadoria prioriza organização e relevância, não exclusão agressiva.
+O objetivo é ajudar o usuário a decidir, e não esconder opções.
+
+Os cards seguem o padrão visual “Classic”, com destaque visual para:
+- Estabelecimentos VIP
+- Alta avaliação (≥ 4.5)
+- Destaques editoriais definidos pelo projeto
+
+Essas decisões visam estabilidade visual, clareza cognitiva e prevenção de regressões futuras.

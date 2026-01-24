@@ -318,3 +318,17 @@ Este documento existe para garantir que o produto:
 
 **O sucesso não é fazer tudo.**  
 **O sucesso é fazer o certo.**
+
+### Diretriz de Curadoria e Ordenação
+
+Filtros e ordenações no aplicativo são tratados como ferramentas de priorização,
+e não como mecanismos de exclusão.
+
+Diretrizes:
+- O sistema evita cenários de lista vazia.
+- A ordenação padrão é definida pelo projeto.
+- O usuário pode alterar a ordenação, mas sempre visualiza o critério ativo.
+- Destaque visual (VIP, nota alta) faz parte da experiência editorial do produto.
+
+O Dashboard controla quais filtros e ordenações estão disponíveis,
+preservando a simplicidade da experiência final.

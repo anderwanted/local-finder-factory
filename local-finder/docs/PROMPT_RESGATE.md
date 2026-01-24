@@ -139,3 +139,24 @@ Filtros fixos
 Ordenação visível
 
 Dashboard separado por responsabilidade
+
+## Estado Atual do Sistema (Resumo Operacional)
+
+- A PetList é a vitrine principal do aplicativo.
+- Filtros e ordenações são fixos no topo da tela (mobile-first).
+- Não há uso de pop-ups ou modais para filtragem.
+- A ordenação padrão é definida pelo projeto (ex: Melhor Nota).
+- O usuário pode alterar a ordenação entre:
+  - Melhor nota
+  - Mais avaliações
+  - Destaques
+
+- Cards seguem padrão visual Classic.
+- VIP e Destaques são sinais editoriais, não apenas ranking matemático.
+- O Dashboard atua como orquestrador:
+  - Não contém lógica pesada
+  - Controla flags, filtros disponíveis e configuração do app
+- Hooks concentram regras de dados e ordenação.
+- Componentes visuais não contêm regra de negócio.
+
+Este contexto deve ser preservado em futuras evoluções.

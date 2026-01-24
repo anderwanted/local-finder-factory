@@ -106,68 +106,75 @@ export default function StoreCard({
         {/* ==============================
             🔹 AÇÕES ADMINISTRATIVAS
             ============================== */}
-        <div style={{ display: 'flex', gap: '8px' }}>
-          
-          {/* TOGGLE VISIBILIDADE */}
-          <button
-            onClick={() => onToggleStatus(local)}
-            style={{
-              width: '38px',
-              height: '38px',
-              borderRadius: '8px',
-              border: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              background: isVisible ? '#f1f5f9' : '#fee2e2',
-              color: isVisible ? theme.textSec : theme.danger
-            }}
-            title={isVisible ? 'Ocultar' : 'Publicar'}
-          >
-            {isVisible ? <Eye size={18} /> : <EyeOff size={18} />}
-          </button>
+<div
+  style={{
+    display: 'flex',
+    gap: '8px',
+    justifyContent: 'flex-end',
+    marginTop: '12px',
+    borderTop: '1px solid var(--border-color)',
+    paddingTop: '12px'
+  }}
+>
+  {/* VISIBILIDADE */}
+  <button
+    onClick={() => onToggleStatus(local)}
+    style={{
+      padding: '8px 14px',
+      borderRadius: '999px',
+      fontSize: '12px',
+      fontWeight: 600,
+      border: 'none',
+      cursor: 'pointer',
+      background:
+        local.status === 'PUBLICAR_APP'
+          ? 'var(--cor-primaria)'
+          : '#e2e8f0',
+      color:
+        local.status === 'PUBLICAR_APP'
+          ? '#fff'
+          : '#475569'
+    }}
+  >
+    {local.status === 'PUBLICAR_APP'
+      ? '👁 Visível no App'
+      : '🚫 Oculto'}
+  </button>
 
-          {/* EDITAR */}
-          <button
-            onClick={() => onEdit(local)}
-            style={{
-              width: '38px',
-              height: '38px',
-              borderRadius: '8px',
-              border: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              background: '#dbeafe',
-              color: '#2563eb'
-            }}
-            title="Editar"
-          >
-            <Edit size={18} />
-          </button>
+  {/* EDITAR */}
+  <button
+    onClick={() => onEdit(local)}
+    style={{
+      padding: '8px 12px',
+      borderRadius: '8px',
+      border: '1px solid var(--border-color)',
+      background: 'var(--bg-card)',
+      color: 'var(--text-secondary)',
+      cursor: 'pointer',
+      fontSize: '13px'
+    }}
+  >
+    ✏️ Editar
+  </button>
 
-          {/* EXCLUIR */}
-          <button
-            onClick={() => onDelete(local.id)}
-            style={{
-              width: '38px',
-              height: '38px',
-              borderRadius: '8px',
-              border: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              background: '#fef2f2',
-              color: theme.danger
-            }}
-            title="Excluir"
-          >
-            <Trash2 size={18} />
-          </button>
-        </div>
+  {/* EXCLUIR */}
+  <button
+    onClick={() => onDelete(local.id)}
+    style={{
+      padding: '8px 12px',
+      borderRadius: '8px',
+      border: '1px solid #fecaca',
+      background: '#fee2e2',
+      color: '#b91c1c',
+      cursor: 'pointer',
+      fontSize: '13px',
+      fontWeight: 600
+    }}
+  >
+    🗑 Excluir
+  </button>
+</div>
+
       </div>
     </div>
   );
