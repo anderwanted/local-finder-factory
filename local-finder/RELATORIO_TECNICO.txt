@@ -1,5 +1,5 @@
 RELATÓRIO TÉCNICO DO PROJETO
-Data: 24/01/2026, 17:23:34
+Data: 25/01/2026, 15:24:31
 
 --- PACKAGE.JSON ---
 {
@@ -1857,6 +1857,7 @@ import './styles/petlist.css';
 // Ícones
 import { Store, X } from 'lucide-react';
 
+
 // ======================================================
 // 🔹 HELPERS
 // ======================================================
@@ -1947,25 +1948,24 @@ useEffect(() => {
     setLocaisFiltrados(resultado);
   }, [locais, filtroCategoria, ordenacao, filtrosAtivos]);
 
+
+  
   // ======================================================
   // 🔹 RENDER
   // ======================================================
   return (
-    <div
-      style={{
-        background: 'var(--bg-app)',
-        minHeight: '100vh',
-        padding: '16px'
-      }}
-    >
-      {/* HEADER SIMPLES */}
-      <header style={{ marginBottom: '16px' }}>
-        <h1 style={{ margin: 0 }}>{projeto.nome}</h1>
+    <div className="app-shell">
+      {/* HEADER */}
+      <header className="app-header">
+        <div className="app-header-text">
+          <h1>Pet Finder</h1>
+          <p>Serviços confiáveis para o seu pet</p>
+        </div>
       </header>
 
-      {/* FILTROS FIXOS NO TOPO */}
+      {/* FILTROS */}
       {hasFiltro('categoria') && (
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', padding: '0 16px' }}>
           {filtroCategoria && (
             <button onClick={() => setFiltroCategoria(null)}>
               <X size={16} />
@@ -1984,7 +1984,7 @@ useEffect(() => {
       )}
 
       {/* ORDENAÇÃO */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', padding: '0 16px' }}>
         <button onClick={() => setOrdenacao('melhor_nota')}>
           ⭐ Melhor nota
         </button>
@@ -1997,35 +1997,35 @@ useEffect(() => {
       </div>
 
       {/* LISTA */}
-      {loading && <p>Carregando...</p>}
+      {loading && <p style={{ padding: '0 16px' }}>Carregando...</p>}
 
       {!loading && (
-        <div className="petlist-container" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div className="petlist-container">
           {locaisFiltrados.slice(0, limit).map((local) => (
-        <PetCardMapStyle
-            key={local.id}
-            local={local}
-            onOpenChat={(local) => setSelectedLocal(local)}
-          />
+            <PetCardMapStyle
+              key={local.id}
+              local={local}
+              onOpenChat={(local) => setSelectedLocal(local)}
+            />
           ))}
-          {limit < locaisFiltrados.length && (
-      <button
-        onClick={() => setLimit((prev) => prev + 6)}
-        style={{
-          margin: '20px auto',
-          display: 'block',
-          padding: '12px 20px',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0',
-          background: '#fff',
-          fontWeight: 600,
-          cursor: 'pointer'
-        }}
-      >
-        Carregar mais
-      </button>
-    )}
 
+          {limit < locaisFiltrados.length && (
+            <button
+              onClick={() => setLimit((prev) => prev + 6)}
+              style={{
+                margin: '20px auto',
+                display: 'block',
+                padding: '12px 20px',
+                borderRadius: '12px',
+                border: '1px solid #e2e8f0',
+                background: '#fff',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              Carregar mais
+            </button>
+          )}
         </div>
       )}
 
@@ -2039,6 +2039,8 @@ useEffect(() => {
       )}
     </div>
   );
+
+  
 }
 
 ----------------------------------
@@ -3506,35 +3508,15 @@ export default function PetCardMapStyle({ local, onOpenChat }) {
         }}
       />
 
-{/* BADGE VIP — GOLD PREMIUM */}
+
+{/* BADGE VIP */}
 {isVip && (
-  <div
-    style={{
-      position: "absolute",
-      top: 12,
-      right: 12,
-      padding: "6px 14px",
-      borderRadius: "999px",
-      fontSize: "11px",
-      fontWeight: 800,
-      letterSpacing: "0.4px",
-      color: "#3b2f0b",
-      background:
-        "linear-gradient(135deg, #f6e27a 0%, #facc15 35%, #eab308 65%, #a16207 100%)",
-      border: "1px solid rgba(255,255,255,0.6)",
-      boxShadow:
-        "0 0 0 1px rgba(250,204,21,0.35), 0 8px 22px rgba(250,204,21,0.45)",
-      textShadow: "0 1px 0 rgba(255,255,255,0.6)",
-      display: "flex",
-      alignItems: "center",
-      gap: "6px",
-      backdropFilter: "blur(4px)"
-    }}
-  >
+  <div className="badge-vip">
     <Award size={14} />
-    VIP
+    <span>VIP</span>
   </div>
 )}
+
 
 
 
@@ -4290,170 +4272,115 @@ export function useDashboardFilters(locais, filtrosAtivosProjeto = []) {
 
 --- ARQUIVO: src/index.css ---
 /* ======================================================
-   📄 global.css / main.css
-   Estilos Globais da Aplicação
-   ======================================================
-
-   🎯 PROPÓSITO
-   - Definir base visual e tipográfica do app
-   - Garantir legibilidade, consistência e performance
-   - Preparar o app para comportamento "App-like"
-
-   🧠 MODELO MENTAL
-   - Este arquivo:
-     ✅ define defaults
-     ✅ controla UX global
-     ❌ não estiliza componentes específicos
-
-   🔒 CONTRATO
-   - Nenhuma regra de layout de tela aqui
-   - Nenhuma regra específica de Dashboard, Card ou Modal
-   - Apenas fundamentos
-*/
+   📄 index.css / global.css
+   Base global da aplicação
+   ====================================================== */
 
 /* ======================================================
-   🔹 VARIÁVEIS & BASE TIPOGRÁFICA
+   🔹 RESET BÁSICO
+   ====================================================== */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
+/* ======================================================
+   🔹 VARIÁVEIS & TIPOGRAFIA BASE
    ====================================================== */
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  /* Tipografia */
+  --font-main: system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
-  /* Esquema de cores padrão (dark-first) */
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* Cores base */
+  --color-bg: #f8fafc;
+  --color-text: #0f172a;
+  --color-muted: #64748b;
+  --color-border: #e2e8f0;
 
-  /* Qualidade de renderização */
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Brand (ajustável depois) */
+  --color-primary: #2563eb;
+  --color-primary-soft: #dbeafe;
+
+  /* App shell */
+  --app-max-width: 420px;
+}
+
+body {
+  font-family: var(--font-main);
+  color: var(--color-text);
+  background: var(--color-bg);
+
+  /* Centralização HORIZONTAL tipo app */
+  display: flex;
+  justify-content: center;
+
+  /* ⚠️ NUNCA centralizar verticalmente no body */
+}
+
+/* ======================================================
+   🔹 ROOT DO REACT
+   ====================================================== */
+#root {
+  width: 100%;
+  max-width: var(--app-max-width);
+  min-height: 100vh;
+
+  /* Importante para páginas longas */
+  display: block;
 }
 
 /* ======================================================
    🔹 LINKS
    ====================================================== */
 a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+  color: var(--color-primary);
+  text-decoration: none;
 }
 
 a:hover {
-  color: #535bf2;
+  text-decoration: underline;
 }
 
 /* ======================================================
-   🔹 BODY (LAYOUT BASE)
-   ====================================================== */
-body {
-  margin: 0;
-
-  /* Centralização padrão (modo app / landing) */
-  display: flex;
-  place-items: center;
-
-  min-width: 320px;
-  min-height: 100vh;
-
-
-  font-family: var(--font-main);
-  background-color: var(--color-bg);
-  color: var(--color-text);
-}
-
-
-
-
-/* ======================================================
-   🔹 TÍTULOS
-   ====================================================== */
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-/* ======================================================
-   🔹 BOTÕES (BASE GLOBAL)
+   🔹 BOTÕES (BASE NEUTRA)
    ====================================================== */
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-
-  padding: 0.6em 1.2em;
-
-  font-size: 1em;
-  font-weight: 500;
   font-family: inherit;
-
-  background-color: #1a1a1a;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: #fff;
+  color: inherit;
   cursor: pointer;
 
-  transition: border-color 0.25s;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 button:hover {
-  border-color: #646cff;
-}
-
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-/* ======================================================
-   🔹 MODO LIGHT (PREFERÊNCIA DO SISTEMA)
-   ====================================================== */
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-
-  a:hover {
-    color: #747bff;
-  }
-
-  button {
-    background-color: #f9f9f9;
-  }
+  background: #f1f5f9;
 }
 
 /* ======================================================
    🔹 SCROLLBAR (DESKTOP)
-   ====================================================== 
-   🎯 UX
-   - Scroll discreto
-   - Aparência clean
-   - Não interfere no layout
-*/
+   ====================================================== */
 ::-webkit-scrollbar {
   width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  border-radius: 6px;
 }
 
 /* ======================================================
    🔹 SCROLLBAR (MOBILE / APP-LIKE)
-   ====================================================== 
-   🎯 UX
-   - Esconde completamente
-   - Mantém scroll funcional
-   - Sensação de aplicativo nativo
-*/
+   ====================================================== */
 @media (max-width: 768px) {
   ::-webkit-scrollbar {
     display: none;
@@ -4494,15 +4421,12 @@ createRoot(document.getElementById('root')).render(
 --- ARQUIVO: src/styles/pet-card.css ---
 .pet-card {
   background: var(--color-card);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-soft);
-  padding: 16px;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  padding: 18px;
   border: 1px solid var(--color-border);
-
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }
+
 
 .pet-title {
   font-size: 17px;
@@ -4540,14 +4464,42 @@ createRoot(document.getElementById('root')).render(
 
 
 .badge-vip {
-  align-self: flex-start;
-  background: var(--color-accent-soft);
-  color: var(--color-accent);
+  position: absolute;
+  top: 12px;
+  right: 12px;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 6px 12px;
+  border-radius: 999px;
+
   font-size: 11px;
   font-weight: 600;
-  padding: 4px 8px;
-  border-radius: 999px;
+  letter-spacing: 0.3px;
+
+  color: #3a2f0b;
+
+  background: linear-gradient(
+    135deg,
+    #f6e8a6 0%,
+    #e6c76a 45%,
+    #c8a94a 100%
+  );
+
+  border: 1px solid rgba(255, 255, 255, 0.6);
+
+  box-shadow:
+    0 0 0 1px rgba(200, 169, 74, 0.35),
+    0 8px 20px rgba(200, 169, 74, 0.35);
+
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+
+  backdrop-filter: blur(4px);
 }
+
+
 
 
 .pet-info-grid {
@@ -4581,6 +4533,56 @@ createRoot(document.getElementById('root')).render(
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+.app-shell {
+  max-width: 420px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--color-bg);
+  padding-bottom: 24px;
+}
+
+
+.app-header {
+  padding: 20px 16px 16px;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.02),
+    transparent
+  );
+}
+
+.app-header h1 {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.app-header p {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+
+.petlist-container {
+  padding: 0 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+
+.filter-chip {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: #fff;
+  font-size: 13px;
+}
+
+.filter-chip.active {
+  background: var(--color-primary);
+  color: #fff;
 }
 
 ----------------------------------
