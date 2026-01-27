@@ -121,7 +121,8 @@ export default function PetList({ projeto }) {
 
       {/* FILTROS */}
       {hasFiltro('categoria') && (
-        <div className="flex gap-sm mb-sm px-md">
+        <div className="petlist-toolbar flex gap-sm mb-sm">
+
           {filtroCategoria && (
             <button onClick={() => setFiltroCategoria(null)}>
               <X size={16} />
@@ -140,7 +141,8 @@ export default function PetList({ projeto }) {
       )}
 
       {/* ORDENAÇÃO */}
-      <div className="flex gap-sm mb-md px-md">
+<div className="petlist-toolbar flex gap-sm mb-md">
+
         <button onClick={() => setOrdenacao('melhor_nota')}>
           ⭐ Melhor nota
         </button>
