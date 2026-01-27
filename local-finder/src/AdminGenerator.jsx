@@ -118,13 +118,15 @@ DADOS BRUTOS (TEXTO + URL):
   // 🔹 RENDER
   // ======================================================
   return (
-    <div style={{
-      maxWidth: '800px',
-      margin: '0 auto',
-      padding: '20px',
-      fontFamily: 'sans-serif',
-      color: '#334155'
-    }}>
+<div
+  className="mx-auto p-lg"
+  style={{
+    maxWidth: '800px',
+    fontFamily: 'sans-serif',
+    color: '#334155'
+  }}
+>
+
 
       {/* ==========================================
           🔹 HEADER INSTRUCIONAL
@@ -187,7 +189,7 @@ DADOS BRUTOS (TEXTO + URL):
       {/* ==========================================
           🔹 ÁREA DE AÇÃO
          ========================================== */}
-      <div style={{ position: 'relative' }}>
+     <div className="relative">
         <label style={{
           display: 'block',
           marginBottom: '8px',

@@ -1,35 +1,11 @@
 RELATÓRIO TÉCNICO DO PROJETO
-Data: 26/01/2026, 19:58:16
+Data: 26/01/2026, 20:25:54
+Pasta analisada: /home/anderson/Área de trabalho/local-finder/local-finder/src
 
---- PACKAGE.JSON ---
-{
-  "name": "local-finder",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.90.1",
-    "@vitejs/plugin-react": "^5.1.2",
-    "framer-motion": "^12.29.0",
-    "lucide-react": "^0.562.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.30.3",
-    "react-social-media-embed": "^2.5.18"
-  },
-  "devDependencies": {
-    "vite": "^5.4.0"
-  }
-}
+====================================
 
---------------------
 
---- ARQUIVO: src/AdminGenerator.jsx ---
+--- ARQUIVO: AdminGenerator.jsx ---
 // ======================================================
 // 📄 AdminGenerator.jsx
 // Gerador de Prompt para Ingestão de Dados (Admin Tool)
@@ -322,7 +298,7 @@ function StepCard({ icon, title, text, color }) {
 
 ----------------------------------
 
---- ARQUIVO: src/App.css ---
+--- ARQUIVO: App.css ---
 /* ======================================================
    📄 styles.css (ou index.css / App.css)
    Estilos Globais Base do Projeto
@@ -482,7 +458,7 @@ Estilo para textos secundários (ex: links de docs)
 
 ----------------------------------
 
---- ARQUIVO: src/App.jsx ---
+--- ARQUIVO: App.jsx ---
 // ======================================================
 // 📄 App.jsx
 // Entry Point + Roteamento Global (Multi-Tenant)
@@ -769,7 +745,7 @@ export default function App() {
 
 ----------------------------------
 
---- ARQUIVO: src/ChatModal.jsx ---
+--- ARQUIVO: ChatModal.jsx ---
 // ======================================================
 // 📄 ChatModal.jsx
 // Modal de Conversa + Captura de Lead (WhatsApp)
@@ -1204,7 +1180,7 @@ export default function ChatModal({ local, projeto, onClose }) {
 
 ----------------------------------
 
---- ARQUIVO: src/Dashboard.jsx ---
+--- ARQUIVO: Dashboard.jsx ---
 import React, { useEffect, useMemo, useState } from "react";
 import { supabase } from './supabaseClient';
 
@@ -1826,7 +1802,7 @@ const smallLabel = { fontSize: "13px", color: "#334155" };
 
 ----------------------------------
 
---- ARQUIVO: src/PetList.jsx ---
+--- ARQUIVO: PetList.jsx ---
 // ======================================================
 // 📄 PetList.jsx
 // Tela principal do App (usuário final)
@@ -2045,7 +2021,7 @@ useEffect(() => {
 
 ----------------------------------
 
---- ARQUIVO: src/components/dashboard/DashboardHeader.jsx ---
+--- ARQUIVO: components/dashboard/DashboardHeader.jsx ---
 // ======================================================
 // 📄 DashboardHeader.jsx
 // Função: Cabeçalho principal do Dashboard do Projeto
@@ -2150,7 +2126,7 @@ export default function DashboardHeader({ projeto, theme }) {
 
 ----------------------------------
 
---- ARQUIVO: src/components/dashboard/EmptyState.jsx ---
+--- ARQUIVO: components/dashboard/EmptyState.jsx ---
 // ======================================================
 // 📄 EmptyState.jsx
 // Função: Estados vazios do Dashboard e App
@@ -2256,7 +2232,7 @@ export default function EmptyState({ type = 'filter', theme }) {
 
 ----------------------------------
 
---- ARQUIVO: src/components/dashboard/FilterBar.jsx ---
+--- ARQUIVO: components/dashboard/FilterBar.jsx ---
 // ======================================================
 // 📄 FilterBar.jsx
 // Função: Barra de filtros do Dashboard (Admin)
@@ -2386,7 +2362,7 @@ export default function FilterBar({
 
 ----------------------------------
 
---- ARQUIVO: src/components/dashboard/ProjectFiltersPanel.jsx ---
+--- ARQUIVO: components/dashboard/ProjectFiltersPanel.jsx ---
 // ======================================================
 // 📄 ProjectFiltersPanel.jsx
 // Função: Painel de controle dos filtros ativos por projeto
@@ -2658,7 +2634,7 @@ export default function ProjectFiltersPanel({ projeto, theme, onUpdate }) {
 
 ----------------------------------
 
---- ARQUIVO: src/components/dashboard/StoreCard.jsx ---
+--- ARQUIVO: components/dashboard/StoreCard.jsx ---
 // ======================================================
 // 📄 StoreCard.jsx
 // Função: Card administrativo de um estabelecimento
@@ -2843,7 +2819,7 @@ export default function StoreCard({
 
 ----------------------------------
 
---- ARQUIVO: src/components/dashboard/StoreCardEdit.jsx ---
+--- ARQUIVO: components/dashboard/StoreCardEdit.jsx ---
 // ======================================================
 // 📄 StoreCardEdit.jsx
 // Função: Edição inline de um estabelecimento (Dashboard)
@@ -3041,7 +3017,61 @@ export default function StoreCardEdit({ local, theme, onSave, onCancel }) {
 
 ----------------------------------
 
---- ARQUIVO: src/components/pet/FilterSheet.jsx ---
+--- ARQUIVO: components/gerar_relatorio.js ---
+
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Configuração simples para Node.js (ES Modules)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const outputFileName = 'RELATORIO_TECNICO.txt';
+const dirsToScan = ['src']; // Pastas para ler
+const ignoreFiles = ['vite-env.d.ts', '.DS_Store']; // Arquivos para ignorar
+
+let reportContent = `RELATÓRIO TÉCNICO DO PROJETO\nData: ${new Date().toLocaleString()}\n\n`;
+
+function scanDirectory(directory) {
+    const files = fs.readdirSync(directory);
+
+    files.forEach(file => {
+        const fullPath = path.join(directory, file);
+        const stat = fs.statSync(fullPath);
+
+        if (stat.isDirectory()) {
+            scanDirectory(fullPath);
+        } else {
+            if (!ignoreFiles.includes(file) && (file.endsWith('.jsx') || file.endsWith('.js') || file.endsWith('.css'))) {
+                const content = fs.readFileSync(fullPath, 'utf8');
+                reportContent += `\n--- ARQUIVO: ${fullPath} ---\n`;
+                reportContent += content;
+                reportContent += `\n----------------------------------\n`;
+            }
+        }
+    });
+}
+
+// 1. Lê o package.json para saber as dependências
+try {
+    const pkg = fs.readFileSync('package.json', 'utf8');
+    reportContent += `--- PACKAGE.JSON ---\n${pkg}\n--------------------\n`;
+} catch (e) { console.log("Sem package.json?"); }
+
+// 2. Escaneia a pasta SRC
+dirsToScan.forEach(dir => {
+    if (fs.existsSync(dir)) scanDirectory(dir);
+});
+
+// 3. Salva o arquivo
+fs.writeFileSync(outputFileName, reportContent);
+console.log(`✅ Relatório gerado com sucesso: ${outputFileName}`);
+console.log(`👉 Envie este arquivo para a IA caso ela perca o contexto.`);
+
+----------------------------------
+
+--- ARQUIVO: components/pet/FilterSheet.jsx ---
 // ======================================================
 // 📄 FilterSheet.jsx
 // Painel de Filtros & Ordenação (Mobile-first)
@@ -3191,7 +3221,7 @@ export default function FilterSheet({
 
 ----------------------------------
 
---- ARQUIVO: src/components/pet/PetCardClassic.jsx ---
+--- ARQUIVO: components/pet/PetCardClassic.jsx ---
 // ======================================================
 // 🐾 PetCardClassic.jsx
 // Card principal do PetList (versão Classic)
@@ -3447,7 +3477,7 @@ export default function PetCardClassic({ local, onOpenChat }) {
 
 ----------------------------------
 
---- ARQUIVO: src/components/pet/PetCardMapStyle.jsx ---
+--- ARQUIVO: components/pet/PetCardMapStyle.jsx ---
 // src/components/pet/PetCardMapStyle.jsx
 import React, { useState } from "react";
 import {
@@ -3728,7 +3758,7 @@ export default function PetCardMapStyle({ local, onOpenChat }) {
 
 ----------------------------------
 
---- ARQUIVO: src/components/ui/Badge.jsx ---
+--- ARQUIVO: components/ui/Badge.jsx ---
 
 export default function Badge({ label, type = 'default' }) {
   return (
@@ -3740,8 +3770,7 @@ export default function Badge({ label, type = 'default' }) {
 
 ----------------------------------
 
---- ARQUIVO: src/components/ui/Button.jsx ---
-
+--- ARQUIVO: components/ui/Button.jsx ---
 export default function Button({
   children,
   variant = 'primary',
@@ -3760,10 +3789,10 @@ export default function Button({
 
 ----------------------------------
 
---- ARQUIVO: src/components/ui/Card.jsx ---
+--- ARQUIVO: components/ui/Card.jsx ---
 export default function Card({ children, className = '' }) {
   return (
-    <div className={`pet-card ${className}`}>
+    <div className={`card card-padding ${className}`}>
       {children}
     </div>
   );
@@ -3771,11 +3800,92 @@ export default function Card({ children, className = '' }) {
 
 ----------------------------------
 
---- ARQUIVO: src/components/ui/Index.jsx ---
+--- ARQUIVO: components/ui/Index.jsx ---
+export { default as Card } from './Card';
+export { default as Button } from './Button';
+export { default as Badge } from './Badge';
 
 ----------------------------------
 
---- ARQUIVO: src/filters/filters.config.js ---
+--- ARQUIVO: components/ui/gerar_relatorio.js ---
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Configuração para Node.js (ES Modules)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Nome do arquivo de saída
+const outputFileName = 'RELATORIO_TECNICO.txt';
+
+// Pasta base: a MESMA pasta onde este arquivo está
+const baseDir = __dirname;
+
+// Arquivos para ignorar
+const ignoreFiles = ['vite-env.d.ts', '.DS_Store'];
+
+// Conteúdo inicial do relatório
+let reportContent = `RELATÓRIO TÉCNICO DO PROJETO
+Data: ${new Date().toLocaleString()}
+Pasta analisada: ${baseDir}
+
+====================================
+
+`;
+
+function scanDirectory(directory) {
+  const files = fs.readdirSync(directory);
+
+  files.forEach(file => {
+    const fullPath = path.join(directory, file);
+    const stat = fs.statSync(fullPath);
+
+    if (stat.isDirectory()) {
+      scanDirectory(fullPath);
+    } else {
+      const isValidFile =
+        !ignoreFiles.includes(file) &&
+        (file.endsWith('.jsx') || file.endsWith('.js') || file.endsWith('.css'));
+
+      if (isValidFile) {
+        const content = fs.readFileSync(fullPath, 'utf8');
+        const relativePath = path.relative(baseDir, fullPath);
+
+        reportContent += `
+--- ARQUIVO: ${relativePath} ---
+${content}
+----------------------------------
+`;
+      }
+    }
+  });
+}
+
+// (Opcional) tentar ler package.json apenas se existir NA MESMA PASTA
+const pkgPath = path.join(baseDir, 'package.json');
+if (fs.existsSync(pkgPath)) {
+  const pkg = fs.readFileSync(pkgPath, 'utf8');
+  reportContent += `
+--- PACKAGE.JSON ---
+${pkg}
+--------------------
+`;
+}
+
+// Executa o scan
+scanDirectory(baseDir);
+
+// Salva o relatório
+const outputPath = path.join(baseDir, outputFileName);
+fs.writeFileSync(outputPath, reportContent);
+
+console.log(`✅ Relatório gerado com sucesso: ${outputPath}`);
+console.log(`👉 Este relatório analisa apenas a pasta onde o script está.`);
+
+----------------------------------
+
+--- ARQUIVO: filters/filters.config.js ---
 /**
  * SISTEMA GLOBAL DE FILTROS
  * =========================
@@ -3915,7 +4025,85 @@ export const FILTERS = {
 
 ----------------------------------
 
---- ARQUIVO: src/hooks/useDashboardData.jsx ---
+--- ARQUIVO: gerar_relatorio.js ---
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Configuração para Node.js (ES Modules)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Nome do arquivo de saída
+const outputFileName = 'RELATORIO_TECNICO.txt';
+
+// Pasta base: a MESMA pasta onde este arquivo está
+const baseDir = __dirname;
+
+// Arquivos para ignorar
+const ignoreFiles = ['vite-env.d.ts', '.DS_Store'];
+
+// Conteúdo inicial do relatório
+let reportContent = `RELATÓRIO TÉCNICO DO PROJETO
+Data: ${new Date().toLocaleString()}
+Pasta analisada: ${baseDir}
+
+====================================
+
+`;
+
+function scanDirectory(directory) {
+  const files = fs.readdirSync(directory);
+
+  files.forEach(file => {
+    const fullPath = path.join(directory, file);
+    const stat = fs.statSync(fullPath);
+
+    if (stat.isDirectory()) {
+      scanDirectory(fullPath);
+    } else {
+      const isValidFile =
+        !ignoreFiles.includes(file) &&
+        (file.endsWith('.jsx') || file.endsWith('.js') || file.endsWith('.css'));
+
+      if (isValidFile) {
+        const content = fs.readFileSync(fullPath, 'utf8');
+        const relativePath = path.relative(baseDir, fullPath);
+
+        reportContent += `
+--- ARQUIVO: ${relativePath} ---
+${content}
+----------------------------------
+`;
+      }
+    }
+  });
+}
+
+// (Opcional) tentar ler package.json apenas se existir NA MESMA PASTA
+const pkgPath = path.join(baseDir, 'package.json');
+if (fs.existsSync(pkgPath)) {
+  const pkg = fs.readFileSync(pkgPath, 'utf8');
+  reportContent += `
+--- PACKAGE.JSON ---
+${pkg}
+--------------------
+`;
+}
+
+// Executa o scan
+scanDirectory(baseDir);
+
+// Salva o relatório
+const outputPath = path.join(baseDir, outputFileName);
+fs.writeFileSync(outputPath, reportContent);
+
+console.log(`✅ Relatório gerado com sucesso: ${outputPath}`);
+console.log(`👉 Este relatório analisa apenas a pasta onde o script está.`);
+
+----------------------------------
+
+--- ARQUIVO: hooks/useDashboardData.jsx ---
 // ======================================================
 // 📄 useDashboardData.jsx
 // Hook de dados do Dashboard (CRUD + Estado)
@@ -4126,7 +4314,7 @@ export function useDashboardData(projetoId) {
 
 ----------------------------------
 
---- ARQUIVO: src/hooks/useDashboardFilters.jsx ---
+--- ARQUIVO: hooks/useDashboardFilters.jsx ---
 // ======================================================
 // 📄 useDashboardFilters.jsx
 // Hook de filtros + ordenação do Dashboard / App
@@ -4307,7 +4495,7 @@ export function useDashboardFilters(locais, filtrosAtivosProjeto = []) {
 
 ----------------------------------
 
---- ARQUIVO: src/index.css ---
+--- ARQUIVO: index.css ---
 /* ======================================================
    📄 index.css / global.css
    Base global da aplicação
@@ -4426,7 +4614,7 @@ button:hover {
 
 ----------------------------------
 
---- ARQUIVO: src/main.jsx ---
+--- ARQUIVO: main.jsx ---
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
@@ -4444,18 +4632,265 @@ createRoot(document.getElementById('root')).render(
 
 ----------------------------------
 
---- ARQUIVO: src/styles/components.css ---
-.card {
-  background: var(--color-card);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-soft);
-  padding: 16px;
+--- ARQUIVO: styles/button.css ---
+/* =========================================================
+   BUTTON — Base canônica do Design System
+   ---------------------------------------------------------
+   Define apenas o botão genérico.
+   Botões específicos (ex: WhatsApp) ficam fora daqui.
+   ========================================================= */
+
+/* Botão base */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+
+  font-family: var(--font-main);
+  font-size: 14px;
+  font-weight: 500;
+
+  border: none;
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.1s ease;
+}
+
+/* Variante primária */
+.btn-primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  filter: brightness(0.95);
+}
+
+/* Variante neutra */
+.btn-secondary {
+  background: #fff;
+  color: var(--color-text);
   border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover {
+  background: var(--color-bg);
+}
+
+/* Estado desabilitado */
+.btn:disabled,
+.btn-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Botão largura total (helper) */
+.btn-block {
+  width: 100%;
 }
 
 ----------------------------------
 
---- ARQUIVO: src/styles/pet-card.css ---
+--- ARQUIVO: styles/card.css ---
+/* =========================================================
+   CARD — Base canônica do Design System
+   ---------------------------------------------------------
+   Este arquivo define APENAS o card genérico.
+   Variantes específicas (pet-card, etc) ficam fora daqui.
+   ========================================================= */
+
+.card {
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-soft);
+}
+
+/* Padding padrão do card */
+.card-padding {
+  padding: 16px;
+}
+
+/* Variante de interação (hover) */
+.card-hover:hover {
+  box-shadow: var(--shadow-md);
+}
+
+----------------------------------
+
+--- ARQUIVO: styles/components.css ---
+/* =========================================================
+   COMPONENTS — Padrões auxiliares (LEGADO CONTROLADO)
+   ---------------------------------------------------------
+   ⚠️ Este arquivo NÃO define componentes base do Design System.
+   ⚠️ Cards, Buttons e afins vivem em arquivos próprios.
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   Card helpers (uso opcional)
+   --------------------------------------------------------- */
+
+/* Padding padrão para cards legados */
+.card-padding {
+  padding: 16px;
+}
+
+/* Hover genérico para cards interativos */
+.card-hover:hover {
+  box-shadow: var(--shadow-md);
+}
+
+----------------------------------
+
+--- ARQUIVO: styles/gerar_relatorio.js ---
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Configuração para Node.js (ES Modules)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Nome do arquivo de saída
+const outputFileName = 'RELATORIO_TECNICO.txt';
+
+// Pasta base: a MESMA pasta onde este arquivo está
+const baseDir = __dirname;
+
+// Arquivos para ignorar
+const ignoreFiles = ['vite-env.d.ts', '.DS_Store'];
+
+// Conteúdo inicial do relatório
+let reportContent = `RELATÓRIO TÉCNICO DO PROJETO
+Data: ${new Date().toLocaleString()}
+Pasta analisada: ${baseDir}
+
+====================================
+
+`;
+
+function scanDirectory(directory) {
+  const files = fs.readdirSync(directory);
+
+  files.forEach(file => {
+    const fullPath = path.join(directory, file);
+    const stat = fs.statSync(fullPath);
+
+    if (stat.isDirectory()) {
+      scanDirectory(fullPath);
+    } else {
+      const isValidFile =
+        !ignoreFiles.includes(file) &&
+        (file.endsWith('.jsx') || file.endsWith('.js') || file.endsWith('.css'));
+
+      if (isValidFile) {
+        const content = fs.readFileSync(fullPath, 'utf8');
+        const relativePath = path.relative(baseDir, fullPath);
+
+        reportContent += `
+--- ARQUIVO: ${relativePath} ---
+${content}
+----------------------------------
+`;
+      }
+    }
+  });
+}
+
+// (Opcional) tentar ler package.json apenas se existir NA MESMA PASTA
+const pkgPath = path.join(baseDir, 'package.json');
+if (fs.existsSync(pkgPath)) {
+  const pkg = fs.readFileSync(pkgPath, 'utf8');
+  reportContent += `
+--- PACKAGE.JSON ---
+${pkg}
+--------------------
+`;
+}
+
+// Executa o scan
+scanDirectory(baseDir);
+
+// Salva o relatório
+const outputPath = path.join(baseDir, outputFileName);
+fs.writeFileSync(outputPath, reportContent);
+
+console.log(`✅ Relatório gerado com sucesso: ${outputPath}`);
+console.log(`👉 Este relatório analisa apenas a pasta onde o script está.`);
+
+----------------------------------
+
+--- ARQUIVO: styles/layout.css ---
+/* =========================================================
+   LAYOUT — Utilitários estruturais
+   ---------------------------------------------------------
+   Este arquivo cobre APENAS estrutura:
+   display, direção, alinhamento, distribuição e espaçamento.
+   ========================================================= */
+
+/* Flex base */
+.flex {
+  display: flex;
+}
+
+/* Direção */
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Alinhamento */
+.items-center {
+  align-items: center;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+.items-end {
+  align-items: flex-end;
+}
+
+/* Distribuição */
+.justify-start {
+  justify-content: flex-start;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+/* Espaçamento entre itens */
+.gap-sm { gap: 8px; }
+.gap-md { gap: 12px; }
+.gap-lg { gap: 16px; }
+.gap-xl { gap: 24px; }
+
+----------------------------------
+
+--- ARQUIVO: styles/pet-card.css ---
 .pet-card {
   background: var(--color-card);
   border-radius: 18px;
@@ -4562,7 +4997,7 @@ createRoot(document.getElementById('root')).render(
 
 ----------------------------------
 
---- ARQUIVO: src/styles/petlist.css ---
+--- ARQUIVO: styles/petlist.css ---
 .petlist-container {
   max-width: 720px;
   margin: 0 auto;
@@ -4624,42 +5059,320 @@ createRoot(document.getElementById('root')).render(
 
 ----------------------------------
 
---- ARQUIVO: src/styles/theme.css ---
-:root {
-  /* 🎨 CORES */
-  --color-bg: #F8FAF9;
-  --color-card: #FFFFFF;
-  --color-border: #E6E8EB;
+--- ARQUIVO: styles/spacing.css ---
+/* =========================================================
+   SPACING — Utilitários de espaçamento
+   ---------------------------------------------------------
+   Padding e margin reutilizáveis.
+   Não inclui layout, cor ou tipografia.
+   ========================================================= */
 
-  --color-text: #1F2933;
-  --color-muted: #6B7280;
+/* Padding (todos os lados) */
+.p-xs { padding: 4px; }
+.p-sm { padding: 8px; }
+.p-md { padding: 16px; }
+.p-lg { padding: 24px; }
 
-  --color-primary: #2563eb;
-  --color-accent: #C8A94A;      /* VIP */
-  --color-accent-soft: #F6F1DF;
+/* Padding vertical / horizontal */
+.py-sm { padding-top: 8px; padding-bottom: 8px; }
+.py-md { padding-top: 16px; padding-bottom: 16px; }
 
-  --color-whatsapp: #2FBF71;
-  --color-whatsapp-hover: #28A863;
+.px-sm { padding-left: 8px; padding-right: 8px; }
+.px-md { padding-left: 16px; padding-right: 16px; }
 
-  /* 🧱 LAYOUT */
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 18px;
+/* Margin (todos os lados) */
+.m-sm { margin: 8px; }
+.m-md { margin: 16px; }
+.m-lg { margin: 24px; }
 
-  --shadow-soft: 0 6px 20px rgba(0,0,0,0.06);
+/* Margin top */
+.mt-xs { margin-top: 4px; }
+.mt-sm { margin-top: 8px; }
+.mt-md { margin-top: 16px; }
+.mt-lg { margin-top: 24px; }
 
-  /* ✍️ TIPOGRAFIA */
-  --font-main: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+/* Margin bottom */
+.mb-xs { margin-bottom: 4px; }
+.mb-sm { margin-bottom: 8px; }
+.mb-md { margin-bottom: 16px; }
+.mb-lg { margin-bottom: 24px; }
+
+/* Margin left / right (casos pontuais) */
+.ml-sm { margin-left: 8px; }
+.mr-sm { margin-right: 8px; }
+
+----------------------------------
+
+--- ARQUIVO: styles/text.css ---
+/* =========================================================
+   TEXT — Tipografia base do Design System
+   ---------------------------------------------------------
+   Define estilos de texto reutilizáveis.
+   Não controla layout (margin/padding ficam em spacing.css).
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   Headings
+   --------------------------------------------------------- */
+
+.h1 {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.25;
 }
 
+.h2 {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.3;
+}
 
-body {
-  outline: 5px solid red;
+.h3 {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+/* ---------------------------------------------------------
+   Texto base
+   --------------------------------------------------------- */
+
+.text {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.text-sm {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.text-lg {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* ---------------------------------------------------------
+   Cores de texto
+   --------------------------------------------------------- */
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+.text-primary {
+  color: var(--color-primary);
+}
+
+.text-success {
+  color: var(--color-success);
+}
+
+.text-warning {
+  color: var(--color-warning);
+}
+
+.text-danger {
+  color: var(--color-danger);
+}
+
+/* ---------------------------------------------------------
+   Ênfase
+   --------------------------------------------------------- */
+
+.text-bold {
+  font-weight: 600;
+}
+
+.text-semibold {
+  font-weight: 500;
 }
 
 ----------------------------------
 
---- ARQUIVO: src/supabaseClient.js ---
+--- ARQUIVO: styles/theme.css ---
+/* =========================================================
+   THEME — Tokens globais do Design System
+   ---------------------------------------------------------
+   Fonte única de cores, tipografia, radius e sombras.
+   NÃO aplicar layout nem estilos de componentes aqui.
+   ========================================================= */
+
+:root {
+  /* -------------------------------------------------------
+     CORES
+     ------------------------------------------------------- */
+
+  --color-primary: #1a73e8;
+  --color-primary-soft: #e8f0fe;
+
+  --color-bg: #f8fafc;
+  --color-card: #ffffff;
+
+  --color-text: #1f2933;
+  --color-text-muted: #6b7280;
+
+  --color-border: #e5e7eb;
+
+  --color-success: #16a34a;
+  --color-warning: #f59e0b;
+  --color-danger: #dc2626;
+
+  /* -------------------------------------------------------
+     TIPOGRAFIA
+     ------------------------------------------------------- */
+
+  --font-main: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
+               'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+
+  /* -------------------------------------------------------
+     RADIUS
+     ------------------------------------------------------- */
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  /* -------------------------------------------------------
+     SOMBRAS
+     ------------------------------------------------------- */
+
+  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* ---------------------------------------------------------
+   BASE GLOBAL (mínimo necessário)
+   --------------------------------------------------------- */
+
+body {
+  margin: 0;
+  font-family: var(--font-main);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+----------------------------------
+
+--- ARQUIVO: styles/tokens.css ---
+/* =========================================================
+   TOKENS — Alias e documentação do Design System
+   ---------------------------------------------------------
+   Este arquivo NÃO define novos valores.
+   Ele expõe aliases semânticos para tokens do theme.css
+   e documenta o sistema de design.
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   CORES (aliases semânticos)
+   --------------------------------------------------------- */
+
+:root {
+  /* Superfícies */
+  --surface-page: var(--color-bg);
+  --surface-card: var(--color-card);
+
+  /* Texto */
+  --text-primary: var(--color-text);
+  --text-muted: var(--color-text-muted);
+
+  /* Ações */
+  --action-primary: var(--color-primary);
+  --action-success: var(--color-success);
+  --action-warning: var(--color-warning);
+  --action-danger: var(--color-danger);
+
+  /* Bordas */
+  --border-default: var(--color-border);
+
+  /* Sombras */
+  --elevation-soft: var(--shadow-soft);
+  --elevation-sm: var(--shadow-sm);
+  --elevation-md: var(--shadow-md);
+
+  /* Radius */
+  --radius-control: var(--radius-md);
+  --radius-surface: var(--radius-lg);
+}
+
+----------------------------------
+
+--- ARQUIVO: styles/utilities.css ---
+/* =========================================================
+   UTILITIES — Helpers genéricos
+   ---------------------------------------------------------
+   Pequenas classes utilitárias para casos pontuais.
+   Não substituem layout.css nem spacing.css.
+   ========================================================= */
+
+/* Visibilidade */
+.hidden {
+  display: none !important;
+}
+
+.invisible {
+  visibility: hidden;
+}
+
+/* Largura / altura */
+.w-full {
+  width: 100%;
+}
+
+.h-full {
+  height: 100%;
+}
+
+/* Texto */
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* Bordas e forma */
+.rounded-sm {
+  border-radius: var(--radius-sm);
+}
+
+.rounded-md {
+  border-radius: var(--radius-md);
+}
+
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+
+/* Overflow */
+.overflow-hidden {
+  overflow: hidden;
+}
+
+/* Cursor */
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* Elevação rápida (casos especiais) */
+.shadow-sm {
+  box-shadow: var(--shadow-sm);
+}
+
+.shadow-md {
+  box-shadow: var(--shadow-md);
+}
+
+----------------------------------
+
+--- ARQUIVO: supabaseClient.js ---
 import { createClient } from '@supabase/supabase-js';
 
 // ------------------------------------------------------------------
@@ -4674,7 +5387,7 @@ const supabaseKey = 'sb_publishable_JnzduU-F6qpkX82P8G1o5A_WHj_dh5v';
 export const supabase = createClient(supabaseUrl, supabaseKey);
 ----------------------------------
 
---- ARQUIVO: src/utils/constants.js ---
+--- ARQUIVO: utils/constants.js ---
 // ======================================================
 // 📄 constants.js
 // Constantes globais do App / Dashboard
@@ -4863,7 +5576,7 @@ export const DEFAULT_FILTROS_APP = [
 
 ----------------------------------
 
---- ARQUIVO: src/utils/theme.js ---
+--- ARQUIVO: utils/theme.js ---
 
 
 ----------------------------------

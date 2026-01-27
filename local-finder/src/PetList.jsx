@@ -16,18 +16,13 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
 
-
 // Componentes
 import ChatModal from './ChatModal';
-//import PetCardClassic from './components/pet/PetCardClassic';
 import PetCardMapStyle from './components/pet/PetCardMapStyle';
 import './styles/petlist.css';
 
-
-
 // Ícones
 import { Store, X } from 'lucide-react';
-
 
 // ======================================================
 // 🔹 HELPERS
@@ -47,46 +42,40 @@ const getFiltrosAtivos = (projeto) => {
 export default function PetList({ projeto }) {
   const [locais, setLocais] = useState([]);
   const [locaisFiltrados, setLocaisFiltrados] = useState([]);
-
   const [limit, setLimit] = useState(6);
-
   const [loading, setLoading] = useState(true);
-
   const [selectedLocal, setSelectedLocal] = useState(null);
-
   const [filtroCategoria, setFiltroCategoria] = useState(null);
   const [ordenacao, setOrdenacao] = useState('melhor_nota');
 
   const filtrosAtivos = getFiltrosAtivos(projeto);
   const hasFiltro = (id) => filtrosAtivos.includes(id);
 
-// ======================================================
-// 🔹 BUSCA DE LOCAIS (APENAS PUBLICADOS NO APP)
-// ======================================================
-useEffect(() => {
-  async function buscarLocais() {
-    setLoading(true);
+  // ======================================================
+  // 🔹 BUSCA DE LOCAIS (APENAS PUBLICADOS NO APP)
+  // ======================================================
+  useEffect(() => {
+    async function buscarLocais() {
+      setLoading(true);
 
-    const { data, error } = await supabase
-      .from("locais")
-      .select("*")
-      .eq("status", "PUBLICAR_APP")
-      .order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("locais")
+        .select("*")
+        .eq("status", "PUBLICAR_APP")
+        .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("Erro ao buscar locais:", error);
-      setLocais([]);
-    } else {
-      setLocais(data || []);
+      if (error) {
+        console.error("Erro ao buscar locais:", error);
+        setLocais([]);
+      } else {
+        setLocais(data || []);
+      }
+
+      setLoading(false);
     }
 
-    setLoading(false);
-  }
-
-  buscarLocais();
-}, []);
-
-
+    buscarLocais();
+  }, []);
 
   // ======================================================
   // 🔹 FILTROS + ORDENAÇÃO
@@ -94,7 +83,6 @@ useEffect(() => {
   useEffect(() => {
     let resultado = [...locais];
 
-    // Categoria
     if (hasFiltro('categoria') && filtroCategoria) {
       resultado = resultado.filter(
         l =>
@@ -103,7 +91,6 @@ useEffect(() => {
       );
     }
 
-    // Ordenação padrão
     if (ordenacao === 'melhor_nota') {
       resultado.sort((a, b) => Number(b.nota || 0) - Number(a.nota || 0));
     }
@@ -119,8 +106,6 @@ useEffect(() => {
     setLocaisFiltrados(resultado);
   }, [locais, filtroCategoria, ordenacao, filtrosAtivos]);
 
-
-  
   // ======================================================
   // 🔹 RENDER
   // ======================================================
@@ -136,7 +121,7 @@ useEffect(() => {
 
       {/* FILTROS */}
       {hasFiltro('categoria') && (
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', padding: '0 16px' }}>
+        <div className="flex gap-sm mb-sm px-md">
           {filtroCategoria && (
             <button onClick={() => setFiltroCategoria(null)}>
               <X size={16} />
@@ -155,7 +140,7 @@ useEffect(() => {
       )}
 
       {/* ORDENAÇÃO */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', padding: '0 16px' }}>
+      <div className="flex gap-sm mb-md px-md">
         <button onClick={() => setOrdenacao('melhor_nota')}>
           ⭐ Melhor nota
         </button>
@@ -168,7 +153,11 @@ useEffect(() => {
       </div>
 
       {/* LISTA */}
-      {loading && <p style={{ padding: '0 16px' }}>Carregando...</p>}
+      {loading && (
+        <p className="px-md">
+          Carregando...
+        </p>
+      )}
 
       {!loading && (
         <div className="petlist-container">
@@ -183,15 +172,14 @@ useEffect(() => {
           {limit < locaisFiltrados.length && (
             <button
               onClick={() => setLimit((prev) => prev + 6)}
+              className="cursor-pointer"
               style={{
                 margin: '20px auto',
-                display: 'block',
                 padding: '12px 20px',
                 borderRadius: '12px',
                 border: '1px solid #e2e8f0',
                 background: '#fff',
-                fontWeight: 600,
-                cursor: 'pointer'
+                fontWeight: 600
               }}
             >
               Carregar mais
@@ -210,6 +198,4 @@ useEffect(() => {
       )}
     </div>
   );
-
-  
 }

@@ -1,6 +1,6 @@
 export default function Card({ children, className = '' }) {
   return (
-    <div className={`pet-card ${className}`}>
+    <div className={`card card-padding ${className}`}>
       {children}
     </div>
   );

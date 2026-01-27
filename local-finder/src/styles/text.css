@@ -1,0 +1,84 @@
+/* =========================================================
+   TEXT — Tipografia base do Design System
+   ---------------------------------------------------------
+   Define estilos de texto reutilizáveis.
+   Não controla layout (margin/padding ficam em spacing.css).
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   Headings
+   --------------------------------------------------------- */
+
+.h1 {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.h2 {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.h3 {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+/* ---------------------------------------------------------
+   Texto base
+   --------------------------------------------------------- */
+
+.text {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.text-sm {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.text-lg {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* ---------------------------------------------------------
+   Cores de texto
+   --------------------------------------------------------- */
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+.text-primary {
+  color: var(--color-primary);
+}
+
+.text-success {
+  color: var(--color-success);
+}
+
+.text-warning {
+  color: var(--color-warning);
+}
+
+.text-danger {
+  color: var(--color-danger);
+}
+
+/* ---------------------------------------------------------
+   Ênfase
+   --------------------------------------------------------- */
+
+.text-bold {
+  font-weight: 600;
+}
+
+.text-semibold {
+  font-weight: 500;
+}

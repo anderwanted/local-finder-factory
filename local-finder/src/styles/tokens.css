@@ -1,0 +1,39 @@
+/* =========================================================
+   TOKENS — Alias e documentação do Design System
+   ---------------------------------------------------------
+   Este arquivo NÃO define novos valores.
+   Ele expõe aliases semânticos para tokens do theme.css
+   e documenta o sistema de design.
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   CORES (aliases semânticos)
+   --------------------------------------------------------- */
+
+:root {
+  /* Superfícies */
+  --surface-page: var(--color-bg);
+  --surface-card: var(--color-card);
+
+  /* Texto */
+  --text-primary: var(--color-text);
+  --text-muted: var(--color-text-muted);
+
+  /* Ações */
+  --action-primary: var(--color-primary);
+  --action-success: var(--color-success);
+  --action-warning: var(--color-warning);
+  --action-danger: var(--color-danger);
+
+  /* Bordas */
+  --border-default: var(--color-border);
+
+  /* Sombras */
+  --elevation-soft: var(--shadow-soft);
+  --elevation-sm: var(--shadow-sm);
+  --elevation-md: var(--shadow-md);
+
+  /* Radius */
+  --radius-control: var(--radius-md);
+  --radius-surface: var(--radius-lg);
+}

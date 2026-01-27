@@ -1,7 +1,20 @@
-.card {
-  background: var(--color-card);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-soft);
+/* =========================================================
+   COMPONENTS — Padrões auxiliares (LEGADO CONTROLADO)
+   ---------------------------------------------------------
+   ⚠️ Este arquivo NÃO define componentes base do Design System.
+   ⚠️ Cards, Buttons e afins vivem em arquivos próprios.
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   Card helpers (uso opcional)
+   --------------------------------------------------------- */
+
+/* Padding padrão para cards legados */
+.card-padding {
   padding: 16px;
-  border: 1px solid var(--color-border);
+}
+
+/* Hover genérico para cards interativos */
+.card-hover:hover {
+  box-shadow: var(--shadow-md);
 }

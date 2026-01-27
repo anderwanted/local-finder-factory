@@ -1,3 +1,58 @@
+RELATÓRIO TÉCNICO DO PROJETO
+Data: 26/01/2026, 20:20:03
+Pasta analisada: /home/anderson/Área de trabalho/local-finder/local-finder/src/components/ui
+
+====================================
+
+
+--- ARQUIVO: Badge.jsx ---
+
+export default function Badge({ label, type = 'default' }) {
+  return (
+    <span className={`badge badge-${type}`}>
+      {label}
+    </span>
+  );
+}
+
+----------------------------------
+
+--- ARQUIVO: Button.jsx ---
+
+export default function Button({
+  children,
+  variant = 'primary',
+  className = '',
+  ...props
+}) {
+  return (
+    <button
+      className={`btn btn-${variant} ${className}`}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
+
+----------------------------------
+
+--- ARQUIVO: Card.jsx ---
+export default function Card({ children, className = '' }) {
+  return (
+    <div className={`pet-card ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+----------------------------------
+
+--- ARQUIVO: Index.jsx ---
+
+----------------------------------
+
+--- ARQUIVO: gerar_relatorio.js ---
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -72,3 +127,5 @@ fs.writeFileSync(outputPath, reportContent);
 
 console.log(`✅ Relatório gerado com sucesso: ${outputPath}`);
 console.log(`👉 Este relatório analisa apenas a pasta onde o script está.`);
+
+----------------------------------
