@@ -37,3 +37,32 @@
   --radius-control: var(--radius-md);
   --radius-surface: var(--radius-lg);
 }
+
+
+/* =========================================================
+   APP ALIASES — use no CSS (sem depender do nome "app-*")
+   ========================================================= */
+
+:root {
+  --brand-primary: var(--app-primary);
+  --brand-primary-2: var(--app-primary-2);
+  --brand-on-primary: var(--app-primary-contrast);
+
+  --surface-bg: var(--app-bg);
+  --surface-card: var(--app-surface);
+  --surface-glass: var(--app-surface-soft);
+
+  --text-main: var(--app-text);
+  --text-muted: var(--app-text-muted);
+
+  --border-soft: var(--app-border);
+
+  --shadow-card: var(--app-shadow-card);
+  --shadow-float: var(--app-shadow-float);
+
+  --radius-lg: var(--app-radius-lg);
+  --radius-md: var(--app-radius-md);
+  --radius-sm: var(--app-radius-sm);
+
+  --header-gradient: var(--app-header-gradient);
+}

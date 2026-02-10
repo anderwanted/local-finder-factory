@@ -17,12 +17,11 @@
 
 
 .app-header {
-  padding: 20px 16px 16px;
-  background: linear-gradient(
-    to bottom,
-    rgba(0,0,0,0.02),
-    transparent
-  );
+  background: var(--header-gradient);
+  color: var(--brand-on-primary);
+  padding: 28px 20px 52px;          /* mais alto estilo app */
+  border-bottom-left-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
 }
 
 .app-header h1 {
@@ -151,5 +150,78 @@
 
   .petlist-categories {
     margin-bottom: 16px;
+  }
+}
+
+
+/* =========================================================
+   APP HEADER (PetLovers vibe) — tokenizado
+   ========================================================= */
+
+
+
+.app-header-text h1 {
+  font-size: 26px;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.app-header-text p {
+  margin: 8px 0 0;
+  font-size: 14px;
+  opacity: 0.92;
+}
+
+/* “área de conteúdo” abaixo do topo */
+.petlist-container {
+  padding: 0 16px 24px;
+}
+
+
+/* =========================================================
+   TOOLBAR — flutuante, estilo app (tokenizado)
+   ========================================================= */
+
+.petlist-toolbar {
+  background: var(--surface-card);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  padding: 12px 12px;
+  margin: -28px 16px 14px;          /* sobe sobre o header */
+  box-shadow: var(--shadow-card);
+  position: relative;
+  z-index: 5;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Botões dentro da toolbar */
+.petlist-toolbar button {
+  background: #ffffff;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+/* Hover suave */
+.petlist-toolbar button:hover {
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+}
+
+/* Mobile: um pouco mais compacto */
+@media (max-width: 640px) {
+  .app-header {
+    padding: 24px 16px 50px;
+  }
+
+  .petlist-toolbar {
+    margin: -26px 12px 12px;
+    padding: 10px;
   }
 }

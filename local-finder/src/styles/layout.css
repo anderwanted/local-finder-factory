@@ -56,3 +56,13 @@
 .gap-md { gap: 12px; }
 .gap-lg { gap: 16px; }
 .gap-xl { gap: 24px; }
+
+/* =========================================================
+   APP BACKGROUND
+   ========================================================= */
+
+body {
+  background: var(--surface-bg);
+  color: var(--text-main);
+}
+
