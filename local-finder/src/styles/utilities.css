@@ -80,3 +80,7 @@
   margin-left: auto;
   margin-right: auto;
 }
+
+.overflow-x-auto {
+  overflow-x: auto;
+}

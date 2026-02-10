@@ -217,6 +217,16 @@ export default function Dashboard() {
     }
   };
 
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 900);
+
+useEffect(() => {
+  const onResize = () => setIsMobile(window.innerWidth < 900);
+  window.addEventListener("resize", onResize);
+  return () => window.removeEventListener("resize", onResize);
+}, []);
+
+
   return (
     <div className="p-lg">
       <header className="mb-lg">
@@ -520,44 +530,71 @@ export default function Dashboard() {
           {loadingLocais && <div style={{ color: "#64748b" }}>Carregando locais...</div>}
           {errorLocais && <div style={{ color: "#b91c1c" }}>Erro: {errorLocais}</div>}
 
-          {!loadingLocais && !errorLocais && (
-            <div style={{ overflowX: "auto" }}>
-              <table style={table}>
-                <thead>
-                  <tr>
-                    <th style={th}>Nome</th>
-                    <th style={th}>Nicho</th>
-                    <th style={th}>Status</th>
-                    <th style={th}>Destaque</th>
-                    <th style={th}>Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {locaisFiltrados.map((l) => (
-                    <tr key={l.id}>
-                      <td style={td}>{l.nome}</td>
-                      <td style={td}>{l.niche}</td>
-                      <td style={td}>{l.status}</td>
-                      <td style={td}>{l.destaque ? "⭐" : ""}</td>
-                      <td style={td}>
-                        <button style={miniBtn} onClick={() => onEdit(l)}>Editar</button>
-                        <button style={{ ...miniBtn, marginLeft: 8 }} onClick={() => onDelete(l.id)}>
-                          Deletar
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                  {locaisFiltrados.length === 0 && (
-                    <tr>
-                      <td style={td} colSpan={5}>
-                        Nenhum local encontrado.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+{!loadingLocais && !errorLocais && (
+  <>
+    {isMobile ? (
+      <div style={{ display: "grid", gap: 12 }}>
+        {locaisFiltrados.map((l) => (
+          <div key={l.id} style={box}>
+            <div style={{ fontWeight: 800, marginBottom: 6 }}>{l.nome}</div>
+            <div style={{ color: "#475569", fontSize: 13, marginBottom: 6 }}>
+              <strong>Nicho:</strong> {l.niche || "-"} &nbsp; | &nbsp;
+              <strong>Status:</strong> {l.status || "-"} &nbsp; | &nbsp;
+              <strong>Destaque:</strong> {l.destaque ? "⭐" : "-"}
             </div>
-          )}
+
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <button style={miniBtn} onClick={() => onEdit(l)}>Editar</button>
+              <button style={miniBtn} onClick={() => onDelete(l.id)}>Deletar</button>
+            </div>
+          </div>
+        ))}
+
+        {locaisFiltrados.length === 0 && (
+          <div style={{ color: "#475569" }}>Nenhum local encontrado.</div>
+        )}
+      </div>
+    ) : (
+      <div style={{ width: "100%" }}>
+        <table style={{ ...table, minWidth: "unset" }}>
+          <thead>
+            <tr>
+              <th style={th}>Nome</th>
+              <th style={th}>Nicho</th>
+              <th style={th}>Status</th>
+              <th style={th}>Destaque</th>
+              <th style={th}>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {locaisFiltrados.map((l) => (
+              <tr key={l.id}>
+                <td style={td}>{l.nome}</td>
+                <td style={td}>{l.niche}</td>
+                <td style={td}>{l.status}</td>
+                <td style={td}>{l.destaque ? "⭐" : ""}</td>
+                <td style={td}>
+                  <button style={miniBtn} onClick={() => onEdit(l)}>Editar</button>
+                  <button style={{ ...miniBtn, marginLeft: 8 }} onClick={() => onDelete(l.id)}>
+                    Deletar
+                  </button>
+                </td>
+              </tr>
+            ))}
+            {locaisFiltrados.length === 0 && (
+              <tr>
+                <td style={td} colSpan={5}>
+                  Nenhum local encontrado.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </>
+)}
+
         </div>
       </div>
     </div>
@@ -635,6 +672,7 @@ const miniBtn = {
 
 const table = {
   width: "100%",
+  minWidth: "760px",      // <-- força scroll quando a tela é estreita
   borderCollapse: "collapse"
 };
 
@@ -643,12 +681,14 @@ const th = {
   padding: 10,
   fontSize: 13,
   borderBottom: "1px solid #e2e8f0",
-  color: "#475569"
+  color: "#475569",
+  whiteSpace: "nowrap"
 };
 
 const td = {
   padding: 10,
   fontSize: 13,
   borderBottom: "1px solid #f1f5f9",
-  color: "#0f172a"
+  color: "#0f172a",
+  whiteSpace: "nowrap"
 };
