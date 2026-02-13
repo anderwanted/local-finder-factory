@@ -18,7 +18,6 @@
 // - Nenhuma lógica de filtro
 // - Apenas orquestração e injeção de dados
 //
-// ======================================================
 
 // ======================================================
 // 🔹 DEPENDÊNCIAS
@@ -31,22 +30,19 @@ import {
   Link,
   useParams
 } from 'react-router-dom';
-import { supabase } from './services/supabaseClient';
+
+import { supabase } from './supabaseClient';
 import { FolderPlus } from 'lucide-react';
-import { DataProvider } from './context/DataContext';
 
 // ======================================================
 // 🔹 TELAS DO SISTEMA
 // ======================================================
-import Viewer from './pages/Viewer';
-import Processor from './pages/Processor';
-import Manager from './pages/Manager';
+import PetList from './PetList';
+import AdminGenerator from './AdminGenerator';
+import Dashboard from './Dashboard';
+import './styles/components.css';
+import './styles/theme.css';
 
-// ======================================================
-// 🔹 ESTILOS
-// ======================================================
-import './assets/global.css';
-import './assets/theme.css';
 
 // ======================================================
 // 🔹 COMPONENTE: UniversalLoader
@@ -88,6 +84,7 @@ function UniversalLoader() {
       }
       setLoading(false);
     }
+
     carregarProjeto();
   }, [nicho]);
 
@@ -115,6 +112,7 @@ function UniversalLoader() {
   //
   return (
     <div>
+
       {/* =====================================
          🔹 MENU LOCAL (DEV / TESTES)
       ====================================== */}
@@ -135,12 +133,15 @@ function UniversalLoader() {
         >
           {projeto.nome}
         </Link>
+
         <Link to={`/${nicho}/dashboard`} style={{ color: '#64748b' }}>
           Dashboard
         </Link>
+
         <Link to={`/${nicho}/admin`} style={{ color: '#64748b' }}>
           Admin SQL
         </Link>
+
         <Link to="/" style={{ color: '#94a3b8' }}>
           🏠 Sair
         </Link>
@@ -150,9 +151,9 @@ function UniversalLoader() {
          🔹 ROTAS DO PROJETO
       ====================================== */}
       <Routes>
-        <Route path="/" element={<Viewer projeto={projeto} />} />
-        <Route path="/dashboard" element={<Manager projeto={projeto} />} />
-        <Route path="/admin" element={<Processor projeto={projeto} />} />
+        <Route path="/" element={<PetList projeto={projeto} />} />
+        <Route path="/dashboard" element={<Dashboard projeto={projeto} />} />
+        <Route path="/admin" element={<AdminGenerator projeto={projeto} />} />
       </Routes>
     </div>
   );
@@ -195,6 +196,7 @@ function HomeFactory() {
       <h1 style={{ textAlign: 'center', marginBottom: '40px' }}>
         🏭 Fábrica de Apps
       </h1>
+
       <div
         style={{
           display: 'grid',
@@ -266,16 +268,16 @@ function HomeFactory() {
 //
 export default function App() {
   return (
-    <DataProvider>
-      <Router>
-        <Routes>
-          {/* Home / Fábrica */}
-          <Route path="/" element={<HomeFactory />} />
-          
-          {/* Apps Dinâmicos com Multi-Tenant */}
-          <Route path="/:nicho/*" element={<UniversalLoader />} />
-        </Routes>
-      </Router>
-    </DataProvider>
+    <Router>
+      <Routes>
+
+        {/* Home / Fábrica */}
+        <Route path="/" element={<HomeFactory />} />
+
+        {/* Apps Dinâmicos */}
+        <Route path="/:nicho/*" element={<UniversalLoader />} />
+
+      </Routes>
+    </Router>
   );
 }

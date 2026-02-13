@@ -1,0 +1,63 @@
+/* =========================================================
+   BUTTON — Base canônica do Design System
+   ---------------------------------------------------------
+   Define apenas o botão genérico.
+   Botões específicos (ex: WhatsApp) ficam fora daqui.
+   ========================================================= */
+
+/* Botão base */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+
+  font-family: var(--font-main);
+  font-size: 14px;
+  font-weight: 500;
+
+  border: none;
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.1s ease;
+}
+
+/* Variante primária */
+.btn-primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  filter: brightness(0.95);
+}
+
+/* Variante neutra */
+.btn-secondary {
+  background: #fff;
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover {
+  background: var(--color-bg);
+}
+
+/* Estado desabilitado */
+.btn:disabled,
+.btn-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Botão largura total (helper) */
+.btn-block {
+  width: 100%;
+}

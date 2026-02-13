@@ -1,0 +1,74 @@
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Configuração para Node.js (ES Modules)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Nome do arquivo de saída
+const outputFileName = 'RELATORIO_TECNICO.txt';
+
+// Pasta base: a MESMA pasta onde este arquivo está
+const baseDir = __dirname;
+
+// Arquivos para ignorar
+const ignoreFiles = ['vite-env.d.ts', '.DS_Store'];
+
+// Conteúdo inicial do relatório
+let reportContent = `RELATÓRIO TÉCNICO DO PROJETO
+Data: ${new Date().toLocaleString()}
+Pasta analisada: ${baseDir}
+
+====================================
+
+`;
+
+function scanDirectory(directory) {
+  const files = fs.readdirSync(directory);
+
+  files.forEach(file => {
+    const fullPath = path.join(directory, file);
+    const stat = fs.statSync(fullPath);
+
+    if (stat.isDirectory()) {
+      scanDirectory(fullPath);
+    } else {
+      const isValidFile =
+        !ignoreFiles.includes(file) &&
+        (file.endsWith('.jsx') || file.endsWith('.js') || file.endsWith('.css'));
+
+      if (isValidFile) {
+        const content = fs.readFileSync(fullPath, 'utf8');
+        const relativePath = path.relative(baseDir, fullPath);
+
+        reportContent += `
+--- ARQUIVO: ${relativePath} ---
+${content}
+----------------------------------
+`;
+      }
+    }
+  });
+}
+
+// (Opcional) tentar ler package.json apenas se existir NA MESMA PASTA
+const pkgPath = path.join(baseDir, 'package.json');
+if (fs.existsSync(pkgPath)) {
+  const pkg = fs.readFileSync(pkgPath, 'utf8');
+  reportContent += `
+--- PACKAGE.JSON ---
+${pkg}
+--------------------
+`;
+}
+
+// Executa o scan
+scanDirectory(baseDir);
+
+// Salva o relatório
+const outputPath = path.join(baseDir, outputFileName);
+fs.writeFileSync(outputPath, reportContent);
+
+console.log(`✅ Relatório gerado com sucesso: ${outputPath}`);
+console.log(`👉 Este relatório analisa apenas a pasta onde o script está.`);
