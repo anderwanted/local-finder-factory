@@ -12,7 +12,8 @@ import {
   Award
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import "../../styles/pet-card.css";
+
+import "./pet-card.css";
 
 export default function PetCardMapStyle({ local, onOpenChat }) {
   const nota = Number(local.nota || 0);

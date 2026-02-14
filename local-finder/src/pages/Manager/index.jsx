@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { supabase } from '../../services/supabaseClient';
 
+
 /* ======================================================
    DASHBOARD — PET FINDER
    3 seções (1 e 2 config; 3 CRUD real em 'locais')
