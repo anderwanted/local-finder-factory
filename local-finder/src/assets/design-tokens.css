@@ -1,0 +1,50 @@
+/* Sistema de Design - Pet Finder */
+/* Variáveis CSS para uso em todo o projeto */
+
+:root {
+  /* Cores Principais */
+  --color-primary: #F97316;
+  --color-primary-dark: #EA580C;
+  --color-primary-light: #FED7AA;
+  --color-primary-bg: #FFF7ED;
+
+  /* VIP/Premium */
+  --color-vip: #A855F7;
+  --color-vip-dark: #9333EA;
+  --color-vip-light: #E9D5FF;
+  --color-vip-bg: #FAF5FF;
+
+  /* Sucesso (WhatsApp) */
+  --color-success: #22C55E;
+  --color-success-dark: #16A34A;
+
+  /* Neutros */
+  --color-gray-50: #F9FAFB;
+  --color-gray-100: #F3F4F6;
+  --color-gray-200: #E5E7EB;
+  --color-gray-300: #D1D5DB;
+  --color-gray-500: #6B7280;
+  --color-gray-700: #374151;
+  --color-gray-900: #111827;
+
+  /* Sombras */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-vip: 0 0 0 3px rgba(168, 85, 247, 0.1),
+                0 10px 15px rgba(168, 85, 247, 0.2);
+
+  /* Espaçamentos */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+}

@@ -1,14 +1,12 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import "./assets/global.css";
-import "./assets/theme.css"; // ✅ Caminho novo!
+import "./assets/theme.css";
+import "./assets/design-tokens.css"; // ← NOVA LINHA ADICIONADA
 import App from "./App.jsx";
-
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />
   </StrictMode>,
 )
-
-

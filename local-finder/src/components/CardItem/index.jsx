@@ -1,4 +1,4 @@
-// src/components/pet/PetCardMapStyle.jsx
+// src/components/CardItem/index.jsx
 import React, { useState } from "react";
 import {
   Star,
@@ -9,13 +9,14 @@ import {
   ChevronDown,
   ChevronUp,
   MapPin,
-  Award
+  Award,
+  Sparkles
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import "./pet-card.css";
 
-export default function PetCardMapStyle({ local, onOpenChat }) {
+export default function PetCardMapStyle({ local, onOpenChat, isNovo = false }) {
   const nota = Number(local.nota || 0);
   const avaliacoes = Number(local.avaliacoes || 0);
   const [expanded, setExpanded] = useState(false);
@@ -28,6 +29,7 @@ export default function PetCardMapStyle({ local, onOpenChat }) {
 
   return (
     <div
+      className={`pet-card-wrapper ${isVip ? 'is-vip' : ''}`}
       style={{
         background: "#fff",
         borderRadius: "16px",
@@ -36,8 +38,7 @@ export default function PetCardMapStyle({ local, onOpenChat }) {
       }}
     >
       {/* IMAGEM */}
-      <div className="relative w-full">
-
+      <div className="pet-card-image-wrapper relative w-full">
         <img
           src={imagem}
           alt={local.nome}
@@ -47,33 +48,29 @@ export default function PetCardMapStyle({ local, onOpenChat }) {
             e.currentTarget.src =
               "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?auto=format&fit=crop&w=800&q=80";
           }}
-          className="w-full"
-          style={{ height: "160px", objectFit: "cover" }}
+          className="pet-card-image w-full"
+          style={{ height: "180px", objectFit: "cover" }}
         />
 
-        {/* BADGE VIP */}
+        {/* BADGE VIP MELHORADO */}
         {isVip && (
-          <div className="badge-vip">
-            <Award size={14} />
-            <span>VIP</span>
+          <div className="badge-vip-modern">
+            <Sparkles size={12} />
+            <span>PARCEIRO VIP</span>
           </div>
+              )}
+
+                {/* BADGE NOVO */}
+        {isNovo && !isVip && (
+          <span className="badge-novo">
+            ✨ NOVO
+          </span>
         )}
 
         {/* STATUS */}
         {local.aberto_agora && (
-          <span
-            style={{
-              position: "absolute",
-              top: 12,
-              left: 12,
-              background: "#22c55e",
-              color: "#fff",
-              fontSize: "11px",
-              fontWeight: 700,
-              padding: "4px 10px",
-              borderRadius: "999px"
-            }}
-          >
+          <span className="badge-status badge-open">
+            <span className="status-dot"></span>
             ABERTO AGORA
           </span>
         )}
@@ -85,10 +82,10 @@ export default function PetCardMapStyle({ local, onOpenChat }) {
 
         {/* NOTA */}
         {nota > 0 && (
-          <div className="flex items-center gap-sm mt-xs text-sm">
-            <Star size={14} fill="#facc15" color="#facc15" />
-            <strong>{nota.toFixed(1)}</strong>
-            <span>({avaliacoes} avaliações)</span>
+          <div className="pet-rating flex items-center gap-sm mt-xs text-sm">
+            <Star size={14} fill="#FBBF24" color="#FBBF24" />
+            <strong className="rating-value">{nota.toFixed(1)}</strong>
+            <span className="rating-count">({avaliacoes})</span>
           </div>
         )}
 
@@ -127,7 +124,7 @@ export default function PetCardMapStyle({ local, onOpenChat }) {
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="w-full mt-md flex justify-center items-center gap-sm cursor-pointer"
+          className="pet-expand-btn w-full mt-md flex justify-center items-center gap-sm cursor-pointer"
           style={{
             background: expanded ? "#f8fafc" : "transparent",
             border: "1px solid #e2e8f0",
@@ -138,8 +135,9 @@ export default function PetCardMapStyle({ local, onOpenChat }) {
             color: "#334155"
           }}
         >
+          <MapPin size={14} />
           <span className="text-center text-sm">
-            Toque para ver endereço e mais informações
+            Ver endereço e detalhes
           </span>
           {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
         </button>
@@ -154,7 +152,7 @@ export default function PetCardMapStyle({ local, onOpenChat }) {
               className="mt-sm"
             >
               <div
-                className="flex flex-col gap-sm p-md"
+                className="pet-expanded-content flex flex-col gap-sm p-md"
                 style={{
                   background: "#f8fafc",
                   borderRadius: "12px",
@@ -185,6 +183,7 @@ export default function PetCardMapStyle({ local, onOpenChat }) {
                     {local.tags.map((tag) => (
                       <span
                         key={tag}
+                        className="pet-tag"
                         style={{
                           background: "#ffffff",
                           border: "1px solid #e2e8f0",
@@ -206,10 +205,11 @@ export default function PetCardMapStyle({ local, onOpenChat }) {
 
         {/* CTA */}
         <button
-          className="btn-whatsapp mt-md w-full flex justify-center gap-sm"
+          className="btn-whatsapp-modern mt-md w-full flex justify-center gap-sm"
           onClick={() => onOpenChat(local)}
         >
-          <MessageCircle size={18} /> Falar no WhatsApp
+          <MessageCircle size={18} /> 
+          <span>Falar no WhatsApp</span>
         </button>
       </div>
     </div>

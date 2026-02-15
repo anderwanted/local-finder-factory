@@ -17,7 +17,7 @@ export const DataProvider = ({ children }) => {
     setLoading(true)
     try {
       const { data, error } = await supabase
-        .from('seu_nome_da_tabela') // ⚠️ AJUSTE AQUI
+        .from('locais') // ⚠️ AJUSTE AQUI
         .select('*')
       
       if (error) throw error
