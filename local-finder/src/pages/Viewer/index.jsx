@@ -1,5 +1,5 @@
 // ======================================================
-// 📄 PetList.jsx - VERSÃO FINAL COMPLETA
+// 📄 PetList.jsx - VERSÃO FINAL COMPLETA COM HERO GRID
 // Tela principal do App (usuário final)
 // ======================================================
 
@@ -11,6 +11,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ChatModal from '../../components/ChatModal';
 import PetCardMapStyle from '../../components/CardItem';
 import './Viewer.css';
+
+// ✨ NOVO: Hero Grid
+import { HeroGridCategories } from './HeroGridCategories';
+import './hero-grid.css';
 
 // Ícones
 import { 
@@ -156,6 +160,20 @@ export default function PetList({ projeto }) {
     return () => clearTimeout(timeout);
   }, [locais, filtroCategoria, ordenacao, filtrosAtivos]);
 
+  // ✨ HANDLER PARA MUDAR FILTRO DO HERO GRID
+  const handleCategoriaChange = (categoria) => {
+    // 'todos' = limpar filtro
+    // outros valores = setar categoria
+    if (categoria === 'todos') {
+      setFiltroCategoria(null);
+    } else if (categoria === 'vip') {
+      setOrdenacao('destaques');
+      setFiltroCategoria(null);
+    } else {
+      setFiltroCategoria(categoria);
+    }
+  };
+
   // Estatísticas para o header
   const stats = {
     total: locais.length,
@@ -168,94 +186,13 @@ export default function PetList({ projeto }) {
   // ======================================================
   return (
     <div className="app-shell">
-      {/* HEADER HERO */}
-      <header className="app-header-modern">
-        <div className="hero-pattern"></div>
-        <div className="app-header-content">
-          <div className="hero-badge">
-            <span className="hero-badge-dot"></span>
-            <span>Serviços verificados</span>
-          </div>
-          
-          <h1 className="hero-title">🐾 Pet Finder</h1>
-          <p className="hero-subtitle">Os melhores serviços para o seu melhor amigo</p>
-          
-          {/* Estatísticas */}
-          <div className="hero-stats">
-            <div className="stat-item">
-              <span className="stat-value">{stats.total}+</span>
-              <span className="stat-label">Parceiros</span>
-            </div>
-            <div className="stat-divider"></div>
-            <div className="stat-item">
-              <span className="stat-value">{stats.vips}</span>
-              <span className="stat-label">VIP</span>
-            </div>
-            <div className="stat-divider"></div>
-            <div className="stat-item">
-              <span className="stat-value">{stats.abertos}</span>
-              <span className="stat-label">Abertos</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* ✨ HERO GRID DE CATEGORIAS - NOVO! */}
+      <HeroGridCategories 
+        onFilterChange={handleCategoriaChange}
+        currentFilter={filtroCategoria || (ordenacao === 'destaques' ? 'vip' : 'todos')}
+      />
 
-      {/* FILTROS DE CATEGORIA - STICKY */}
-      {hasFiltro('categoria') && (
-        <div className="petlist-toolbar sticky-toolbar" ref={toolbarRef}>
-          <button 
-            onClick={() => setFiltroCategoria(null)}
-            className={`filter-btn ${!filtroCategoria ? 'active' : ''}`}
-          >
-            <Store size={14} />
-            <span>Todos</span>
-          </button>
-
-          <button 
-            onClick={() => setFiltroCategoria('banho')}
-            className={`filter-btn ${filtroCategoria === 'banho' ? 'active' : ''}`}
-          >
-            <Scissors size={14} />
-            <span>Banho & Tosa</span>
-          </button>
-
-          <button 
-            onClick={() => setFiltroCategoria('vet')}
-            className={`filter-btn ${filtroCategoria === 'vet' ? 'active' : ''}`}
-          >
-            <Stethoscope size={14} />
-            <span>Veterinário</span>
-          </button>
-
-          <button 
-            onClick={() => setFiltroCategoria('loja')}
-            className={`filter-btn ${filtroCategoria === 'loja' ? 'active' : ''}`}
-          >
-            <ShoppingBag size={14} />
-            <span>Pet Shop</span>
-          </button>
-
-          <button 
-            onClick={() => setFiltroCategoria('hotel')}
-            className={`filter-btn ${filtroCategoria === 'hotel' ? 'active' : ''}`}
-          >
-            <Home size={14} />
-            <span>Hotel</span>
-          </button>
-
-          {filtroCategoria && (
-            <button 
-              onClick={() => setFiltroCategoria(null)}
-              className="filter-btn clear-btn"
-            >
-              <X size={14} />
-              <span>Limpar</span>
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* ORDENAÇÃO - STICKY */}
+      {/* FILTROS DE ORDENAÇÃO - SIMPLIFICADO (removido categorias duplicadas) */}
       <div className="petlist-toolbar sticky-toolbar">
         <button 
           onClick={() => setOrdenacao('melhor_nota')}
@@ -273,13 +210,15 @@ export default function PetList({ projeto }) {
           <span>Mais Populares</span>
         </button>
 
-        <button 
-          onClick={() => setOrdenacao('destaques')}
-          className={`filter-btn ${ordenacao === 'destaques' ? 'active' : ''}`}
-        >
-          <Award size={14} />
-          <span>Parceiros VIP</span>
-        </button>
+        {filtroCategoria && (
+          <button 
+            onClick={() => setFiltroCategoria(null)}
+            className="filter-btn clear-btn"
+          >
+            <X size={14} />
+            <span>Limpar Filtro</span>
+          </button>
+        )}
       </div>
 
       {/* CONTADOR DE RESULTADOS */}

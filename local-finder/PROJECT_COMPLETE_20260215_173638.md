@@ -32,7 +32,6 @@
   src/components
   src/components/CardItem
   src/components/ChatModal
-  src/components/FilterSheet
   src/components/ui
   src/context
   src/hooks
@@ -59,18 +58,14 @@ src/assets/text.css
 src/assets/theme.css
 src/assets/tokens.css
 src/assets/utilities.css
-src/components/CardItem/CardClassic.jsx
 src/components/CardItem/index.jsx
 src/components/CardItem/pet-card.css
-src/components/CardItem/styles.css
 src/components/ChatModal/index.jsx
-src/components/FilterSheet/index.jsx
 src/components/ui/Badge.jsx
 src/components/ui/button.css
 src/components/ui/Button.jsx
 src/components/ui/Card.jsx
 src/components/ui/index.js
-src/components/ui/Index.jsx
 src/context/DataContext.jsx
 src/hooks/useDashboardData.jsx
 src/hooks/useDashboardFilters.jsx
@@ -86,14 +81,11 @@ src/pages/Manager/Manager.css
 src/pages/Processor/index.jsx
 src/pages/Viewer/index.jsx
 src/pages/Viewer/Viewer.css
-src/services/cardService.js
-src/services/filterService.js
 src/services/supabaseClient.js
 src/utils/constants.js
 src/utils/generateReport.js
 src/utils/index.js
 src/utils/textLogic.js
-src/utils/theme.js
 ```
 
 ---
@@ -1086,266 +1078,6 @@ body {
 #### 🧩 Components
 
 
-### 📄 src/components/CardItem/CardClassic.jsx
-
-```javascript
-// ======================================================
-// 🐾 PetCardClassic.jsx
-// Card principal do PetList (versão Classic)
-// ======================================================
-//
-// RESPONSABILIDADE
-// - Renderizar TODAS as informações visuais do Pet Shop
-// - Garantir imagem SEMPRE
-// - Controlar expansão (sanfona)
-// - NÃO acessar Supabase diretamente
-//
-// CONTRATO COM SUPABASE
-// - Campo de imagem: image_url
-// ======================================================
-
-import React, { useState } from "react";
-import {
-  MapPin,
-  MessageCircle,
-  Star,
-  Award,
-  ChevronDown,
-  ChevronUp
-} from "lucide-react";
-
-export default function PetCardClassic({ local, onOpenChat }) {
-  const [expanded, setExpanded] = useState(false);
-
-  // =========================
-  // DADOS NORMALIZADOS
-  // =========================
-  const isVip = Boolean(local.destaque);
-  const nota = Number(local.nota || 0);
-  const avaliacoes = Number(local.avaliacoes || 0);
-
-  // =========================
-  // 🖼️ IMAGEM FINAL (CONTRATO)
-  // =========================
-  const imagemFinal =
-    typeof local.image_url === "string" && local.image_url.trim() !== ""
-      ? local.image_url
-      : "https://images.unsplash.com/photo-abc123?auto=format&fit=crop&w=800&q=80";
-
-  // =========================
-  // PLACEHOLDER (se imagem quebrar)
-  // =========================
-  const getPlaceholderIcon = () => {
-    const niche = (local.niche || "").toLowerCase();
-    if (niche.includes("vet")) return "🏥";
-    if (niche.includes("banho") || niche.includes("tosa")) return "✂️";
-    if (niche.includes("hotel")) return "🏨";
-    return "🐶";
-  };
-
-  // ======================================================
-  // RENDER
-  // ======================================================
-  return (
-    <div
-      style={{
-        background: "var(--bg-card)",
-        borderRadius: "var(--radius-card)",
-        overflow: "hidden",
-        boxShadow: "var(--shadow-card)",
-        position: "relative"
-      }}
-    >
-      {/* =========================
-          SELO VIP
-      ========================== */}
-      {isVip && (
-        <div
-          style={{
-            position: "absolute",
-            top: 8,
-            right: 8,
-            background: "var(--cor-destaque)",
-            color: "#fff",
-            fontSize: "10px",
-            fontWeight: "700",
-            padding: "4px 10px",
-            borderRadius: "999px",
-            display: "flex",
-            alignItems: "center",
-            gap: "4px",
-            zIndex: 2
-          }}
-        >
-          <Award size={12} /> VIP
-        </div>
-      )}
-
-      {/* =========================
-          IMAGEM
-      ========================== */}
-<img
-  src={imagemFinal}
-  alt={local.nome}
-  loading="lazy"
-  onError={(e) => {
-    e.currentTarget.onerror = null;
-    e.currentTarget.src =
-      "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?auto=format&fit=crop&w=800&q=80";
-  }}
-  style={{
-    width: "100%",
-    height: "160px",
-    objectFit: "cover",
-    display: "block"
-  }}
-/>
-
-      {/* =========================
-          CONTEÚDO
-      ========================== */}
-      <div style={{ padding: "16px" }}>
-        {/* NOME */}
-        <h3 style={{ margin: 0, fontSize: "1.2rem", fontWeight: 700 }}>
-          {local.nome}
-        </h3>
-
-        {/* NOTA */}
-        {nota > 0 && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              marginTop: "4px",
-              fontSize: "13px",
-              color: "var(--text-secondary)"
-            }}
-          >
-            <Star size={14} color="#facc15" fill="#facc15" />
-            <strong>{nota.toFixed(1)}</strong>
-            <span>({avaliacoes} avaliações)</span>
-          </div>
-        )}
-
-        {/* ENDEREÇO */}
-        <div
-          style={{
-            display: "flex",
-            gap: "6px",
-            marginTop: "8px",
-            fontSize: "13px",
-            color: "var(--text-secondary)"
-          }}
-        >
-          <MapPin size={14} />
-          <span>{local.endereco || "Endereço não informado"}</span>
-        </div>
-
-        {/* TAGS */}
-        {Array.isArray(local.tags) && local.tags.length > 0 && (
-          <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "10px" }}>
-            {local.tags.map((tag) => (
-              <span
-                key={tag}
-                style={{
-                  background: "#f1f5f9",
-                  fontSize: "11px",
-                  padding: "4px 10px",
-                  borderRadius: "999px",
-                  fontWeight: 600
-                }}
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* =========================
-            TOGGLE EXTRA
-        ========================== */}
-        <button
-          onClick={() => setExpanded((v) => !v)}
-          style={{
-            marginTop: "12px",
-            width: "100%",
-            background: "transparent",
-            border: "1px solid var(--border-color)",
-            borderRadius: "10px",
-            padding: "8px",
-            fontSize: "13px",
-            cursor: "pointer",
-            display: "flex",
-            justifyContent: "center",
-            gap: "6px"
-          }}
-        >
-          Conteúdo extra {expanded ? <ChevronUp /> : <ChevronDown />}
-        </button>
-
-        {/* =========================
-            SANFONA
-        ========================== */}
-        <div
-          style={{
-            maxHeight: expanded ? "300px" : "0",
-            opacity: expanded ? 1 : 0,
-            overflow: "hidden",
-            transition: "all 0.35s ease",
-            marginTop: expanded ? "10px" : "0"
-          }}
-        >
-          <div
-            style={{
-              padding: "12px",
-              background: "#f8fafc",
-              borderRadius: "10px",
-              fontSize: "13px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "6px"
-            }}
-          >
-            {local.aberto_agora !== null && (
-              <div>{local.aberto_agora ? "🟢 Aberto agora" : "🔴 Fechado"}</div>
-            )}
-            {local.horario_fechamento && (
-              <div>⏰ Até {local.horario_fechamento}</div>
-            )}
-            {local.estacionamento && <div>🅿️ Estacionamento disponível</div>}
-          </div>
-        </div>
-      </div>
-
-      {/* =========================
-          CTA
-      ========================== */}
-      <button
-        onClick={() => onOpenChat?.(local)}
-        style={{
-          width: "100%",
-          padding: "14px",
-          border: "none",
-          background: "#25D366",
-          color: "#fff",
-          fontWeight: 700,
-          cursor: "pointer",
-          display: "flex",
-          justifyContent: "center",
-          gap: "8px"
-        }}
-      >
-        <MessageCircle size={20} /> Falar com a loja
-      </button>
-    </div>
-  );
-}
-```
-
----
-
-
 ### 📄 src/components/CardItem/index.jsx
 
 ```javascript
@@ -1916,14 +1648,8 @@ export default function PetCardMapStyle({ local, onOpenChat, isNovo = false }) {
   text-transform: uppercase;
   border-radius: 999px;
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
-}```
+}
 
----
-
-
-### 📄 src/components/CardItem/styles.css
-
-```css
 /* =========================================================
    CARD — Base canônica do Design System
    ---------------------------------------------------------
@@ -2391,160 +2117,6 @@ export default function ChatModal({ local, projeto, onClose }) {
 ---
 
 
-### 📄 src/components/FilterSheet/index.jsx
-
-```javascript
-// ======================================================
-// 📄 FilterSheet.jsx
-// Painel de Filtros & Ordenação (Mobile-first)
-// ======================================================
-
-import React from 'react';
-import {
-  X,
-  Star,
-  TrendingUp,
-  Award,
-  Scissors,
-  Stethoscope,
-  ShoppingBag,
-  Home
-} from 'lucide-react';
-
-// Categorias oficiais
-const CATEGORIAS = [
-  { id: 'banho', label: 'Banho', icon: <Scissors size={18} /> },
-  { id: 'vet', label: 'Vet', icon: <Stethoscope size={18} /> },
-  { id: 'loja', label: 'Loja', icon: <ShoppingBag size={18} /> },
-  { id: 'hotel', label: 'Hotel', icon: <Home size={18} /> }
-];
-
-// Ordenações possíveis
-const ORDENACOES = [
-  { id: 'melhor_nota', label: 'Melhor nota', icon: <Star size={18} /> },
-  { id: 'mais_avaliados', label: 'Mais avaliados', icon: <TrendingUp size={18} /> },
-  { id: 'destaques', label: 'Destaques (VIP)', icon: <Award size={18} /> }
-];
-
-export default function FilterSheet({
-  onClose,
-  categoriaAtiva,
-  setCategoriaAtiva,
-  ordenacaoAtiva,
-  setOrdenacaoAtiva
-}) {
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0,0,0,0.4)',
-        zIndex: 1000,
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'flex-end'
-      }}
-    >
-      <div
-        style={{
-          background: '#fff',
-          width: '100%',
-          maxWidth: '500px',
-          borderTopLeftRadius: '20px',
-          borderTopRightRadius: '20px',
-          padding: '20px',
-          maxHeight: '85vh',
-          overflowY: 'auto'
-        }}
-      >
-
-        {/* HEADER */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={{ margin: 0 }}>Filtros & Ordenação</h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none' }}>
-            <X size={24} />
-          </button>
-        </div>
-
-        {/* ==============================
-            🔹 ORDENAÇÃO
-        ============================== */}
-        <div style={{ marginTop: '25px' }}>
-          <h4>Ordenar por</h4>
-
-          {ORDENACOES.map(opt => (
-            <label
-              key={opt.id}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                padding: '12px',
-                borderRadius: '12px',
-                border: '1px solid #e2e8f0',
-                marginBottom: '10px',
-                cursor: 'pointer',
-                background:
-                  ordenacaoAtiva === opt.id ? '#2563eb' : '#fff',
-                color:
-                  ordenacaoAtiva === opt.id ? '#fff' : '#1e293b',
-                fontWeight: 600
-              }}
-            >
-              <input
-                type="radio"
-                name="ordenacao"
-                checked={ordenacaoAtiva === opt.id}
-                onChange={() => setOrdenacaoAtiva(opt.id)}
-              />
-              {opt.icon} {opt.label}
-            </label>
-          ))}
-        </div>
-
-        {/* ==============================
-            🔹 CATEGORIAS
-        ============================== */}
-        <div style={{ marginTop: '25px' }}>
-          <h4>Categoria</h4>
-
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-            {CATEGORIAS.map(cat => {
-              const ativo = categoriaAtiva === cat.id;
-
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => setCategoriaAtiva(ativo ? null : cat.id)}
-                  style={{
-                    padding: '10px 14px',
-                    borderRadius: '20px',
-                    border: '1px solid #e2e8f0',
-                    background: ativo ? '#2563eb' : '#fff',
-                    color: ativo ? '#fff' : '#64748b',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}
-                >
-                  {cat.icon} {cat.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-      </div>
-    </div>
-  );
-}
-```
-
----
-
-
 ### 📄 src/components/ui/Badge.jsx
 
 ```javascript
@@ -2677,17 +2249,6 @@ export default function Card({ children, className = '' }) {
 export { default as Badge } from './Badge';
 export { default as Button } from './Button';
 export { default as Card } from './Card';
-```
-
----
-
-
-### 📄 src/components/ui/Index.jsx
-
-```javascript
-export { default as Card } from './Card';
-export { default as Button } from './Button';
-export { default as Badge } from './Badge';
 ```
 
 ---
@@ -6197,207 +5758,6 @@ export default function PetList({ projeto }) {
 #### 🔧 Services
 
 
-### 📄 src/services/cardService.js
-
-```javascript
-import { supabase } from './supabaseClient'
-
-const TABLE_NAME = 'seu_nome_da_tabela' // ⚠️ AJUSTE AQUI
-
-export const getCards = async () => {
-  const { data, error } = await supabase
-    .from(TABLE_NAME)
-    .select('*')
-    .order('created_at', { ascending: false })
-  
-  return { data, error }
-}
-
-export const getCardById = async (id) => {
-  const { data, error } = await supabase
-    .from(TABLE_NAME)
-    .select('*')
-    .eq('id', id)
-    .single()
-  
-  return { data, error }
-}
-
-export const createCard = async (cardData) => {
-  const { data, error } = await supabase
-    .from(TABLE_NAME)
-    .insert([cardData])
-    .select()
-  
-  return { data: data?.[0], error }
-}
-
-export const updateCard = async (id, updates) => {
-  const { data, error } = await supabase
-    .from(TABLE_NAME)
-    .update(updates)
-    .eq('id', id)
-    .select()
-  
-  return { data: data?.[0], error }
-}
-
-export const deleteCard = async (id) => {
-  const { error } = await supabase
-    .from(TABLE_NAME)
-    .delete()
-    .eq('id', id)
-  
-  return { error }
-}```
-
----
-
-
-### 📄 src/services/filterService.js
-
-```javascript
-/**
- * SISTEMA GLOBAL DE FILTROS
- * =========================
- *
- * Este arquivo define TODOS os filtros possíveis da plataforma.
- *
- * ➜ Filtros são infraestrutura.
- * ➜ Nunca são criados pelo dashboard.
- * ➜ Funcionam em qualquer nicho (multi-tenant).
- *
- * O dashboard apenas:
- * - ativa ou desativa filtros por projeto
- * - define prioridade entre filtros de ordenação
- *
- * Este arquivo deve ser legível como documentação viva.
- */
-
-/**
- * Cada filtro segue um contrato fixo.
- * Se alguém não entender o filtro lendo apenas este arquivo,
- * o filtro está mal definido.
- */
-
-export const FILTERS = {
-  /**
-   * ⭐ FILTRO: Bem avaliados
-   * ----------------------
-   * Intenção:
-   * Priorizar locais com boa reputação.
-   *
-   * Impacto:
-   * Reorganiza o ranking, não remove resultados.
-   *
-   * Limite:
-   * Se o local não tiver avaliação, ele é ignorado pelo filtro.
-   */
-  bem_avaliados: {
-    id: 'bem_avaliados',
-
-    nome_humano: 'Bem avaliados',
-
-    descricao:
-      'Prioriza locais com avaliação igual ou superior a 4.0. Não remove resultados.',
-
-    tipo: 'ordenacao',
-
-    campo_afetado: 'nota',
-
-    comportamento: 'ordenar',
-
-    /**
-     * Função de ordenação.
-     * Retorna um número para comparação.
-     * Quanto maior, mais acima no ranking.
-     */
-    ordenar: (local) => {
-      if (typeof local.nota !== 'number') return 0;
-      if (local.nota < 4) return 0;
-      return local.nota;
-    },
-
-    /**
-     * Fallback seguro:
-     * Se algo falhar, o filtro não interfere na lista.
-     */
-    fallback: () => 0
-  },
-
-  /**
-   * 💬 FILTRO: WhatsApp disponível
-   * -----------------------------
-   * Intenção:
-   * Priorizar locais com contato rápido.
-   *
-   * Impacto:
-   * Reorganiza o ranking.
-   *
-   * Limite:
-   * Não remove locais sem WhatsApp.
-   */
-  whatsapp_disponivel: {
-    id: 'whatsapp_disponivel',
-
-    nome_humano: 'WhatsApp disponível',
-
-    descricao:
-      'Prioriza locais que possuem WhatsApp ativo para contato direto.',
-
-    tipo: 'ordenacao',
-
-    campo_afetado: 'is_whatsapp',
-
-    comportamento: 'ordenar',
-
-    ordenar: (local) => {
-      if (local.is_whatsapp === true) return 1;
-      return 0;
-    },
-
-    fallback: () => 0
-  },
-
-  /**
-   * 💎 FILTRO: Destaque / VIP
-   * ------------------------
-   * Intenção:
-   * Dar prioridade a locais destacados pelo projeto.
-   *
-   * Impacto:
-   * Reorganiza o ranking.
-   *
-   * Limite:
-   * Não remove locais comuns.
-   */
-  destaque: {
-    id: 'destaque',
-
-    nome_humano: 'Destaque',
-
-    descricao:
-      'Prioriza locais marcados como destaque (VIP). Não remove resultados.',
-
-    tipo: 'ordenacao',
-
-    campo_afetado: 'destaque',
-
-    comportamento: 'ordenar',
-
-    ordenar: (local) => {
-      if (local.destaque === true) return 1;
-      return 0;
-    },
-
-    fallback: () => 0
-  }
-};
-```
-
----
-
-
 ### 📄 src/services/supabaseClient.js
 
 ```javascript
@@ -6726,15 +6086,6 @@ export const validateInput = (text) => {
 
 ---
 
-
-### 📄 src/utils/theme.js
-
-```javascript
-
-```
-
----
-
 #### 🏠 Root Files
 
 
@@ -7051,10 +6402,10 @@ createRoot(document.getElementById('root')).render(
 
 | Tipo | Arquivos | Linhas de Código |
 |------|----------|------------------|
-| JSX  | 22 | 4171 |
-| JS   | 9  | 477 |
-| CSS  | 14 | 1797 |
-| **TOTAL** | **45** | **6445** |
+| JSX  | 19 | 3770 |
+| JS   | 6  | 291 |
+| CSS  | 13 | 1799 |
+| **TOTAL** | **38** | **5860** |
 
 ### Estrutura src/
 
@@ -7064,7 +6415,6 @@ src
   components
   components/CardItem
   components/ChatModal
-  components/FilterSheet
   components/ui
   context
   hooks
@@ -7082,17 +6432,16 @@ src
 ```
       9 src/assets
       6 src/pages/Manager/components
-      6 src/components/ui
-      5 src/utils
-      4 src/components/CardItem
-      3 src/services
+      5 src/components/ui
+      4 src/utils
       2 src/pages/Viewer
       2 src/pages/Manager
       2 src/hooks
+      2 src/components/CardItem
       2 src
+      1 src/services
       1 src/pages/Processor
       1 src/context
-      1 src/components/FilterSheet
       1 src/components/ChatModal
 ```
 

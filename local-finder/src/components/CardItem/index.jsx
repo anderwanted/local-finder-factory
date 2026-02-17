@@ -10,7 +10,10 @@ import {
   ChevronUp,
   MapPin,
   Award,
-  Sparkles
+  Sparkles,
+  Clock,
+  ExternalLink,
+  Info
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -27,191 +30,222 @@ export default function PetCardMapStyle({ local, onOpenChat, isNovo = false }) {
       ? local.image_url
       : "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?auto=format&fit=crop&w=800&q=80";
 
+  // Função para abrir Google Maps
+  const handleOpenMaps = () => {
+    if (local.google_maps_url) {
+      window.open(local.google_maps_url, '_blank');
+    } else if (local.endereco) {
+      const encodedAddress = encodeURIComponent(local.endereco);
+      window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+    }
+  };
+
   return (
     <div
-      className={`pet-card-wrapper ${isVip ? 'is-vip' : ''}`}
-      style={{
-        background: "#fff",
-        borderRadius: "16px",
-        overflow: "hidden",
-        boxShadow: "0 6px 18px rgba(0,0,0,0.08)"
-      }}
+      className={`pet-card-horizontal ${isVip ? 'is-vip' : ''}`}
     >
-      {/* IMAGEM */}
-      <div className="pet-card-image-wrapper relative w-full">
-        <img
-          src={imagem}
-          alt={local.nome}
-          loading="lazy"
-          onError={(e) => {
-            e.currentTarget.onerror = null;
-            e.currentTarget.src =
-              "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?auto=format&fit=crop&w=800&q=80";
-          }}
-          className="pet-card-image w-full"
-          style={{ height: "180px", objectFit: "cover" }}
-        />
-
-        {/* BADGE VIP MELHORADO */}
-        {isVip && (
-          <div className="badge-vip-modern">
-            <Sparkles size={12} />
-            <span>PARCEIRO VIP</span>
-          </div>
-              )}
-
-                {/* BADGE NOVO */}
-        {isNovo && !isVip && (
-          <span className="badge-novo">
-            ✨ NOVO
-          </span>
-        )}
-
-        {/* STATUS */}
-        {local.aberto_agora && (
-          <span className="badge-status badge-open">
-            <span className="status-dot"></span>
-            ABERTO AGORA
-          </span>
-        )}
-      </div>
-
-      {/* CONTEÚDO */}
-      <div className="pet-card p-md">
-        <h3 className="pet-title">{local.nome}</h3>
-
-        {/* NOTA */}
-        {nota > 0 && (
-          <div className="pet-rating flex items-center gap-sm mt-xs text-sm">
-            <Star size={14} fill="#FBBF24" color="#FBBF24" />
-            <strong className="rating-value">{nota.toFixed(1)}</strong>
-            <span className="rating-count">({avaliacoes})</span>
-          </div>
-        )}
-
-        {/* INFO */}
-        <div className="pet-info-grid">
-          {local.horario_fechamento && (
-            <div className="pet-info-item">
-              <span className="pet-info-icon">⏰</span>
-              <span>Até {local.horario_fechamento}</span>
-            </div>
-          )}
-
-          {local.tags?.includes("banho") && (
-            <div className="pet-info-item">
-              <Scissors size={14} />
-              <span>Banho e Tosa</span>
-            </div>
-          )}
-
-          {local.tags?.includes("vet") && (
-            <div className="pet-info-item">
-              <Stethoscope size={14} />
-              <span>Veterinário</span>
-            </div>
-          )}
-
-          {local.estacionamento && (
-            <div className="pet-info-item">
-              <Car size={14} />
-              <span>Estacionamento</span>
-            </div>
+      {/* LAYOUT HORIZONTAL: FOTO CIRCULAR À ESQUERDA + CONTEÚDO DIREITA */}
+      <div className="pet-card-main-row">
+        
+        {/* FOTO CIRCULAR */}
+        <div className="pet-photo-circular">
+          <img
+            src={imagem}
+            alt={local.nome}
+            loading="lazy"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src =
+                "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?auto=format&fit=crop&w=800&q=80";
+            }}
+          />
+          
+          {/* STATUS DOT NO CANTO DA FOTO */}
+          {local.aberto_agora && (
+            <span className="status-dot-on-photo"></span>
           )}
         </div>
 
-        {/* EXPANDIR */}
-        <button
-          type="button"
-          onClick={() => setExpanded((v) => !v)}
-          className="pet-expand-btn w-full mt-md flex justify-center items-center gap-sm cursor-pointer"
-          style={{
-            background: expanded ? "#f8fafc" : "transparent",
-            border: "1px solid #e2e8f0",
-            borderRadius: "12px",
-            padding: "10px",
-            fontSize: "13px",
-            fontWeight: 600,
-            color: "#334155"
-          }}
-        >
-          <MapPin size={14} />
-          <span className="text-center text-sm">
-            Ver endereço e detalhes
-          </span>
-          {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-        </button>
+        {/* CONTEÚDO À DIREITA */}
+        <div className="pet-card-info-right">
+          
+          {/* HEADER: Nome + VIP Badge */}
+          <div className="pet-header-row">
+            <h3 className="pet-title-horizontal">{local.nome}</h3>
+            
+            {/* VIP Badge inline */}
+            {isVip && (
+              <span className="badge-vip-inline">
+                <Sparkles size={10} />
+                VIP
+              </span>
+            )}
 
-        <AnimatePresence initial={false}>
-          {expanded && (
-            <motion.div
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-              className="mt-sm"
-            >
-              <div
-                className="pet-expanded-content flex flex-col gap-sm p-md"
-                style={{
-                  background: "#f8fafc",
-                  borderRadius: "12px",
-                  fontSize: "13px",
-                  color: "#475569",
-                  border: "1px solid #e2e8f0"
-                }}
-              >
-                {local.aberto_agora !== null && (
-                  <div>{local.aberto_agora ? "🟢 Aberto agora" : "🔴 Fechado"}</div>
-                )}
+            {/* NOVO Badge inline */}
+            {isNovo && !isVip && (
+              <span className="badge-novo-inline">
+                ✨ NOVO
+              </span>
+            )}
+          </div>
 
-                {local.horario_fechamento && (
-                  <div>⏰ Até {local.horario_fechamento}</div>
-                )}
+          {/* RATING + STATUS */}
+          <div className="pet-meta-row">
+            {nota > 0 && (
+              <div className="rating-inline">
+                <Star size={12} fill="#FBBF24" color="#FBBF24" />
+                <strong>{nota.toFixed(1)}</strong>
+                <span>({avaliacoes})</span>
+              </div>
+            )}
 
-                {local.endereco && (
-                  <div className="flex gap-sm items-start">
-                    <MapPin size={16} className="mt-xs" />
-                    <span>{local.endereco}</span>
-                  </div>
-                )}
+            {local.aberto_agora && (
+              <span className="status-inline">
+                🟢 Aberto agora
+              </span>
+            )}
+          </div>
 
-                {local.estacionamento && <div>🅿️ Estacionamento disponível</div>}
+          {/* DISTÂNCIA */}
+          {local.distancia && (
+            <div className="distance-inline">
+              <MapPin size={12} />
+              <span>{local.distancia} km de você</span>
+            </div>
+          )}
 
-                {Array.isArray(local.tags) && local.tags.length > 0 && (
-                  <div className="flex gap-sm mt-xs">
-                    {local.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="pet-tag"
-                        style={{
-                          background: "#ffffff",
-                          border: "1px solid #e2e8f0",
-                          fontSize: "11px",
-                          padding: "4px 10px",
-                          borderRadius: "999px",
-                          fontWeight: 600
-                        }}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
+          {/* TAGS INLINE */}
+          {Array.isArray(local.tags) && local.tags.length > 0 && (
+            <div className="tags-inline">
+              {local.tags.slice(0, 3).map((tag) => (
+                <span key={tag} className="tag-pill">
+                  {tag === 'banho' && '✂️'}
+                  {tag === 'vet' && '🏥'}
+                  {tag === 'loja' && '🛒'}
+                  {tag === 'hotel' && '🏨'}
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* BOTÃO EXPANDIR COMPACTO */}
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="expand-btn-compact"
+          >
+            <span>{expanded ? 'Menos info' : 'Ver detalhes'}</span>
+            {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          </button>
+        </div>
+      </div>
+
+      {/* ÁREA EXPANDIDA */}
+      <AnimatePresence initial={false}>
+        {expanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="pet-expanded-area"
+          >
+            {/* ENDEREÇO + MAPA */}
+            {local.endereco && (
+              <div className="info-section">
+                <div className="info-header">
+                  <MapPin size={14} />
+                  <span>Endereço</span>
+                </div>
+                <p className="info-text">{local.endereco}</p>
+                {(local.google_maps_url || local.endereco) && (
+                  <button 
+                    onClick={handleOpenMaps}
+                    className="btn-map-link"
+                  >
+                    <ExternalLink size={12} />
+                    Ver no Google Maps
+                  </button>
                 )}
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            )}
 
-        {/* CTA */}
-        <button
-          className="btn-whatsapp-modern mt-md w-full flex justify-center gap-sm"
-          onClick={() => onOpenChat(local)}
-        >
-          <MessageCircle size={18} /> 
-          <span>Falar no WhatsApp</span>
-        </button>
-      </div>
+            {/* GRID DE INFORMAÇÕES */}
+            <div className="info-grid-3col">
+              {/* HORÁRIO */}
+              {local.horario_fechamento && (
+                <div className="info-box">
+                  <Clock size={14} />
+                  <span className="info-label">Horário</span>
+                  <span className="info-value">Até {local.horario_fechamento}</span>
+                </div>
+              )}
+
+              {/* ESTACIONAMENTO */}
+              {local.estacionamento !== undefined && (
+                <div className="info-box">
+                  <Car size={14} />
+                  <span className="info-label">Estacionamento</span>
+                  <span className="info-value">
+                    {local.estacionamento ? '✓ Sim' : '✗ Não'}
+                  </span>
+                </div>
+              )}
+
+              {/* RATING */}
+              {nota > 0 && (
+                <div className="info-box">
+                  <Star size={14} fill="#FBBF24" color="#FBBF24" />
+                  <span className="info-label">Avaliação</span>
+                  <span className="info-value">{nota.toFixed(1)} ★</span>
+                </div>
+              )}
+            </div>
+
+            {/* SOBRE */}
+            {local.descricao && (
+              <div className="info-section">
+                <div className="info-header">
+                  <Info size={14} />
+                  <span>Sobre</span>
+                </div>
+                <p className="info-text">{local.descricao}</p>
+              </div>
+            )}
+
+            {/* SERVIÇOS */}
+            {Array.isArray(local.tags) && local.tags.length > 0 && (
+              <div className="info-section">
+                <div className="info-header">
+                  <Award size={14} />
+                  <span>Serviços</span>
+                </div>
+                <div className="services-pills">
+                  {local.tags.map((tag) => (
+                    <span key={tag} className="service-pill">
+                      {tag === 'banho' && '✂️ Banho e Tosa'}
+                      {tag === 'vet' && '🏥 Veterinário'}
+                      {tag === 'loja' && '🛒 Pet Shop'}
+                      {tag === 'hotel' && '🏨 Hotel'}
+                      {!['banho', 'vet', 'loja', 'hotel'].includes(tag) && tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* CTA WHATSAPP */}
+      <button
+        className="btn-whatsapp-full"
+        onClick={() => onOpenChat(local)}
+      >
+        <MessageCircle size={16} /> 
+        <span>Falar no WhatsApp</span>
+      </button>
     </div>
   );
 }
