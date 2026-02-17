@@ -1,0 +1,159 @@
+/* =========================================================
+   FAVORITOS - Adicionar no final do pet-card.css
+   ========================================================= */
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   BOTÃO FAVORITO ❤️
+   ========================================================= */
+.btn-favorito {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: white;
+  border: 2px solid var(--color-gray-200);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  flex-shrink: 0;
+}
+
+.btn-favorito:hover {
+  border-color: #FCA5A5;
+  background: #FEF2F2;
+  transform: scale(1.1);
+}
+
+.btn-favorito.ativo {
+  border-color: #EF4444;
+  background: #FEF2F2;
+  animation: heartPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes heartPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.35); }
+  70%  { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+/* =========================================================
+   PARTÍCULAS AO FAVORITAR
+   ========================================================= */
+.heart-burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.burst-particle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 12px;
+  animation: burstOut 0.6s ease-out forwards;
+}
+
+.burst-particle.p0 { --angle: -45deg;  --dist: 28px; animation-delay: 0s; }
+.burst-particle.p1 { --angle: 90deg;   --dist: 32px; animation-delay: 0.05s; }
+.burst-particle.p2 { --angle: 200deg;  --dist: 26px; animation-delay: 0.1s; }
+
+@keyframes burstOut {
+  0%   { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(0); opacity: 1; scale: 0.5; }
+  60%  { opacity: 1; scale: 1; }
+  100% { transform: translate(-50%, -50%) rotate(var(--angle)) translateX(var(--dist)); opacity: 0; scale: 0; }
+}
+
+/* =========================================================
+   BADGE CONTADOR DE FAVORITOS (toolbar)
+   ========================================================= */
+.favoritos-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: white;
+  border: 2px solid #FCA5A5;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 700;
+  color: #EF4444;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15);
+}
+
+.favoritos-badge:hover {
+  background: #EF4444;
+  border-color: #EF4444;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.favoritos-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  background: #EF4444;
+  color: white;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  transition: all 0.3s;
+  animation: countBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.favoritos-badge:hover .favoritos-count {
+  background: white;
+  color: #EF4444;
+}
+
+@keyframes countBounce {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}
+
+/* =========================================================
+   TOAST NOTIFICATION
+   ========================================================= */
+.toast-favorito {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 20px;
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  z-index: 999;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  animation: toastSlide 2.5s ease forwards;
+}
+
+.toast-favorito.add    { background: linear-gradient(135deg, #EF4444, #DC2626); }
+.toast-favorito.remove { background: linear-gradient(135deg, #6B7280, #4B5563); }
+
+@keyframes toastSlide {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  15%  { opacity: 1; transform: translateX(-50%) translateY(0px); }
+  75%  { opacity: 1; transform: translateX(-50%) translateY(0px); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+}
