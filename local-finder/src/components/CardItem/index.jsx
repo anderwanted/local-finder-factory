@@ -13,16 +13,17 @@ import {
   Sparkles,
   Clock,
   ExternalLink,
-  Info
+  Info,
+  Heart
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-
 import "./pet-card.css";
 
-export default function PetCardMapStyle({ local, onOpenChat, isNovo = false }) {
+export default function PetCardMapStyle({ local, onOpenChat, isNovo = false, isFavorito = false, onToggleFavorito }) {
   const nota = Number(local.nota || 0);
   const avaliacoes = Number(local.avaliacoes || 0);
   const [expanded, setExpanded] = useState(false);
+  const [heartBurst, setHeartBurst] = useState(false);
   const isVip = Boolean(local.destaque);
 
   const imagem =
@@ -30,23 +31,29 @@ export default function PetCardMapStyle({ local, onOpenChat, isNovo = false }) {
       ? local.image_url
       : "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?auto=format&fit=crop&w=800&q=80";
 
-  // Função para abrir Google Maps
   const handleOpenMaps = () => {
     if (local.google_maps_url) {
       window.open(local.google_maps_url, '_blank');
     } else if (local.endereco) {
-      const encodedAddress = encodeURIComponent(local.endereco);
-      window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+      window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(local.endereco)}`, '_blank');
     }
   };
 
+  // Animação do coração ao favoritar
+  const handleFavorito = () => {
+    if (!isFavorito) {
+      setHeartBurst(true);
+      setTimeout(() => setHeartBurst(false), 600);
+    }
+    onToggleFavorito?.(local.id);
+  };
+
   return (
-    <div
-      className={`pet-card-horizontal ${isVip ? 'is-vip' : ''}`}
-    >
-      {/* LAYOUT HORIZONTAL: FOTO CIRCULAR À ESQUERDA + CONTEÚDO DIREITA */}
+    <div className={`pet-card-horizontal ${isVip ? 'is-vip' : ''}`}>
+
+      {/* LAYOUT HORIZONTAL */}
       <div className="pet-card-main-row">
-        
+
         {/* FOTO CIRCULAR */}
         <div className="pet-photo-circular">
           <img
@@ -59,34 +66,50 @@ export default function PetCardMapStyle({ local, onOpenChat, isNovo = false }) {
                 "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?auto=format&fit=crop&w=800&q=80";
             }}
           />
-          
-          {/* STATUS DOT NO CANTO DA FOTO */}
           {local.aberto_agora && (
             <span className="status-dot-on-photo"></span>
           )}
         </div>
 
-        {/* CONTEÚDO À DIREITA */}
+        {/* CONTEÚDO DIREITA */}
         <div className="pet-card-info-right">
-          
-          {/* HEADER: Nome + VIP Badge */}
+
+          {/* HEADER: Nome + Badges + ❤️ */}
           <div className="pet-header-row">
             <h3 className="pet-title-horizontal">{local.nome}</h3>
-            
-            {/* VIP Badge inline */}
-            {isVip && (
-              <span className="badge-vip-inline">
-                <Sparkles size={10} />
-                VIP
-              </span>
-            )}
 
-            {/* NOVO Badge inline */}
-            {isNovo && !isVip && (
-              <span className="badge-novo-inline">
-                ✨ NOVO
-              </span>
-            )}
+            <div className="card-actions">
+              {isVip && (
+                <span className="badge-vip-inline">
+                  <Sparkles size={10} />
+                  VIP
+                </span>
+              )}
+              {isNovo && !isVip && (
+                <span className="badge-novo-inline">✨ NOVO</span>
+              )}
+
+              {/* ❤️ BOTÃO FAVORITO */}
+              <button
+                className={`btn-favorito ${isFavorito ? 'ativo' : ''}`}
+                onClick={handleFavorito}
+                aria-label={isFavorito ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+              >
+                <Heart
+                  size={18}
+                  fill={isFavorito ? '#EF4444' : 'none'}
+                  color={isFavorito ? '#EF4444' : '#9CA3AF'}
+                />
+                {/* Burst de partículas ao favoritar */}
+                {heartBurst && (
+                  <span className="heart-burst">
+                    {['❤️','💕','✨'].map((e, i) => (
+                      <span key={i} className={`burst-particle p${i}`}>{e}</span>
+                    ))}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
 
           {/* RATING + STATUS */}
@@ -98,11 +121,8 @@ export default function PetCardMapStyle({ local, onOpenChat, isNovo = false }) {
                 <span>({avaliacoes})</span>
               </div>
             )}
-
             {local.aberto_agora && (
-              <span className="status-inline">
-                🟢 Aberto agora
-              </span>
+              <span className="status-inline">🟢 Aberto</span>
             )}
           </div>
 
@@ -110,29 +130,29 @@ export default function PetCardMapStyle({ local, onOpenChat, isNovo = false }) {
           {local.distancia && (
             <div className="distance-inline">
               <MapPin size={12} />
-              <span>{local.distancia} km de você</span>
+              <span>{local.distancia} km</span>
             </div>
           )}
 
-          {/* TAGS INLINE */}
+          {/* TAGS */}
           {Array.isArray(local.tags) && local.tags.length > 0 && (
             <div className="tags-inline">
               {local.tags.slice(0, 3).map((tag) => (
                 <span key={tag} className="tag-pill">
-                  {tag === 'banho' && '✂️'}
-                  {tag === 'vet' && '🏥'}
-                  {tag === 'loja' && '🛒'}
-                  {tag === 'hotel' && '🏨'}
+                  {tag === 'banho' && '✂️ '}
+                  {tag === 'vet' && '🏥 '}
+                  {tag === 'loja' && '🛒 '}
+                  {tag === 'hotel' && '🏨 '}
                   {tag}
                 </span>
               ))}
             </div>
           )}
 
-          {/* BOTÃO EXPANDIR COMPACTO */}
+          {/* BOTÃO EXPANDIR */}
           <button
             type="button"
-            onClick={() => setExpanded((v) => !v)}
+            onClick={() => setExpanded(v => !v)}
             className="expand-btn-compact"
           >
             <span>{expanded ? 'Menos info' : 'Ver detalhes'}</span>
@@ -151,7 +171,7 @@ export default function PetCardMapStyle({ local, onOpenChat, isNovo = false }) {
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             className="pet-expanded-area"
           >
-            {/* ENDEREÇO + MAPA */}
+            {/* ENDEREÇO */}
             {local.endereco && (
               <div className="info-section">
                 <div className="info-header">
@@ -159,21 +179,15 @@ export default function PetCardMapStyle({ local, onOpenChat, isNovo = false }) {
                   <span>Endereço</span>
                 </div>
                 <p className="info-text">{local.endereco}</p>
-                {(local.google_maps_url || local.endereco) && (
-                  <button 
-                    onClick={handleOpenMaps}
-                    className="btn-map-link"
-                  >
-                    <ExternalLink size={12} />
-                    Ver no Google Maps
-                  </button>
-                )}
+                <button onClick={handleOpenMaps} className="btn-map-link">
+                  <ExternalLink size={12} />
+                  Ver no Google Maps
+                </button>
               </div>
             )}
 
             {/* GRID DE INFORMAÇÕES */}
             <div className="info-grid-3col">
-              {/* HORÁRIO */}
               {local.horario_fechamento && (
                 <div className="info-box">
                   <Clock size={14} />
@@ -181,19 +195,13 @@ export default function PetCardMapStyle({ local, onOpenChat, isNovo = false }) {
                   <span className="info-value">Até {local.horario_fechamento}</span>
                 </div>
               )}
-
-              {/* ESTACIONAMENTO */}
               {local.estacionamento !== undefined && (
                 <div className="info-box">
                   <Car size={14} />
-                  <span className="info-label">Estacionamento</span>
-                  <span className="info-value">
-                    {local.estacionamento ? '✓ Sim' : '✗ Não'}
-                  </span>
+                  <span className="info-label">Estacion.</span>
+                  <span className="info-value">{local.estacionamento ? '✓ Sim' : '✗ Não'}</span>
                 </div>
               )}
-
-              {/* RATING */}
               {nota > 0 && (
                 <div className="info-box">
                   <Star size={14} fill="#FBBF24" color="#FBBF24" />
@@ -228,7 +236,7 @@ export default function PetCardMapStyle({ local, onOpenChat, isNovo = false }) {
                       {tag === 'vet' && '🏥 Veterinário'}
                       {tag === 'loja' && '🛒 Pet Shop'}
                       {tag === 'hotel' && '🏨 Hotel'}
-                      {!['banho', 'vet', 'loja', 'hotel'].includes(tag) && tag}
+                      {!['banho','vet','loja','hotel'].includes(tag) && tag}
                     </span>
                   ))}
                 </div>
@@ -239,11 +247,8 @@ export default function PetCardMapStyle({ local, onOpenChat, isNovo = false }) {
       </AnimatePresence>
 
       {/* CTA WHATSAPP */}
-      <button
-        className="btn-whatsapp-full"
-        onClick={() => onOpenChat(local)}
-      >
-        <MessageCircle size={16} /> 
+      <button className="btn-whatsapp-full" onClick={() => onOpenChat(local)}>
+        <MessageCircle size={16} />
         <span>Falar no WhatsApp</span>
       </button>
     </div>
