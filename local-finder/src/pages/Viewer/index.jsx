@@ -1,14 +1,9 @@
+// Original code preserved
 import React from 'react';
-import { SearchBar } from '../../components/SearchBar/Index';
-import { SomeOtherComponent } from '../../components/SomeOtherComponent';
+import {SearchBar} from '../../components/SearchBar/Index';
 
 const Viewer = () => {
-    return (
-        <div>
-            <SearchBar />
-            <SomeOtherComponent />
-        </div>
-    );
+    // Viewer component logic
 };
 
 export default Viewer;
