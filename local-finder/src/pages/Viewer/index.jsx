@@ -1,5 +1,5 @@
 // ======================================================
-// 📄 PetList.jsx - COM BUSCA + FAVORITOS
+// 📄 PetList.jsx - BUSCA NA POSIÇÃO CORRETA
 // ======================================================
 
 import React, { useEffect, useState } from 'react';
@@ -32,7 +32,6 @@ const isNovo = (createdAt) => {
   return diff <= 7;
 };
 
-// ✨ Normaliza texto para busca (ignora acentos e maiúsculas)
 const normalizar = (texto) =>
   texto?.toLowerCase()
     .normalize('NFD')
@@ -64,11 +63,8 @@ export default function PetList({ projeto }) {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [mostrarSoFavoritos, setMostrarSoFavoritos] = useState(false);
   const [toast, setToast] = useState(null);
-
-  // ✨ BUSCA
   const [termoBusca, setTermoBusca] = useState('');
 
-  // Favoritos
   const { isFavorito, toggleFavorito, total: totalFavoritos } = useFavoritos();
 
   const handleToggleFavorito = (id, nome) => {
@@ -78,14 +74,12 @@ export default function PetList({ projeto }) {
     setTimeout(() => setToast(null), 2600);
   };
 
-  // Scroll to top
   useEffect(() => {
     const handleScroll = () => setShowScrollTop(window.scrollY > 400);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Busca de locais
   useEffect(() => {
     async function buscarLocais() {
       setLoading(true);
@@ -100,22 +94,17 @@ export default function PetList({ projeto }) {
     buscarLocais();
   }, []);
 
-  // ======================================================
-  // ✨ FILTROS + BUSCA + ORDENAÇÃO
-  // ======================================================
   useEffect(() => {
     setIsTransitioning(true);
     const timeout = setTimeout(() => {
       let resultado = [...locais];
 
-      // 1. Filtro por categoria
       if (filtroCategoria) {
         resultado = resultado.filter(
           l => Array.isArray(l.tags) && l.tags.includes(filtroCategoria)
         );
       }
 
-      // 2. ✨ Filtro por busca (nome, tags, endereço)
       if (termoBusca.trim()) {
         const termo = normalizar(termoBusca);
         resultado = resultado.filter(l =>
@@ -125,27 +114,25 @@ export default function PetList({ projeto }) {
         );
       }
 
-      // 3. Filtro favoritos
       if (mostrarSoFavoritos) {
         resultado = resultado.filter(l => isFavorito(l.id));
       }
 
-      // 4. Ordenação
       if (ordenacao === 'melhor_nota') resultado.sort((a, b) => Number(b.nota || 0) - Number(a.nota || 0));
       if (ordenacao === 'mais_avaliados') resultado.sort((a, b) => Number(b.avaliacoes || 0) - Number(a.avaliacoes || 0));
       if (ordenacao === 'destaques') resultado.sort((a, b) => Number(b.destaque) - Number(a.destaque));
 
       setLocaisFiltrados(resultado);
-      setLimit(6); // Reset ao filtrar
+      setLimit(6);
       setIsTransitioning(false);
-    }, termoBusca ? 200 : 300); // Mais rápido na busca
+    }, termoBusca ? 200 : 300);
 
     return () => clearTimeout(timeout);
   }, [locais, filtroCategoria, ordenacao, mostrarSoFavoritos, termoBusca]);
 
   const handleCategoriaChange = (categoria) => {
     setMostrarSoFavoritos(false);
-    setTermoBusca(''); // Limpa busca ao trocar categoria
+    setTermoBusca('');
     if (categoria === 'todos') {
       setFiltroCategoria(null);
     } else if (categoria === 'vip') {
@@ -156,7 +143,6 @@ export default function PetList({ projeto }) {
     }
   };
 
-  // Estado da busca/filtros para o empty state
   const temFiltroAtivo = filtroCategoria || termoBusca || mostrarSoFavoritos;
 
   const limparTudo = () => {
@@ -169,20 +155,26 @@ export default function PetList({ projeto }) {
   return (
     <div className="app-shell">
 
-      {/* HERO GRID */}
+      {/* ========================================
+          HERO GRID - SEMPRE VISÍVEL
+          ======================================== */}
       <HeroGridCategories
         onFilterChange={handleCategoriaChange}
         currentFilter={filtroCategoria || (ordenacao === 'destaques' ? 'vip' : 'todos')}
       />
 
-      {/* ✨ SEARCH BAR */}
+      {/* ========================================
+          🔍 SEARCH BAR - SEMPRE VISÍVEL
+          ======================================== */}
       <SearchBar
         value={termoBusca}
         onChange={setTermoBusca}
         total={termoBusca ? locaisFiltrados.length : undefined}
       />
 
-      {/* TOOLBAR */}
+      {/* ========================================
+          TOOLBAR - SEMPRE VISÍVEL
+          ======================================== */}
       <div className="petlist-toolbar sticky-toolbar">
         <button
           onClick={() => { setOrdenacao('melhor_nota'); setMostrarSoFavoritos(false); }}
@@ -222,7 +214,9 @@ export default function PetList({ projeto }) {
         )}
       </div>
 
-      {/* CONTADOR */}
+      {/* ========================================
+          CONTADOR - SÓ QUANDO NÃO ESTÁ LOADING
+          ======================================== */}
       {!loading && locaisFiltrados.length > 0 && (
         <div className="results-counter">
           <span className="results-text">
@@ -234,14 +228,18 @@ export default function PetList({ projeto }) {
         </div>
       )}
 
-      {/* SKELETON */}
+      {/* ========================================
+          SKELETON LOADING
+          ======================================== */}
       {loading && (
         <div className="petlist-container">
           {[...Array(3)].map((_, i) => <SkeletonCard key={i} />)}
         </div>
       )}
 
-      {/* CARDS */}
+      {/* ========================================
+          LISTA DE CARDS
+          ======================================== */}
       {!loading && (
         <AnimatePresence mode="wait">
           <motion.div
@@ -279,7 +277,6 @@ export default function PetList({ projeto }) {
               </motion.button>
             )}
 
-            {/* EMPTY STATE */}
             {locaisFiltrados.length === 0 && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
