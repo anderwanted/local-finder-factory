@@ -51,4 +51,4 @@ export function SearchBar({ value, onChange, total }) {
       )}
     </div>
   );
-}
+} 
