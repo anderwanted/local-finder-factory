@@ -1,14 +1,15 @@
 // ======================================================
-// 📄 PetList.jsx - COM SISTEMA DE FAVORITOS
+// 📄 PetList.jsx - COM BUSCA + FAVORITOS
 // ======================================================
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { supabase } from '../../services/supabaseClient';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Componentes
 import ChatModal from '../../components/ChatModal';
 import PetCardMapStyle from '../../components/CardItem';
+import { SearchBar } from '../../components/SearchBar';
 import './Viewer.css';
 import './favoritos.css';
 
@@ -20,11 +21,7 @@ import './hero-grid.css';
 import { useFavoritos } from '../../hooks/useFavoritos';
 
 // Ícones
-import { 
-  Store, X, Star, TrendingUp, Award,
-  Scissors, Stethoscope, ShoppingBag,
-  Home, ChevronUp, Heart
-} from 'lucide-react';
+import { X, Star, TrendingUp, ChevronUp, Heart } from 'lucide-react';
 
 // ======================================================
 // HELPERS
@@ -34,6 +31,12 @@ const isNovo = (createdAt) => {
   const diff = (new Date() - new Date(createdAt)) / (1000 * 60 * 60 * 24);
   return diff <= 7;
 };
+
+// ✨ Normaliza texto para busca (ignora acentos e maiúsculas)
+const normalizar = (texto) =>
+  texto?.toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') || '';
 
 const SkeletonCard = () => (
   <div className="skeleton-card">
@@ -59,13 +62,15 @@ export default function PetList({ projeto }) {
   const [ordenacao, setOrdenacao] = useState('melhor_nota');
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
-
-  // ✨ FAVORITOS
-  const { isFavorito, toggleFavorito, total: totalFavoritos } = useFavoritos();
-  const [toast, setToast] = useState(null);
   const [mostrarSoFavoritos, setMostrarSoFavoritos] = useState(false);
+  const [toast, setToast] = useState(null);
 
-  // Handler de favorito com toast
+  // ✨ BUSCA
+  const [termoBusca, setTermoBusca] = useState('');
+
+  // Favoritos
+  const { isFavorito, toggleFavorito, total: totalFavoritos } = useFavoritos();
+
   const handleToggleFavorito = (id, nome) => {
     const jaEra = isFavorito(id);
     toggleFavorito(id);
@@ -73,18 +78,14 @@ export default function PetList({ projeto }) {
     setTimeout(() => setToast(null), 2600);
   };
 
-  // ======================================================
-  // SCROLL TO TOP
-  // ======================================================
+  // Scroll to top
   useEffect(() => {
     const handleScroll = () => setShowScrollTop(window.scrollY > 400);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // ======================================================
-  // BUSCA DE LOCAIS
-  // ======================================================
+  // Busca de locais
   useEffect(() => {
     async function buscarLocais() {
       setLoading(true);
@@ -93,7 +94,6 @@ export default function PetList({ projeto }) {
         .select("*")
         .eq("status", "PUBLICAR_APP")
         .order("created_at", { ascending: false });
-
       setLocais(error ? [] : (data || []));
       setLoading(false);
     }
@@ -101,49 +101,53 @@ export default function PetList({ projeto }) {
   }, []);
 
   // ======================================================
-  // FILTROS + ORDENAÇÃO
+  // ✨ FILTROS + BUSCA + ORDENAÇÃO
   // ======================================================
-  const getFiltrosAtivos = (projeto) => {
-    if (Array.isArray(projeto?.filtros_ativos) && projeto.filtros_ativos.length > 0)
-      return projeto.filtros_ativos;
-    return ['categoria', 'bem_avaliados'];
-  };
-
-  const filtrosAtivos = getFiltrosAtivos(projeto);
-  const hasFiltro = (id) => filtrosAtivos.includes(id);
-
   useEffect(() => {
     setIsTransitioning(true);
     const timeout = setTimeout(() => {
       let resultado = [...locais];
 
+      // 1. Filtro por categoria
       if (filtroCategoria) {
         resultado = resultado.filter(
           l => Array.isArray(l.tags) && l.tags.includes(filtroCategoria)
         );
       }
 
-      // Filtrar só favoritos
+      // 2. ✨ Filtro por busca (nome, tags, endereço)
+      if (termoBusca.trim()) {
+        const termo = normalizar(termoBusca);
+        resultado = resultado.filter(l =>
+          normalizar(l.nome).includes(termo) ||
+          normalizar(l.endereco).includes(termo) ||
+          (Array.isArray(l.tags) && l.tags.some(t => normalizar(t).includes(termo)))
+        );
+      }
+
+      // 3. Filtro favoritos
       if (mostrarSoFavoritos) {
         resultado = resultado.filter(l => isFavorito(l.id));
       }
 
+      // 4. Ordenação
       if (ordenacao === 'melhor_nota') resultado.sort((a, b) => Number(b.nota || 0) - Number(a.nota || 0));
       if (ordenacao === 'mais_avaliados') resultado.sort((a, b) => Number(b.avaliacoes || 0) - Number(a.avaliacoes || 0));
       if (ordenacao === 'destaques') resultado.sort((a, b) => Number(b.destaque) - Number(a.destaque));
 
       setLocaisFiltrados(resultado);
+      setLimit(6); // Reset ao filtrar
       setIsTransitioning(false);
-    }, 300);
+    }, termoBusca ? 200 : 300); // Mais rápido na busca
 
     return () => clearTimeout(timeout);
-  }, [locais, filtroCategoria, ordenacao, mostrarSoFavoritos]);
+  }, [locais, filtroCategoria, ordenacao, mostrarSoFavoritos, termoBusca]);
 
-  // Handler do Hero Grid
   const handleCategoriaChange = (categoria) => {
+    setMostrarSoFavoritos(false);
+    setTermoBusca(''); // Limpa busca ao trocar categoria
     if (categoria === 'todos') {
       setFiltroCategoria(null);
-      setMostrarSoFavoritos(false);
     } else if (categoria === 'vip') {
       setOrdenacao('destaques');
       setFiltroCategoria(null);
@@ -152,51 +156,56 @@ export default function PetList({ projeto }) {
     }
   };
 
-  const stats = {
-    total: locais.length,
-    vips: locais.filter(l => l.destaque).length,
-    abertos: locais.filter(l => l.aberto_agora).length
+  // Estado da busca/filtros para o empty state
+  const temFiltroAtivo = filtroCategoria || termoBusca || mostrarSoFavoritos;
+
+  const limparTudo = () => {
+    setFiltroCategoria(null);
+    setTermoBusca('');
+    setOrdenacao('melhor_nota');
+    setMostrarSoFavoritos(false);
   };
 
-  // ======================================================
-  // RENDER
-  // ======================================================
   return (
     <div className="app-shell">
 
       {/* HERO GRID */}
-      <HeroGridCategories 
+      <HeroGridCategories
         onFilterChange={handleCategoriaChange}
         currentFilter={filtroCategoria || (ordenacao === 'destaques' ? 'vip' : 'todos')}
       />
 
+      {/* ✨ SEARCH BAR */}
+      <SearchBar
+        value={termoBusca}
+        onChange={setTermoBusca}
+        total={termoBusca ? locaisFiltrados.length : undefined}
+      />
+
       {/* TOOLBAR */}
       <div className="petlist-toolbar sticky-toolbar">
-        <button 
-          onClick={() => setOrdenacao('melhor_nota')}
+        <button
+          onClick={() => { setOrdenacao('melhor_nota'); setMostrarSoFavoritos(false); }}
           className={`filter-btn ${ordenacao === 'melhor_nota' && !mostrarSoFavoritos ? 'active' : ''}`}
         >
           <Star size={14} />
           <span>Melhor Avaliados</span>
         </button>
 
-        <button 
-          onClick={() => setOrdenacao('mais_avaliados')}
+        <button
+          onClick={() => { setOrdenacao('mais_avaliados'); setMostrarSoFavoritos(false); }}
           className={`filter-btn ${ordenacao === 'mais_avaliados' && !mostrarSoFavoritos ? 'active' : ''}`}
         >
           <TrendingUp size={14} />
           <span>Mais Populares</span>
         </button>
 
-        {/* ✨ BOTÃO FAVORITOS NA TOOLBAR */}
         {totalFavoritos > 0 && (
           <button
             onClick={() => setMostrarSoFavoritos(v => !v)}
-            className={`favoritos-badge ${mostrarSoFavoritos ? 'ativo' : ''}`}
+            className="favoritos-badge"
             style={mostrarSoFavoritos ? {
-              background: '#EF4444',
-              borderColor: '#EF4444',
-              color: 'white'
+              background: '#EF4444', borderColor: '#EF4444', color: 'white'
             } : {}}
           >
             <Heart size={14} fill={mostrarSoFavoritos ? 'white' : '#EF4444'} />
@@ -205,8 +214,8 @@ export default function PetList({ projeto }) {
           </button>
         )}
 
-        {filtroCategoria && (
-          <button onClick={() => setFiltroCategoria(null)} className="filter-btn clear-btn">
+        {temFiltroAtivo && (
+          <button onClick={limparTudo} className="filter-btn clear-btn">
             <X size={14} />
             <span>Limpar</span>
           </button>
@@ -217,7 +226,8 @@ export default function PetList({ projeto }) {
       {!loading && locaisFiltrados.length > 0 && (
         <div className="results-counter">
           <span className="results-text">
-            {mostrarSoFavoritos ? '❤️ ' : ''}
+            {mostrarSoFavoritos && '❤️ '}
+            {termoBusca && `🔍 "${termoBusca}" — `}
             Mostrando <strong>{Math.min(limit, locaisFiltrados.length)}</strong> de{' '}
             <strong>{locaisFiltrados.length}</strong> resultados
           </span>
@@ -231,7 +241,7 @@ export default function PetList({ projeto }) {
         </div>
       )}
 
-      {/* LISTA DE CARDS */}
+      {/* CARDS */}
       {!loading && (
         <AnimatePresence mode="wait">
           <motion.div
@@ -239,14 +249,13 @@ export default function PetList({ projeto }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
           >
             {locaisFiltrados.slice(0, limit).map((local, index) => (
               <motion.div
                 key={local.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.4, delay: index * 0.08 }}
               >
                 <PetCardMapStyle
                   local={local}
@@ -258,7 +267,6 @@ export default function PetList({ projeto }) {
               </motion.div>
             ))}
 
-            {/* CARREGAR MAIS */}
             {limit < locaisFiltrados.length && (
               <motion.button
                 initial={{ opacity: 0 }}
@@ -279,26 +287,23 @@ export default function PetList({ projeto }) {
                 className="empty-state"
               >
                 <div className="empty-icon">
-                  {mostrarSoFavoritos ? '💔' : '🔍'}
+                  {mostrarSoFavoritos ? '💔' : termoBusca ? '🔍' : '🐾'}
                 </div>
                 <h3>
-                  {mostrarSoFavoritos 
-                    ? 'Nenhum favorito ainda' 
-                    : 'Nenhum resultado encontrado'}
+                  {mostrarSoFavoritos
+                    ? 'Nenhum favorito ainda'
+                    : termoBusca
+                      ? `Nada encontrado para "${termoBusca}"`
+                      : 'Nenhum resultado'}
                 </h3>
                 <p>
-                  {mostrarSoFavoritos 
-                    ? 'Toque no ❤️ nos cards para salvar seus favoritos!'
-                    : 'Tente ajustar os filtros ou buscar por outra categoria'}
+                  {mostrarSoFavoritos
+                    ? 'Toque no ❤️ nos cards para salvar!'
+                    : termoBusca
+                      ? 'Tente outro nome ou verifique a ortografia'
+                      : 'Tente ajustar os filtros'}
                 </p>
-                <button
-                  onClick={() => {
-                    setFiltroCategoria(null);
-                    setOrdenacao('melhor_nota');
-                    setMostrarSoFavoritos(false);
-                  }}
-                  className="empty-btn"
-                >
+                <button onClick={limparTudo} className="empty-btn">
                   Ver todos
                 </button>
               </motion.div>
@@ -322,14 +327,13 @@ export default function PetList({ projeto }) {
         )}
       </AnimatePresence>
 
-      {/* ✨ TOAST NOTIFICATION */}
+      {/* TOAST */}
       <AnimatePresence>
         {toast && (
           <div className={`toast-favorito ${toast.tipo}`}>
-            {toast.tipo === 'add' 
-              ? `❤️ ${toast.nome} adicionado aos favoritos!`
-              : `🗑️ ${toast.nome} removido dos favoritos`
-            }
+            {toast.tipo === 'add'
+              ? `❤️ ${toast.nome} adicionado!`
+              : `🗑️ ${toast.nome} removido`}
           </div>
         )}
       </AnimatePresence>
