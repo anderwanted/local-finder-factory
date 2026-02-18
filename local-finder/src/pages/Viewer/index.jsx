@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 // Componentes
 import ChatModal from '../../components/ChatModal';
 import PetCardMapStyle from '../../components/CardItem';
-import { SearchBar } from '../../components/SearchBar';
+import { SearchBar } from '../../components/SearchBar/index';
 import './Viewer.css';
 import './favoritos.css';
 
