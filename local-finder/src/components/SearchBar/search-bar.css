@@ -1,0 +1,110 @@
+/* =========================================================
+   SEARCH BAR
+   src/components/SearchBar/search-bar.css
+   ========================================================= */
+
+.search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin: 0 16px 12px 16px;
+  background: white;
+  border: 2px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+/* Estado focused */
+.search-wrapper.focused {
+  border-color: var(--color-primary);
+  box-shadow: 
+    0 0 0 4px rgba(249, 115, 22, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
+}
+
+/* ÍCONE */
+.search-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+  color: var(--color-gray-400);
+  transition: color 0.3s;
+  flex-shrink: 0;
+}
+
+.search-wrapper.focused .search-icon {
+  color: var(--color-primary);
+}
+
+/* INPUT */
+.search-input {
+  flex: 1;
+  padding: 14px 0;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-gray-900);
+  background: transparent;
+  min-width: 0;
+}
+
+.search-input::placeholder {
+  color: var(--color-gray-400);
+  font-weight: 400;
+}
+
+/* CONTADOR */
+.search-counter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 8px;
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 700;
+  margin-right: 8px;
+  flex-shrink: 0;
+  animation: counterPop 0.3s ease;
+}
+
+@keyframes counterPop {
+  0%   { transform: scale(0); opacity: 0; }
+  60%  { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* BOTÃO LIMPAR */
+.search-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-right: 8px;
+  background: var(--color-gray-100);
+  border: none;
+  border-radius: 50%;
+  color: var(--color-gray-500);
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  animation: clearFade 0.2s ease;
+}
+
+@keyframes clearFade {
+  from { opacity: 0; transform: scale(0.6); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.search-clear:hover {
+  background: var(--color-gray-200);
+  color: var(--color-gray-700);
+  transform: scale(1.1);
+}
