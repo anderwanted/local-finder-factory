@@ -1,0 +1,398 @@
+/* src/components/ModalSheet/modal-sheet.css */
+
+/* =========================================================
+   BACKDROP
+   ========================================================= */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+}
+
+/* =========================================================
+   MODAL SHEET
+   ========================================================= */
+.modal-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 90vh;
+  background: white;
+  border-radius: 24px 24px 0 0;
+  z-index: 1000;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -4px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* HANDLE BAR (para arrastar) */
+.sheet-handle-area {
+  padding: 12px 0 8px;
+  display: flex;
+  justify-content: center;
+  cursor: grab;
+}
+
+.sheet-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--color-gray-300);
+  border-radius: 999px;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+.sheet-header {
+  position: relative;
+  padding: 0 20px 24px;
+  text-align: center;
+  background: linear-gradient(
+    to bottom,
+    rgba(249, 115, 22, 0.03),
+    transparent
+  );
+}
+
+/* BOTÕES DE AÇÃO */
+.sheet-close-btn,
+.sheet-favorite-btn {
+  position: absolute;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: white;
+  border: 2px solid var(--color-gray-200);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  color: var(--color-gray-700);
+  z-index: 10;
+}
+
+.sheet-close-btn {
+  left: 20px;
+}
+
+.sheet-favorite-btn {
+  right: 20px;
+  border-color: #FCA5A5;
+}
+
+.sheet-favorite-btn.active {
+  background: #FEF2F2;
+  border-color: #EF4444;
+}
+
+.sheet-close-btn:hover {
+  background: var(--color-gray-100);
+  transform: scale(1.1);
+}
+
+.sheet-favorite-btn:hover {
+  background: #FEF2F2;
+  transform: scale(1.1);
+}
+
+/* FOTO CIRCULAR GRANDE */
+.sheet-photo-container {
+  position: relative;
+  display: inline-block;
+  margin: 20px 0 16px;
+}
+
+.sheet-photo {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid white;
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+.sheet-status-badge {
+  position: absolute;
+  bottom: 8px;
+  right: -4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(34, 197, 94, 0.95);
+  color: white;
+  font-size: 11px;
+  font-weight: 800;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+  backdrop-filter: blur(8px);
+}
+
+.status-dot-pulse {
+  width: 6px;
+  height: 6px;
+  background: white;
+  border-radius: 50%;
+  animation: dotPulse 2s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.3); }
+}
+
+/* TÍTULO */
+.sheet-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--color-gray-900);
+  margin: 0 0 12px 0;
+  line-height: 1.2;
+  padding: 0 60px; /* Espaço pros botões */
+}
+
+/* META INFO */
+.sheet-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.sheet-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 15px;
+}
+
+.sheet-rating strong {
+  font-weight: 800;
+  color: var(--color-gray-900);
+}
+
+.sheet-rating span {
+  color: var(--color-gray-500);
+  font-size: 14px;
+}
+
+.sheet-distance {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: var(--color-gray-600);
+}
+
+.sheet-distance svg {
+  color: var(--color-primary);
+}
+
+/* =========================================================
+   CONTENT (scroll area)
+   ========================================================= */
+.sheet-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* SEÇÃO */
+.sheet-section {
+  margin-bottom: 24px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: var(--color-gray-700);
+}
+
+.section-header svg {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.section-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.section-text {
+  font-size: 15px;
+  color: var(--color-gray-700);
+  line-height: 1.6;
+  margin: 0 0 12px 0;
+}
+
+/* BOTÃO MAPS */
+.btn-maps {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: white;
+  border: 2px solid var(--color-primary-light);
+  border-radius: 12px;
+  color: var(--color-primary);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-maps:hover {
+  background: var(--color-primary);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+}
+
+/* =========================================================
+   GRID DE INFORMAÇÕES
+   ========================================================= */
+.sheet-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.info-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 12px;
+  background: var(--color-gray-50);
+  border: 1px solid var(--color-gray-200);
+  border-radius: 16px;
+  text-align: center;
+}
+
+.info-card svg {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.info-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-gray-900);
+  line-height: 1.3;
+}
+
+/* =========================================================
+   SERVIÇOS
+   ========================================================= */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.service-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px;
+  background: white;
+  border: 2px solid var(--color-primary-light);
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.service-badge:hover {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* =========================================================
+   FOOTER FIXO (CTA)
+   ========================================================= */
+.sheet-footer {
+  padding: 16px 20px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0));
+  background: white;
+  border-top: 1px solid var(--color-gray-200);
+  box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.06);
+}
+
+.btn-whatsapp-sheet {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--color-success), var(--color-success-dark));
+  color: white;
+  font-size: 16px;
+  font-weight: 800;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+}
+
+.btn-whatsapp-sheet:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.5);
+}
+
+.btn-whatsapp-sheet:active {
+  transform: scale(0.98);
+}
+
+/* =========================================================
+   RESPONSIVO
+   ========================================================= */
+@media (min-width: 640px) {
+  .modal-sheet {
+    max-width: 500px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 24px;
+    max-height: 85vh;
+  }
+}
+
+@media (max-height: 700px) {
+  .sheet-photo {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .sheet-title {
+    font-size: 22px;
+  }
+}

@@ -435,3 +435,67 @@
     text-align: left;
   }
 }
+
+
+/* Adicionar no final do pet-card.css */
+
+/* =========================================================
+   CARD CLICÁVEL (para abrir modal)
+   ========================================================= */
+.pet-card-clickable {
+  position: relative;
+  background: white;
+  border-radius: 20px;
+  padding: 16px;
+  border: 2px solid transparent;
+  overflow: hidden;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+}
+
+.pet-card-clickable:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+  border-color: rgba(249, 115, 22, 0.2);
+}
+
+.pet-card-clickable:active {
+  transform: translateY(-4px) scale(0.98);
+}
+
+.pet-card-clickable.is-vip {
+  border-color: var(--color-vip-light);
+  box-shadow: var(--shadow-vip);
+}
+
+.pet-card-clickable.is-vip:hover {
+  border-color: var(--color-vip);
+  box-shadow: 
+    0 0 0 2px rgba(168, 85, 247, 0.2),
+    0 12px 28px rgba(168, 85, 247, 0.3);
+}
+
+/* HINT (Toque para ver detalhes) */
+.card-hint {
+  font-size: 12px;
+  color: var(--color-gray-400);
+  font-weight: 500;
+  margin-top: 8px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.pet-card-clickable:hover .card-hint {
+  opacity: 1;
+}
+
+/* Responsivo */
+@media (max-width: 640px) {
+  .pet-card-clickable:hover {
+    transform: translateY(-4px);
+  }
+}

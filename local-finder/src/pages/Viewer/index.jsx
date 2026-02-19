@@ -1,4 +1,4 @@
-// src/pages/Viewer/index.jsx - ATUALIZADO COM NAVBAR
+// src/pages/Viewer/index.jsx - COM MODAL SHEET
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../services/supabaseClient';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ChatModal from '../../components/ChatModal';
 import PetCardMapStyle from '../../components/CardItem';
 import { SearchBar } from '../../components/SearchBar';
+import { ModalSheet } from '../../components/ModalSheet';
 import './Viewer.css';
 import './favoritos.css';
 
@@ -18,9 +19,8 @@ import './hero-grid.css';
 import { useFavoritos } from '../../hooks/useFavoritos';
 
 // Ícones
-import { X, Star, TrendingUp, ChevronUp, Heart } from 'lucide-react';
+import { X, Star, TrendingUp, ChevronUp } from 'lucide-react';
 
-// Helpers
 const isNovo = (createdAt) => {
   if (!createdAt) return false;
   const diff = (new Date() - new Date(createdAt)) / (1000 * 60 * 60 * 24);
@@ -43,9 +43,6 @@ const SkeletonCard = () => (
   </div>
 );
 
-// ==========================================
-// COMPONENTE PRINCIPAL
-// ==========================================
 export default function PetList({ projeto, activeTab }) {
   const [locais, setLocais] = useState([]);
   const [locaisFiltrados, setLocaisFiltrados] = useState([]);
@@ -59,16 +56,32 @@ export default function PetList({ projeto, activeTab }) {
   const [termoBusca, setTermoBusca] = useState('');
   const [toast, setToast] = useState(null);
 
+  // ✨ MODAL SHEET
+  const [modalLocal, setModalLocal] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const { isFavorito, toggleFavorito, total: totalFavoritos } = useFavoritos();
 
-  // ✨ Sincroniza com activeTab da navbar
   const mostrarSoFavoritos = activeTab === 'favoritos';
 
-  const handleToggleFavorito = (id, nome) => {
+  const handleToggleFavorito = (id) => {
+    const local = locais.find(l => l.id === id);
     const jaEra = isFavorito(id);
     toggleFavorito(id);
-    setToast({ tipo: jaEra ? 'remove' : 'add', nome });
+    setToast({ tipo: jaEra ? 'remove' : 'add', nome: local?.nome });
     setTimeout(() => setToast(null), 2600);
+  };
+
+  // Abrir modal
+  const handleCardClick = (local) => {
+    setModalLocal(local);
+    setIsModalOpen(true);
+  };
+
+  // Fechar modal
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setTimeout(() => setModalLocal(null), 300);
   };
 
   useEffect(() => {
@@ -150,20 +163,17 @@ export default function PetList({ projeto, activeTab }) {
   return (
     <div className="app-shell" style={{ paddingBottom: '80px' }}>
 
-      {/* HERO GRID */}
       <HeroGridCategories
         onFilterChange={handleCategoriaChange}
         currentFilter={filtroCategoria || (ordenacao === 'destaques' ? 'vip' : 'todos')}
       />
 
-      {/* SEARCH BAR */}
       <SearchBar
         value={termoBusca}
         onChange={setTermoBusca}
         total={termoBusca ? locaisFiltrados.length : undefined}
       />
 
-      {/* TOOLBAR */}
       <div className="petlist-toolbar sticky-toolbar">
         <button
           onClick={() => setOrdenacao('melhor_nota')}
@@ -189,7 +199,6 @@ export default function PetList({ projeto, activeTab }) {
         )}
       </div>
 
-      {/* CONTADOR */}
       {!loading && locaisFiltrados.length > 0 && (
         <div className="results-counter">
           <span className="results-text">
@@ -201,14 +210,12 @@ export default function PetList({ projeto, activeTab }) {
         </div>
       )}
 
-      {/* SKELETON */}
       {loading && (
         <div className="petlist-container">
           {[...Array(3)].map((_, i) => <SkeletonCard key={i} />)}
         </div>
       )}
 
-      {/* CARDS */}
       {!loading && (
         <AnimatePresence mode="wait">
           <motion.div
@@ -226,10 +233,10 @@ export default function PetList({ projeto, activeTab }) {
               >
                 <PetCardMapStyle
                   local={local}
-                  onOpenChat={(local) => setSelectedLocal(local)}
+                  onClick={() => handleCardClick(local)}
                   isNovo={isNovo(local.created_at)}
                   isFavorito={isFavorito(local.id)}
-                  onToggleFavorito={(id) => handleToggleFavorito(id, local.nome)}
+                  onToggleFavorito={handleToggleFavorito}
                 />
               </motion.div>
             ))}
@@ -278,7 +285,6 @@ export default function PetList({ projeto, activeTab }) {
         </AnimatePresence>
       )}
 
-      {/* SCROLL TO TOP */}
       <AnimatePresence>
         {showScrollTop && (
           <motion.button
@@ -287,14 +293,13 @@ export default function PetList({ projeto, activeTab }) {
             exit={{ opacity: 0, scale: 0.8 }}
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="scroll-to-top"
-            style={{ bottom: '90px' }} /* Ajustado pra não ficar atrás da navbar */
+            style={{ bottom: '90px' }}
           >
             <ChevronUp size={24} />
           </motion.button>
         )}
       </AnimatePresence>
 
-      {/* TOAST */}
       <AnimatePresence>
         {toast && (
           <div className={`toast-favorito ${toast.tipo}`}>
@@ -305,7 +310,16 @@ export default function PetList({ projeto, activeTab }) {
         )}
       </AnimatePresence>
 
-      {/* CHAT MODAL */}
+      {/* ✨ MODAL SHEET */}
+      <ModalSheet
+        local={modalLocal}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        isFavorito={modalLocal ? isFavorito(modalLocal.id) : false}
+        onToggleFavorito={handleToggleFavorito}
+      />
+
+      {/* CHAT MODAL (manter por enquanto se ainda usar) */}
       {selectedLocal && (
         <ChatModal
           local={selectedLocal}
