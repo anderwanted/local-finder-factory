@@ -1,281 +1,105 @@
-// ======================================================
-// 📄 App.jsx
-// Entry Point + Roteamento Global (Multi-Tenant)
-// ======================================================
-//
-// 🎯 PROPÓSITO DESTE ARQUIVO
-// - Definir TODAS as rotas do sistema
-// - Resolver qual app/nicho deve ser carregado
-// - Injetar configuração do projeto nas telas
-//
-// 🧠 MODELO MENTAL
-// - HomeFactory → lista de apps existentes
-// - UniversalLoader → resolve qual app carregar
-// - Telas nunca decidem contexto sozinhas
-//
-// 🔒 CONTRATO
-// - Nenhuma regra de negócio pesada aqui
-// - Nenhuma lógica de filtro
-// - Apenas orquestração e injeção de dados
-//
-// ======================================================
-
-// ======================================================
-// 🔹 DEPENDÊNCIAS
-// ======================================================
-import React, { useEffect, useState } from 'react';
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Link,
-  useParams
-} from 'react-router-dom';
+// src/App.jsx - COM SPLASH + BOTTOM NAV
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { supabase } from './services/supabaseClient';
-import { FolderPlus } from 'lucide-react';
-import { DataProvider } from './context/DataContext';
 
-// ======================================================
-// 🔹 TELAS DO SISTEMA
-// ======================================================
-import Viewer from './pages/Viewer';
-import Processor from './pages/Processor';
+// Componentes
+import { SplashScreen } from './components/SplashScreen';
+import { BottomNav } from './components/BottomNav';
+import PetList from './pages/Viewer';
 import Manager from './pages/Manager';
+import Processor from './pages/Processor';
+import { useFavoritos } from './hooks/useFavoritos';
 
-// ======================================================
-// 🔹 ESTILOS
-// ======================================================
+// CSS global
 import './assets/global.css';
-import './assets/theme.css';
 
-// ======================================================
-// 🔹 COMPONENTE: UniversalLoader
-// ======================================================
-//
-// 🎯 INTENÇÃO
-// Resolver dinamicamente QUAL app deve ser carregado
-// com base na URL (/pets, /mecanicos, etc)
-//
-// 🧠 MODELO MENTAL
-// - URL define o nicho
-// - Nicho busca um projeto no banco
-// - Projeto injeta configuração nas telas
-//
-// 🔒 CONTRATO
-// - Se não encontrar projeto → erro controlado
-// - Nunca renderiza tela sem projeto válido
-//
-function UniversalLoader() {
-  const { nicho } = useParams(); // slug do projeto
+// ==========================================
+// HOME FACTORY - Carrega projeto dinamicamente
+// ==========================================
+function HomeFactory() {
+  const { slug } = useParams();
   const [projeto, setProjeto] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('home');
+  const { total: favoritosCount } = useFavoritos();
 
-  // ==============================
-  // 🔹 FETCH DO PROJETO
-  // ==============================
   useEffect(() => {
     async function carregarProjeto() {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('projetos')
         .select('*')
-        .eq('slug', nicho)
+        .eq('slug', slug)
         .single();
-
-      if (error || !data) {
-        setProjeto(null); // 404 lógico
-      } else {
-        setProjeto(data);
-      }
+      
+      setProjeto(data);
       setLoading(false);
     }
     carregarProjeto();
-  }, [nicho]);
+  }, [slug]);
 
-  // ==============================
-  // 🔹 ESTADOS DE SEGURANÇA
-  // ==============================
-  if (loading) {
-    return <div style={{ padding: 20 }}>Carregando Fábrica…</div>;
-  }
+  // Handler da navbar
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    
+    // Scroll to top ao trocar de aba
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // TODO: Implementar navegação entre telas
+    if (tab === 'favoritos') {
+      // Filtrar favoritos na PetList
+      console.log('Mostrar favoritos');
+    } else if (tab === 'perfil') {
+      console.log('Abrir perfil (futuro)');
+    } else if (tab === 'search') {
+      // Focar no campo de busca
+      document.querySelector('.search-input')?.focus();
+    }
+  };
 
-  if (!projeto) {
-    return (
-      <div style={{ padding: 20, textAlign: 'center' }}>
-        <h2>🚫 Nicho não encontrado</h2>
-        <Link to="/">Voltar para a Home</Link>
-      </div>
-    );
-  }
+  if (loading) return null; // Splash cuida do loading
 
-  // ==============================
-  // 🔹 RENDERIZAÇÃO DO APP
-  // ==============================
-  //
-  // Projeto encontrado → injetamos config nas telas
-  //
   return (
-    <div>
-      {/* =====================================
-         🔹 MENU LOCAL (DEV / TESTES)
-      ====================================== */}
-      <nav
-        style={{
-          padding: '10px',
-          background: '#f8fafc',
-          borderBottom: '1px solid #eee',
-          display: 'flex',
-          gap: '15px',
-          justifyContent: 'center',
-          fontSize: '14px'
-        }}
-      >
-        <Link
-          to={`/${nicho}`}
-          style={{ fontWeight: 'bold', color: projeto.cor_primaria }}
-        >
-          {projeto.nome}
-        </Link>
-        <Link to={`/${nicho}/dashboard`} style={{ color: '#64748b' }}>
-          Dashboard
-        </Link>
-        <Link to={`/${nicho}/admin`} style={{ color: '#64748b' }}>
-          Admin SQL
-        </Link>
-        <Link to="/" style={{ color: '#94a3b8' }}>
-          🏠 Sair
-        </Link>
-      </nav>
-
-      {/* =====================================
-         🔹 ROTAS DO PROJETO
-      ====================================== */}
-      <Routes>
-        <Route path="/" element={<Viewer projeto={projeto} />} />
-        <Route path="/dashboard" element={<Manager projeto={projeto} />} />
-        <Route path="/admin" element={<Processor projeto={projeto} />} />
-      </Routes>
-    </div>
+    <>
+      <PetList projeto={projeto} activeTab={activeTab} />
+      <BottomNav 
+        activeTab={activeTab} 
+        onTabChange={handleTabChange}
+        favoritosCount={favoritosCount}
+      />
+    </>
   );
 }
 
-// ======================================================
-// 🔹 TELA: HomeFactory
-// ======================================================
-//
-// 🎯 INTENÇÃO
-// Listar todos os projetos/nichos existentes
-//
-// 🧠 MODELO MENTAL
-// - Cada card = um app independente
-// - Clique → entra no app
-//
-// 🔒 CONTRATO
-// - Não cria projetos
-// - Apenas navega
-//
-function HomeFactory() {
-  const [projetos, setProjetos] = useState([]);
-
-  useEffect(() => {
-    supabase
-      .from('projetos')
-      .select('*')
-      .then(({ data }) => setProjetos(data || []));
-  }, []);
-
-  return (
-    <div
-      style={{
-        padding: '40px',
-        maxWidth: '800px',
-        margin: '0 auto',
-        fontFamily: 'sans-serif'
-      }}
-    >
-      <h1 style={{ textAlign: 'center', marginBottom: '40px' }}>
-        🏭 Fábrica de Apps
-      </h1>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-          gap: '20px'
-        }}
-      >
-        {/* =============================
-           🔹 PROJETOS EXISTENTES
-        ============================== */}
-        {projetos.map(proj => (
-          <Link key={proj.id} to={`/${proj.slug}`} style={{ textDecoration: 'none' }}>
-            <div
-              style={{
-                padding: '30px',
-                borderRadius: '12px',
-                background: 'white',
-                border: '1px solid #e2e8f0',
-                boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
-                textAlign: 'center',
-                transition: 'transform 0.2s',
-                cursor: 'pointer'
-              }}
-            >
-              <div style={{ fontSize: '40px', marginBottom: '10px' }}>🚀</div>
-              <h3 style={{ margin: 0, color: '#1e293b' }}>{proj.nome}</h3>
-              <span style={{ fontSize: '12px', color: '#64748b' }}>
-                /{proj.slug}
-              </span>
-            </div>
-          </Link>
-        ))}
-
-        {/* =============================
-           🔹 CARD FUTURO (CRIAR NOVO)
-        ============================== */}
-        <div
-          style={{
-            padding: '30px',
-            borderRadius: '12px',
-            border: '2px dashed #cbd5e1',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#94a3b8',
-            cursor: 'not-allowed'
-          }}
-        >
-          <FolderPlus size={32} />
-          <span style={{ fontWeight: 'bold', marginTop: '10px' }}>
-            Novo Nicho
-          </span>
-          <span style={{ fontSize: '10px' }}>
-            (Em breve no Painel)
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ======================================================
-// 🔹 ROOT DO APP
-// ======================================================
-//
-// 🎯 INTENÇÃO
-// Definir roteamento global
-//
+// ==========================================
+// APP PRINCIPAL
+// ==========================================
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
   return (
-    <DataProvider>
-      <Router>
+    <>
+      {/* SPLASH SCREEN */}
+      {showSplash && (
+        <SplashScreen onFinish={() => setShowSplash(false)} />
+      )}
+
+      {/* APP */}
+      <BrowserRouter>
         <Routes>
-          {/* Home / Fábrica */}
-          <Route path="/" element={<HomeFactory />} />
+          {/* Viewer (App do usuário) */}
+          <Route path="/:slug" element={<HomeFactory />} />
           
-          {/* Apps Dinâmicos com Multi-Tenant */}
-          <Route path="/:nicho/*" element={<UniversalLoader />} />
+          {/* Manager (Admin) */}
+          <Route path="/:slug/manager" element={<Manager />} />
+          
+          {/* Processor (Sistema) */}
+          <Route path="/processor" element={<Processor />} />
+          
+          {/* Redirect */}
+          <Route path="/" element={<Navigate to="/pets" replace />} />
         </Routes>
-      </Router>
-    </DataProvider>
+      </BrowserRouter>
+    </>
   );
 }

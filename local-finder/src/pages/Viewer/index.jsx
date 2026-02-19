@@ -1,7 +1,4 @@
-// ======================================================
-// 📄 PetList.jsx - COM BUSCA + FAVORITOS
-// ======================================================
-
+// src/pages/Viewer/index.jsx - ATUALIZADO COM NAVBAR
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../services/supabaseClient';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 // Componentes
 import ChatModal from '../../components/ChatModal';
 import PetCardMapStyle from '../../components/CardItem';
-import { SearchBar } from '../../components/SearchBar/index';
+import { SearchBar } from '../../components/SearchBar';
 import './Viewer.css';
 import './favoritos.css';
 
@@ -23,16 +20,13 @@ import { useFavoritos } from '../../hooks/useFavoritos';
 // Ícones
 import { X, Star, TrendingUp, ChevronUp, Heart } from 'lucide-react';
 
-// ======================================================
-// HELPERS
-// ======================================================
+// Helpers
 const isNovo = (createdAt) => {
   if (!createdAt) return false;
   const diff = (new Date() - new Date(createdAt)) / (1000 * 60 * 60 * 24);
   return diff <= 7;
 };
 
-// ✨ Normaliza texto para busca (ignora acentos e maiúsculas)
 const normalizar = (texto) =>
   texto?.toLowerCase()
     .normalize('NFD')
@@ -49,10 +43,10 @@ const SkeletonCard = () => (
   </div>
 );
 
-// ======================================================
+// ==========================================
 // COMPONENTE PRINCIPAL
-// ======================================================
-export default function PetList({ projeto }) {
+// ==========================================
+export default function PetList({ projeto, activeTab }) {
   const [locais, setLocais] = useState([]);
   const [locaisFiltrados, setLocaisFiltrados] = useState([]);
   const [limit, setLimit] = useState(6);
@@ -62,14 +56,13 @@ export default function PetList({ projeto }) {
   const [ordenacao, setOrdenacao] = useState('melhor_nota');
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [mostrarSoFavoritos, setMostrarSoFavoritos] = useState(false);
+  const [termoBusca, setTermoBusca] = useState('');
   const [toast, setToast] = useState(null);
 
-  // ✨ BUSCA
-  const [termoBusca, setTermoBusca] = useState('');
-
-  // Favoritos
   const { isFavorito, toggleFavorito, total: totalFavoritos } = useFavoritos();
+
+  // ✨ Sincroniza com activeTab da navbar
+  const mostrarSoFavoritos = activeTab === 'favoritos';
 
   const handleToggleFavorito = (id, nome) => {
     const jaEra = isFavorito(id);
@@ -78,14 +71,12 @@ export default function PetList({ projeto }) {
     setTimeout(() => setToast(null), 2600);
   };
 
-  // Scroll to top
   useEffect(() => {
     const handleScroll = () => setShowScrollTop(window.scrollY > 400);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Busca de locais
   useEffect(() => {
     async function buscarLocais() {
       setLoading(true);
@@ -100,22 +91,17 @@ export default function PetList({ projeto }) {
     buscarLocais();
   }, []);
 
-  // ======================================================
-  // ✨ FILTROS + BUSCA + ORDENAÇÃO
-  // ======================================================
   useEffect(() => {
     setIsTransitioning(true);
     const timeout = setTimeout(() => {
       let resultado = [...locais];
 
-      // 1. Filtro por categoria
       if (filtroCategoria) {
         resultado = resultado.filter(
           l => Array.isArray(l.tags) && l.tags.includes(filtroCategoria)
         );
       }
 
-      // 2. ✨ Filtro por busca (nome, tags, endereço)
       if (termoBusca.trim()) {
         const termo = normalizar(termoBusca);
         resultado = resultado.filter(l =>
@@ -125,27 +111,24 @@ export default function PetList({ projeto }) {
         );
       }
 
-      // 3. Filtro favoritos
       if (mostrarSoFavoritos) {
         resultado = resultado.filter(l => isFavorito(l.id));
       }
 
-      // 4. Ordenação
       if (ordenacao === 'melhor_nota') resultado.sort((a, b) => Number(b.nota || 0) - Number(a.nota || 0));
       if (ordenacao === 'mais_avaliados') resultado.sort((a, b) => Number(b.avaliacoes || 0) - Number(a.avaliacoes || 0));
       if (ordenacao === 'destaques') resultado.sort((a, b) => Number(b.destaque) - Number(a.destaque));
 
       setLocaisFiltrados(resultado);
-      setLimit(6); // Reset ao filtrar
+      setLimit(6);
       setIsTransitioning(false);
-    }, termoBusca ? 200 : 300); // Mais rápido na busca
+    }, termoBusca ? 200 : 300);
 
     return () => clearTimeout(timeout);
   }, [locais, filtroCategoria, ordenacao, mostrarSoFavoritos, termoBusca]);
 
   const handleCategoriaChange = (categoria) => {
-    setMostrarSoFavoritos(false);
-    setTermoBusca(''); // Limpa busca ao trocar categoria
+    setTermoBusca('');
     if (categoria === 'todos') {
       setFiltroCategoria(null);
     } else if (categoria === 'vip') {
@@ -156,18 +139,16 @@ export default function PetList({ projeto }) {
     }
   };
 
-  // Estado da busca/filtros para o empty state
-  const temFiltroAtivo = filtroCategoria || termoBusca || mostrarSoFavoritos;
+  const temFiltroAtivo = filtroCategoria || termoBusca;
 
   const limparTudo = () => {
     setFiltroCategoria(null);
     setTermoBusca('');
     setOrdenacao('melhor_nota');
-    setMostrarSoFavoritos(false);
   };
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" style={{ paddingBottom: '80px' }}>
 
       {/* HERO GRID */}
       <HeroGridCategories
@@ -175,7 +156,7 @@ export default function PetList({ projeto }) {
         currentFilter={filtroCategoria || (ordenacao === 'destaques' ? 'vip' : 'todos')}
       />
 
-      {/* ✨ SEARCH BAR */}
+      {/* SEARCH BAR */}
       <SearchBar
         value={termoBusca}
         onChange={setTermoBusca}
@@ -185,7 +166,7 @@ export default function PetList({ projeto }) {
       {/* TOOLBAR */}
       <div className="petlist-toolbar sticky-toolbar">
         <button
-          onClick={() => { setOrdenacao('melhor_nota'); setMostrarSoFavoritos(false); }}
+          onClick={() => setOrdenacao('melhor_nota')}
           className={`filter-btn ${ordenacao === 'melhor_nota' && !mostrarSoFavoritos ? 'active' : ''}`}
         >
           <Star size={14} />
@@ -193,26 +174,12 @@ export default function PetList({ projeto }) {
         </button>
 
         <button
-          onClick={() => { setOrdenacao('mais_avaliados'); setMostrarSoFavoritos(false); }}
+          onClick={() => setOrdenacao('mais_avaliados')}
           className={`filter-btn ${ordenacao === 'mais_avaliados' && !mostrarSoFavoritos ? 'active' : ''}`}
         >
           <TrendingUp size={14} />
           <span>Mais Populares</span>
         </button>
-
-        {totalFavoritos > 0 && (
-          <button
-            onClick={() => setMostrarSoFavoritos(v => !v)}
-            className="favoritos-badge"
-            style={mostrarSoFavoritos ? {
-              background: '#EF4444', borderColor: '#EF4444', color: 'white'
-            } : {}}
-          >
-            <Heart size={14} fill={mostrarSoFavoritos ? 'white' : '#EF4444'} />
-            <span>Favoritos</span>
-            <span className="favoritos-count">{totalFavoritos}</span>
-          </button>
-        )}
 
         {temFiltroAtivo && (
           <button onClick={limparTudo} className="filter-btn clear-btn">
@@ -279,7 +246,6 @@ export default function PetList({ projeto }) {
               </motion.button>
             )}
 
-            {/* EMPTY STATE */}
             {locaisFiltrados.length === 0 && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -321,6 +287,7 @@ export default function PetList({ projeto }) {
             exit={{ opacity: 0, scale: 0.8 }}
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="scroll-to-top"
+            style={{ bottom: '90px' }} /* Ajustado pra não ficar atrás da navbar */
           >
             <ChevronUp size={24} />
           </motion.button>
